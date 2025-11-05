@@ -181,6 +181,11 @@
                                         class="fa fa-shopping-bag me-1"></i> Acheter / Prêter</a>
                             </div>
                         </div>
+                        <a href="{{ route('about.index') }}"
+                            class="nav-item nav-link{{ request()->routeIs('about.*') ? ' active' : '' }}"><i
+                                class="fa fa-info-circle me-1"></i> À propos</a>
+                        <a href="{{ route('blog.index') }}"
+                            class="nav-item nav-link{{ request()->routeIs('blog.*') ? ' active' : '' }}"><i class="fa fa-blog me-1"></i> Blog</a>
                         <div class="nav-item dropdown">
                             <a href="#"
                                 class="nav-link dropdown-toggle{{ request()->routeIs('account.*') || request()->routeIs('login') || request()->routeIs('register') ? ' active' : '' }}"
@@ -202,11 +207,6 @@
                             </div>
 
                         </div>
-                        <a href="{{ route('blog.index') }}"
-                            class="nav-item nav-link{{ request()->routeIs('blog.*') ? ' active' : '' }}"><i class="fa fa-blog me-1"></i> Blog</a>
-                        <a href="{{ route('about.index') }}"
-                            class="nav-item nav-link{{ request()->routeIs('about.*') ? ' active' : '' }}"><i
-                                class="fa fa-info-circle me-1"></i> À propos</a>
                         <a href="{{ route('contact.index') }}"
                             class="nav-item nav-link{{ request()->routeIs('contact.*') ? ' active' : '' }}"><i
                                 class="fa fa-envelope me-1"></i> Contact</a>
