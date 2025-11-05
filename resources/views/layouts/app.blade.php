@@ -232,25 +232,15 @@
     </div>
     <!-- Navbar End -->
 
-    <!-- Ticker Start -->
+    <!-- Ticker (statique) Start -->
     <div class="container-fluid ticker-wrap bg-light">
         <div class="container">
-            <div class="ticker" role="status" aria-live="polite" aria-atomic="true">
-                <div class="ticker__move">
-                    <span class="ticker-item">Bienvenue sur Colibri Littéraire</span>
-                    <span class="ticker-item">Un projet soutenu par l'OIF dans le cadre du dispositif FORCE</span>
-                    <span class="ticker-item">Consultez notre catalogue en ligne</span>
-                    <span class="ticker-item">Bénéficiez de nos offres spéciales |</span>
-                    <!-- duplicated content to create seamless loop -->
-                    <span class="ticker-item">Bienvenue sur Colibri Littéraire</span>
-                    <span class="ticker-item">Un projet soutenu par l'OIF dans le cadre du dispositif FORCE</span>
-                    <span class="ticker-item">Consultez notre catalogue en ligne</span>
-                    <span class="ticker-item">Bénéficiez de nos offres spéciales |</span>
-                </div>
+            <div class="d-flex justify-content-center py-2" role="status" aria-live="polite" aria-atomic="true">
+                <p class="m-0 text-center" style="font-size:0.95rem; color:#333;">Un projet ouest-africain de formation et de découvrabilité soutenu par l'OIF dans le cadre du dispositif FORCE</p>
             </div>
         </div>
     </div>
-    <!-- Ticker End -->
+    <!-- Ticker (statique) End -->
 
     <!-- Contenu de la page -->
     @yield('content')
