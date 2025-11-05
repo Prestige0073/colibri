@@ -1,0 +1,36 @@
+/* Published copy of resources/css/custom.css for direct asset access */
+.cod-card {
+  background: linear-gradient(180deg, #66b26b 0%, #1e7a2f 100%);
+  color: #ffffff;
+  border-radius: 12px;
+}
+.cod-card .card-body { background: transparent; }
+.cod-card h4, .cod-card p, .cod-card label, .cod-card .form-label, .cod-card .small {
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+.cod-card .form-control {
+  background: #ffffff !important;
+  color: #08331f !important;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.cod-card .btn-primary {
+  background: #0b5e34 !important;
+  border-color: #0b5e34 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(11,94,52,0.18);
+}
+.cod-card .btn-outline-primary, .cod-card .btn-outline-secondary {
+  background: rgba(255,255,255,0.06) !important;
+  color: #ffffff !important;
+  border-color: rgba(255,255,255,0.16) !important;
+}
+.cod-actions .btn { min-width: 140px; }
+.cod-actions .btn i { margin-right: 8px; }
+
+@media (max-width: 768px) {
+  .cod-card { padding: 1rem !important; }
+}
+
+/* Small utility to increase contrast for small text */
+.cod-card .small { font-weight: 500; }
