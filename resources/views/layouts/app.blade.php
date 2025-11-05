@@ -100,28 +100,26 @@
                                 class="img-fluid" style="max-height:60px;">
                         </a>
                     </div>
-                    <div class="col-4 text-center d-none d-sm-block topbar-logo">
+                    <div class="col-4 d-none d-sm-block topbar-logo">
+                        <!-- spacer to keep layout balanced -->
+                        <div style="height:60px;"></div>
+                    </div>
+                    <div class="col-4 text-end d-none d-sm-block topbar-logo">
                         <a href="{{ route('index') }}">
                             <img src="{{ asset('img/LOGO-COLIBRI-LITTERAIRE.png') }}" alt="Colibri Littéraire" class="img-fluid"
                                 style="max-height:60px;">
                         </a>
                     </div>
-                    <div class="col-4 text-end d-none d-sm-block topbar-logo">
-                        <!-- Logo OIF retiré intentionally to match design -->
-                        <div style="height:60px;"></div>
-                    </div>
 
                     <!-- Mobile view: keep logos side-by-side (flex row, no wrap) -->
                     <div
-                        class="d-flex d-sm-none justify-content-center align-items-center flex-row gap-2 flex-nowrap mt-2 w-100 topbar-logos">
+                        class="d-flex d-sm-none justify-content-between align-items-center flex-row gap-2 flex-nowrap mt-2 w-100 topbar-logos">
                         <a href="{{ route('index') }}" class="d-inline-block topbar-logo">
-                            <img src="{{ asset('img/asso.png') }}" alt="Association écrivains Humanistes" class="img-fluid">
+                            <img src="{{ asset('img/asso.png') }}" alt="Association écrivains Humanistes" class="img-fluid" style="height:40px;">
                         </a>
                         <a href="{{ route('index') }}" class="d-inline-block topbar-logo">
-                            <img src="{{ asset('img/LOGO-COLIBRI-LITTERAIRE.png') }}" alt="Colibri Littéraire" class="img-fluid">
+                            <img src="{{ asset('img/LOGO-COLIBRI-LITTERAIRE.png') }}" alt="Colibri Littéraire" class="img-fluid" style="height:40px;">
                         </a>
-                        <!-- Mobile OIF logo removed -->
-                        <span class="d-inline-block topbar-logo" style="width:40px; height:40px; display:inline-block;"></span>
                     </div>
                 </div>
             </div>
