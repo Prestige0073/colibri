@@ -107,10 +107,8 @@
                         </a>
                     </div>
                     <div class="col-4 text-end d-none d-sm-block topbar-logo">
-                        <a href="{{ route('index') }}">
-                            <img src="{{ asset('img/Logo_OIF.png') }}" alt="OIF" class="img-fluid"
-                                style="max-height:60px;">
-                        </a>
+                        <!-- Logo OIF retiré intentionally to match design -->
+                        <div style="height:60px;"></div>
                     </div>
 
                     <!-- Mobile view: keep logos side-by-side (flex row, no wrap) -->
@@ -122,9 +120,8 @@
                         <a href="{{ route('index') }}" class="d-inline-block topbar-logo">
                             <img src="{{ asset('img/LOGO-COLIBRI-LITTERAIRE.png') }}" alt="Colibri Littéraire" class="img-fluid">
                         </a>
-                        <a href="{{ route('index') }}" class="d-inline-block topbar-logo">
-                            <img src="{{ asset('img/Logo_OIF.png') }}" alt="OIF" class="img-fluid">
-                        </a>
+                        <!-- Mobile OIF logo removed -->
+                        <span class="d-inline-block topbar-logo" style="width:40px; height:40px; display:inline-block;"></span>
                     </div>
                 </div>
             </div>
