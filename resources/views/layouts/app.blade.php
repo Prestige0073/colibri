@@ -176,6 +176,8 @@
                                         class="fa fa-shopping-bag me-1"></i> Acheter / Emprunter</a>
                             </div>
                         </div>
+                        <a href="{{ route('index') }}#bibliotheque"
+                            class="nav-item nav-link"><i class="fa fa-book-reader me-1"></i> Emprunts</a>
                         <a href="{{ route('about.index') }}"
                             class="nav-item nav-link{{ request()->routeIs('about.*') ? ' active' : '' }}"><i
                                 class="fa fa-info-circle me-1"></i> À propos</a>
@@ -264,6 +266,7 @@
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-light mb-4">Liens utiles</h4>
                     <a class="btn btn-link" href="{{ route('about.index') }}">À propos</a>
+                    <a class="btn btn-link" href="{{ route('index') }}#bibliotheque">Emprunts</a>
                     <a class="btn btn-link" href="{{ route('contact.index') }}">Contact</a>
                         <a class="btn btn-link" href="{{ route('blog.index') }}">Blog</a>
                     <a class="btn btn-link" href="#">Conditions d’utilisation</a>
