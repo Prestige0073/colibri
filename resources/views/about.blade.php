@@ -125,28 +125,28 @@
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.1s">
                                 <div class="text-center bg-success py-5 px-4 h-100">
                                     <i class="fa fa-users fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">500</h1>
+                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">10</h1>
                                     <span class="text-white">Membres de l'équipe</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.3s">
                                 <div class="text-center bg-secondary py-5 px-4 h-100">
                                     <i class="fa fa-award fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">70</h1>
+                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">0</h1>
                                     <span class="text-white">Award Winning</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.5s">
                                 <div class="text-center bg-secondary py-5 px-4 h-100">
                                     <i class="fa fa-list-check fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">3000</h1>
+                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">0</h1>
                                     <span class="text-white">Total Projects</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.7s">
                                 <div class="text-center bg-success py-5 px-4 h-100">
                                     <i class="fa fa-comments fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">7000</h1>
+                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">0</h1>
                                     <span class="text-white">Client's Review</span>
                                 </div>
                             </div>
@@ -154,7 +154,6 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <p class="section-title bg-white text-start text-success pe-3">Pourquoi Colibri Littéraire ?</p>
                     <h1 class="display-6 mb-4 wow fadeIn" data-wow-delay="0.2s">Pourquoi choisir notre plateforme ?</h1>
                     <p class="mb-4 wow fadeIn" data-wow-delay="0.3s">Des formations certifiantes, un catalogue riche de
                         livres africains, un accompagnement personnalisé, et une vision engagée pour la démocratisation de
@@ -180,9 +179,7 @@
         <div class="container">
             <div class="text-center mb-5 wow fadeIn" data-wow-delay="0.1s">
                 <p class="section-title bg-white text-start text-success pe-3">Équipe</p>
-                <h1 class="display-6">Notre équipe</h1>
-                <p class="mx-auto" style="max-width:700px">Rencontrez les personnes qui portent Colibri Littéraire — des
-                    coordinateurs, éditeurs, libraires et formateurs engagés à promouvoir le livre africain.</p>
+                <p class="mx-auto" style="max-width:700px">Rencontrez les personnes qui portent Colibri Littéraire.</p>
             </div>
             <div class="row g-4">
                 <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.1s">

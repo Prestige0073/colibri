@@ -173,7 +173,7 @@
                                         class="fa fa-search me-1"></i> Découvrir les livres</a>
                                 <a href="{{ route('catalogue.acheter') }}"
                                     class="dropdown-item{{ request()->routeIs('catalogue.acheter') ? ' active' : '' }}"><i
-                                        class="fa fa-shopping-bag me-1"></i> Acheter / Prêter</a>
+                                        class="fa fa-shopping-bag me-1"></i> Acheter / Emprunter</a>
                             </div>
                         </div>
                         <a href="{{ route('about.index') }}"

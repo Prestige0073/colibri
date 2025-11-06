@@ -16,8 +16,7 @@
                 <div class="row g-5 align-items-center">
                     <div class="col-lg-6">
                         <div class="carousel-text">
-                            <h1 class="display-5 text-uppercase mb-3">Rapprocher le livre africain du lecteur grâce à une diffusion et une
-                                distribution solidaire</h1>
+                            <h1 class="display-4 text-uppercase mb-3">Rapprocher le livre africain du lecteur</h1>
                             <div class="d-flex">
                                 <a class="btn btn-success py-3 px-4 me-3" href="{{ route('contact.index') }}">Faire un
                                     don</a>
@@ -36,8 +35,7 @@
                 <div class="row g-5 align-items-center">
                     <div class="col-lg-6">
                         <div class="carousel-text">
-                            <h1 class="display-6 text-uppercase mb-3">Professionnaliser les acteurs du livre | Favoriser une bonne circulation
-                                des productions locales | Contribuer à accroître les chiffres</h1>
+                            <h1 class="display-4 text-uppercase mb-3">Contribuer à dynamiser le marché du livre africain</h1>
                             <p class="fs-5 mb-5"></p>
                             <div class="d-flex mt-4">
                                 <a class="btn btn-success py-3 px-4 me-3" href="{{ route('contact.index') }}">Faire un
@@ -160,17 +158,12 @@
                                 <p>Soutenir les efforts de chaque maillon de la chaine du livre africain en assurant la
                                     formation
                                     continue des professionnels et en facilitant la circulation des productions locales</p>
-                                <p class="text-dark"><i class="fa fa-check text-success me-2"></i>Favoriser la création et
-                                    la diffusion.</p>
-                                <p class="text-dark mb-0"><i class="fa fa-check text-success me-2"></i>Faire rayonner la
-                                    culture africaine.</p>
                             </div>
                         </div>
                         <div class="col-sm-6 wow fadeIn" data-wow-delay="0.5s">
                             <div class="h-100 bg-success p-4 text-center">
                                 <p class="fs-5 text-white">Grâce à vos dons, le livre africain voyage loin à travers
-                                    le monde et l’écrivain africain peut vivre dignement de
-                                    son art. </p>
+                                    le monde. </p>
                                 <a class="btn btn-secondary py-2 px-4" href="#don">Faire un don</a>
                             </div>
                         </div>
@@ -180,6 +173,23 @@
         </div>
     </div>
     <!-- About End -->
+
+    <!-- Partner (OIF) Start -->
+    <div class="container-fluid py-4 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-3 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0">
+                    <img src="{{ asset('img/Logo_OIF.png') }}" alt="OIF" class="img-fluid" style="max-height:80px;">
+                </div>
+                <div class="col-12 col-md-9 text-center text-md-start">
+                    <p class="section-title bg-white text-start text-success pe-3">Partenaire</p>
+                    <h4 class="mb-1">Organisation Internationale de la Francophonie (OIF)</h4>
+                    <p class="mb-0">Soutient ce projet dans le cadre du dispositif <strong>FORCE</strong>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Partner (OIF) End -->
 
     <!-- Catalogue Start -->
     <div class="container-fluid py-5">
@@ -313,28 +323,28 @@
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.1s">
                                 <div class="text-center bg-success py-5 px-4 h-100">
                                     <i class="fa fa-users fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">500</h1>
+                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">10</h1>
                                     <span class="text-white">Membres de l’équipe</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.3s">
                                 <div class="text-center bg-secondary py-5 px-4 h-100">
                                     <i class="fa fa-award fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">70</h1>
+                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">0</h1>
                                     <span class="text-white">Prix et distinctions</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.5s">
                                 <div class="text-center bg-secondary py-5 px-4 h-100">
                                     <i class="fa fa-list-check fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">3000</h1>
+                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">0</h1>
                                     <span class="text-white">Projets réalisés</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.7s">
                                 <div class="text-center bg-success py-5 px-4 h-100">
                                     <i class="fa fa-comments fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">7000</h1>
+                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">0</h1>
                                     <span class="text-white">Avis des membres</span>
                                 </div>
                             </div>
@@ -342,10 +352,9 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <p class="section-title bg-white text-start text-success pe-3">Pourquoi nous ?</p>
-                    <h1 class="display-6 mb-4 wow fadeIn" data-wow-delay="0.2s">Pourquoi choisir Colibri Littéraire ?</h1>
+                    <p class="section-title bg-white text-start text-success pe-3">Pourquoi nous choisir ?</p>
                     <p class="mb-4 wow fadeIn" data-wow-delay="0.3s">Pour la qualité de nos formations, la force de notre
-                        réseau et notre engagement pour la culture africaine. Rejoignez une communauté dynamique et
+                        réseau et notre engagement pour la littérature africaine. Rejoignez une communauté dynamique et
                         solidaire !</p>
                     <p class="text-dark wow fadeIn" data-wow-delay="0.4s"><i
                             class="fa fa-check text-success me-2"></i>Formations certifiantes</p>
@@ -368,7 +377,7 @@
         <div class="container">
             <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
                 <p class="section-title bg-white text-center text-success px-3">Bibliothèque</p>
-                <h1 class="display-6 mb-4">Empruntez nos livres africains pour la lecture</h1>
+                <h1 class="display-6 mb-4">Empruntez nos livres</h1>
             </div>
             <div class="row g-4">
                 @foreach ($Bibliotheques as $livre)
