@@ -46,7 +46,7 @@
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
     <style>
         /* Toast container responsive rules */
-        .toast-container-custom{
+        .toast-container-custom {
             position: fixed;
             top: 1.5rem;
             right: 1.5rem;
@@ -56,20 +56,23 @@
             max-width: calc(100% - 3rem);
             padding: 0 0.25rem;
         }
-        .toast-container-custom .toast{
+
+        .toast-container-custom .toast {
             pointer-events: auto;
             width: auto;
             max-width: 480px;
         }
-        @media (max-width: 576px){
-            .toast-container-custom{
+
+        @media (max-width: 576px) {
+            .toast-container-custom {
                 left: 50%;
                 right: auto;
                 transform: translateX(-50%);
                 top: 1rem;
                 padding: 0 0.5rem;
             }
-            .toast-container-custom .toast{
+
+            .toast-container-custom .toast {
                 max-width: 95vw;
             }
         }
@@ -86,7 +89,7 @@
 
     @php
         // Nombre d'articles dans le panier (utilisé pour le badge du menu burger)
-        $cartCount = Auth::check() ? Auth::user()->cartItems->sum('quantite') : 0;
+$cartCount = Auth::check() ? Auth::user()->cartItems->sum('quantite') : 0;
     @endphp
 
     <!-- Topbar Start -->
@@ -106,8 +109,8 @@
                     </div>
                     <div class="col-4 text-end d-none d-sm-block topbar-logo">
                         <a href="{{ route('index') }}">
-                            <img src="{{ asset('img/LOGO-COLIBRI-LITTERAIRE.png') }}" alt="Colibri Littéraire" class="img-fluid"
-                                style="max-height:60px;">
+                            <img src="{{ asset('img/LOGO-COLIBRI-LITTERAIRE.png') }}" alt="Colibri Littéraire"
+                                class="img-fluid" style="max-height:60px;">
                         </a>
                     </div>
 
@@ -115,10 +118,12 @@
                     <div
                         class="d-flex d-sm-none justify-content-between align-items-center flex-row gap-2 flex-nowrap mt-2 w-100 topbar-logos">
                         <a href="{{ route('index') }}" class="d-inline-block topbar-logo">
-                            <img src="{{ asset('img/asso.png') }}" alt="Association écrivains Humanistes" class="img-fluid" style="height:40px;">
+                            <img src="{{ asset('img/asso.png') }}" alt="Association écrivains Humanistes"
+                                class="img-fluid" style="height:40px;">
                         </a>
                         <a href="{{ route('index') }}" class="d-inline-block topbar-logo">
-                            <img src="{{ asset('img/LOGO-COLIBRI-LITTERAIRE.png') }}" alt="Colibri Littéraire" class="img-fluid" style="height:40px;">
+                            <img src="{{ asset('img/LOGO-COLIBRI-LITTERAIRE.png') }}" alt="Colibri Littéraire"
+                                class="img-fluid" style="height:40px;">
                         </a>
                     </div>
                 </div>
@@ -176,13 +181,15 @@
                                         class="fa fa-shopping-bag me-1"></i> Acheter / Emprunter</a>
                             </div>
                         </div>
-                        <a href="{{ route('index') }}#bibliotheque"
-                            class="nav-item nav-link"><i class="fa fa-book-reader me-1"></i> Emprunts</a>
+                        <a href="{{ route('emprunts.index') }}"
+                            class="nav-item nav-link{{ request()->routeIs('emprunts.*') ? ' active' : '' }}"><i
+                                class="fa fa-book-reader me-1"></i> Emprunts</a>
                         <a href="{{ route('about.index') }}"
                             class="nav-item nav-link{{ request()->routeIs('about.*') ? ' active' : '' }}"><i
                                 class="fa fa-info-circle me-1"></i> À propos</a>
                         <a href="{{ route('blog.index') }}"
-                            class="nav-item nav-link{{ request()->routeIs('blog.*') ? ' active' : '' }}"><i class="fa fa-blog me-1"></i> Blog</a>
+                            class="nav-item nav-link{{ request()->routeIs('blog.*') ? ' active' : '' }}"><i
+                                class="fa fa-blog me-1"></i> Blog</a>
                         <div class="nav-item dropdown">
                             <a href="#"
                                 class="nav-link dropdown-toggle{{ request()->routeIs('account.*') || request()->routeIs('login') || request()->routeIs('register') ? ' active' : '' }}"
@@ -233,7 +240,8 @@
     <div class="container-fluid ticker-wrap bg-light">
         <div class="container">
             <div class="d-flex justify-content-center py-2" role="status" aria-live="polite" aria-atomic="true">
-                <p class="m-0 text-center" style="font-size:0.95rem; color:#333;">Un projet ouest-africain de formation et de découvrabilité soutenu par l'OIF dans le cadre du dispositif FORCE</p>
+                <p class="m-0 text-center" style="font-size:0.95rem; color:#333;">Un projet ouest-africain de
+                    formation et de découvrabilité soutenu par l'OIF dans le cadre du dispositif FORCE</p>
             </div>
         </div>
     </div>
@@ -249,7 +257,8 @@
             <div class="row g-5 py-5">
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-light mb-4">Notre bureau</h4>
-                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i> Abomey-Calavi – Cocotomey Tannou – C/SB . Ms Vignon</p>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i> Abomey-Calavi – Cocotomey Tannou –
+                        C/SB . Ms Vignon</p>
                     <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+33 7 46 52 61 63</p>
                     <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+229 01 66 54 78 08</p>
                     <p class="mb-2"><i class="fa fa-envelope me-3"></i>colibrilitteraire@gmail.com</p>
@@ -266,9 +275,8 @@
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-light mb-4">Liens utiles</h4>
                     <a class="btn btn-link" href="{{ route('about.index') }}">À propos</a>
-                    <a class="btn btn-link" href="{{ route('index') }}#bibliotheque">Emprunts</a>
                     <a class="btn btn-link" href="{{ route('contact.index') }}">Contact</a>
-                        <a class="btn btn-link" href="{{ route('blog.index') }}">Blog</a>
+                    <a class="btn btn-link" href="{{ route('blog.index') }}">Blog</a>
                     <a class="btn btn-link" href="#">Conditions d’utilisation</a>
                     <a class="btn btn-link" href="#">Support</a>
                 </div>
@@ -308,7 +316,8 @@
             <div class="copyright pt-5">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        &copy; <a class="fw-semi-bold text-white" href="#">Colibri Littéraire</a>, Tous droits réservés.
+                        &copy; <a class="fw-semi-bold text-white" href="#">Colibri Littéraire</a>, Tous droits
+                        réservés.
                         Plateforme portée par l’ONG Ecrivains Humanistes et les Editions Encres Universelles, avec le
                         soutien de l’OIF.
                     </div>
@@ -440,8 +449,8 @@
     {{-- Stack for view scripts --}}
     <script>
         // Fix: ensure dismiss buttons actually hide modals even if modals are created dynamically
-        document.addEventListener('click', function(e){
-            try{
+        document.addEventListener('click', function(e) {
+            try {
                 var btn = e.target.closest('[data-bs-dismiss="modal"]');
                 if (!btn) return;
                 // find the modal container
@@ -460,15 +469,15 @@
                         instance2.hide();
                     }
                 }
-            }catch(err){
+            } catch (err) {
                 // noop
                 console.error('Modal dismiss helper error', err);
             }
         });
 
         // Ensure dynamic modals respond to Escape and backdrop clicks
-        document.addEventListener('shown.bs.modal', function(e){
-            try{
+        document.addEventListener('shown.bs.modal', function(e) {
+            try {
                 var modal = e.target;
                 // allow closing with Escape if keyboard option missing
                 if (modal && modal._config && modal._config.keyboard === undefined) {
@@ -478,33 +487,45 @@
                 // (Bootstrap handles this by default, but some dynamic modals may not be initialized properly)
                 var instance = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
                 // re-enable default options
-                instance._config = Object.assign({}, instance._config, { backdrop: true, keyboard: true });
-            }catch(err){ console.error('Modal shown helper error', err); }
+                instance._config = Object.assign({}, instance._config, {
+                    backdrop: true,
+                    keyboard: true
+                });
+            } catch (err) {
+                console.error('Modal shown helper error', err);
+            }
         });
 
         // Toasts: ensure server-rendered toasts (session) are initialised and can be dismissed
-        document.addEventListener('DOMContentLoaded', function(){
-            try{
-                document.querySelectorAll('.toast').forEach(function(t){
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                document.querySelectorAll('.toast').forEach(function(t) {
                     // create instance if not present
-                    var inst = bootstrap.Toast.getInstance(t) || new bootstrap.Toast(t, { autohide: true, delay: 4000 });
+                    var inst = bootstrap.Toast.getInstance(t) || new bootstrap.Toast(t, {
+                        autohide: true,
+                        delay: 4000
+                    });
                     // if element has class show, call show() to wire events
                     if (t.classList.contains('show')) inst.show();
                 });
-            }catch(err){ console.error('Toast init error', err); }
+            } catch (err) {
+                console.error('Toast init error', err);
+            }
         });
 
         // For buttons that dismiss toasts, ensure they hide the right instance even if dynamic
-        document.addEventListener('click', function(e){
-            try{
+        document.addEventListener('click', function(e) {
+            try {
                 var btn = e.target.closest('[data-bs-dismiss="toast"]');
                 if (!btn) return;
                 var toastEl = btn.closest('.toast');
-                if (toastEl){
+                if (toastEl) {
                     var ti = bootstrap.Toast.getInstance(toastEl) || new bootstrap.Toast(toastEl);
                     ti.hide();
                 }
-            }catch(err){ console.error('Toast dismiss helper error', err); }
+            } catch (err) {
+                console.error('Toast dismiss helper error', err);
+            }
         });
     </script>
     @stack('scripts')
