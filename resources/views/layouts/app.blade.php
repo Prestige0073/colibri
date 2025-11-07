@@ -181,9 +181,6 @@ $cartCount = Auth::check() ? Auth::user()->cartItems->sum('quantite') : 0;
                                         class="fa fa-shopping-bag me-1"></i> Acheter / Emprunter</a>
                             </div>
                         </div>
-                        <a href="{{ route('emprunts.index') }}"
-                            class="nav-item nav-link{{ request()->routeIs('emprunts.*') ? ' active' : '' }}"><i
-                                class="fa fa-book-reader me-1"></i> Emprunts</a>
                         <a href="{{ route('about.index') }}"
                             class="nav-item nav-link{{ request()->routeIs('about.*') ? ' active' : '' }}"><i
                                 class="fa fa-info-circle me-1"></i> À propos</a>

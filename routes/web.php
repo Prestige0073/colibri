@@ -12,7 +12,6 @@ use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\ErrorController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 
 // Routes resource pour l'administration
 use App\Http\Controllers\Admin\UserController;
@@ -70,14 +69,6 @@ Route::resource('testimonial', TestimonialController::class);
 Route::resource('error', ErrorController::class); // pour 404
 Route::post('bibliotheque/emprunter', [BibliothequeController::class, 'emprunter'])->name('bibliotheque.emprunter');
 Route::delete('emprunts/{emprunt}', [BibliothequeController::class, 'destroy'])->name('emprunts.destroy');
-
-// Page publique Emprunts (liste et formulaire d'emprunt)
-Route::get('emprunts', function () {
-    $livres = \App\Models\Catalogue::where('type_categorie', 'emprunt')->get();
-    $user = Auth::user();
-    $emprunts = $user ? $user->emprunts()->with('livre')->get() : collect();
-    return view('emprunts', compact('livres', 'emprunts'));
-})->name('emprunts.index');
 
 
 // Routes pour le panier d'achat

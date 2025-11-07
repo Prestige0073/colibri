@@ -174,23 +174,6 @@
     </div>
     <!-- About End -->
 
-    <!-- Partner (OIF) Start -->
-    <div class="container-fluid py-4 bg-light">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-12 col-md-3 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0">
-                    <img src="{{ asset('img/Logo_OIF.png') }}" alt="OIF" class="img-fluid" style="max-height:80px;">
-                </div>
-                <div class="col-12 col-md-9 text-center text-md-start">
-                    <p class="section-title bg-white text-start text-success pe-3">Partenaire</p>
-                    <h4 class="mb-1">Organisation Internationale de la Francophonie (OIF)</h4>
-                    <p class="mb-0">Soutient ce projet dans le cadre du dispositif <strong>FORCE</strong>.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Partner (OIF) End -->
-
     <!-- Catalogue Start -->
     <div class="container-fluid py-5">
         <div class="container">
@@ -470,7 +453,22 @@
         </div>
     </div>
     <!-- Bibliothèque End -->
-
+    <!-- Partner (OIF) Start -->
+    <div class="container-fluid py-4 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-3 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0">
+                    <img src="{{ asset('img/Logo_OIF.png') }}" alt="OIF" class="img-fluid" style="max-height:80px;">
+                </div>
+                <div class="col-12 col-md-9 text-center text-md-start">
+                    <p class="section-title bg-white text-start text-success pe-3">Partenaire</p>
+                    <h4 class="mb-1">Organisation Internationale de la Francophonie (OIF)</h4>
+                    <p class="mb-0">Soutient ce projet dans le cadre du dispositif <strong>FORCE</strong>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Partner (OIF) End -->
     <!-- Newsletter Start -->
     <div class="container-fluid bg-success py-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container">
