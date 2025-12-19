@@ -10,15 +10,37 @@
         $cartItems = Auth::user()->cartItems()->with('catalogue')->get();
         $cartCount = $cartItems->sum('quantite');
         $recentPurchases = Auth::user()->cartItems()->with('catalogue')->orderByDesc('created_at')->take(5)->get();
-        $emprunts = Auth::user()->emprunts()->with('livre')->get();
+        $emprunts = Auth::user()->emprunts()->with('livre')->orderByDesc('created_at')->get();
     @endphp
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="card border-0 rounded-4 shadow-lg p-4 profile-card">
                 <div class="d-flex flex-column flex-md-row align-items-center gap-4">
                     <div class="text-center flex-shrink-0">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=007bff&color=fff&size=180"
-                            alt="Avatar" class="rounded-circle shadow mb-3 profile-avatar">
+                        <form id="avatarForm" action="{{ route('account.avatar.update') }}" method="POST" enctype="multipart/form-data" style="display:inline-block;">
+                            @csrf
+                            <label for="avatarInput" style="cursor:pointer;display:inline-block;">
+                                @if(Auth::user()->avatar)
+                                    <img src="{{ asset(Auth::user()->avatar) }}" alt="Avatar" class="rounded-circle shadow mb-3 profile-avatar img-fluid" id="avatarPreview" style="width:180px;height:180px;object-fit:cover;">
+                                @else
+                                    <div class="position-relative d-inline-block">
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=007bff&color=fff&size=180" alt="Avatar" class="rounded-circle shadow mb-3 profile-avatar img-fluid" id="avatarPreview" style="width:180px;height:180px;object-fit:cover;">
+                                        <span class="position-absolute top-50 start-50 translate-middle bg-dark text-white small rounded-pill px-3 py-1"
+                                              style="opacity:0.85;z-index:3;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,0.35);">
+                                            Cliquer pour changer
+                                        </span>
+                                    </div>
+                                @endif
+                            </label>
+                            <input type="file" name="avatar" id="avatarInput" accept="image/*" style="display:none;">
+                        </form>
+
+                        @if(session('success'))
+                            <div class="alert alert-success alert-sm mt-2">{{ session('success') }}</div>
+                        @endif
+                        @if(session('error'))
+                            <div class="alert alert-danger alert-sm mt-2">{{ session('error') }}</div>
+                        @endif
                         <h4 class="fw-bold text-success mb-1">{{ Auth::user()->name }}</h4>
 
                         <div class="mt-2 d-flex align-items-center gap-2">
@@ -353,6 +375,29 @@
                     // nothing extra needed; events above handle rotation
                 });
             });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var avatarInput = document.getElementById('avatarInput');
+            var avatarForm = document.getElementById('avatarForm');
+            var avatarPreview = document.getElementById('avatarPreview');
+
+            if (avatarInput) {
+                avatarInput.addEventListener('change', function (e) {
+                    var file = this.files[0];
+                    if (!file) return;
+                    // preview
+                    var reader = new FileReader();
+                    reader.onload = function (evt) {
+                        if (avatarPreview) avatarPreview.src = evt.target.result;
+                    };
+                    reader.readAsDataURL(file);
+
+                    // submit form
+                    if (avatarForm) avatarForm.submit();
+                });
+            }
         });
     </script>
 @endpush

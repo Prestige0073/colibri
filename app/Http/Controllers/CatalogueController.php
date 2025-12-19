@@ -18,13 +18,20 @@ class CatalogueController extends Controller
 
     public function acheter()
     {
-        $livres = Catalogue::all();
-        // Récupérer les livres de la bibliothèque (ici, même source que catalogue)
-        $Bibliotheques = Catalogue::all();
+        // Récupérer les livres à vendre, triés du plus récent au plus ancien
+        $livres = Catalogue::where('type_categorie', 'vente')
+            ->orderByDesc('created_at')
+            ->orderBy('titre')
+            ->paginate(12);
+
+        // Collection complète de catalogues (utile pour filtres, catégories, etc.)
+        $catalogues = Catalogue::where('type_categorie', 'vente')
+            ->orderBy('titre')
+            ->get();
 
         $user = Auth::user();
-        $emprunts = $user && method_exists($user, 'emprunts') ? $user->emprunts()->with('livre')->get() : collect();
-        return view('catalogue.acheter', compact('livres', 'emprunts', 'Bibliotheques'));
+        $emprunts = $user && method_exists($user, 'emprunts') ? $user->emprunts()->with('livre')->orderByDesc('created_at')->get() : collect();
+        return view('catalogue.acheter', compact('livres', 'catalogues', 'emprunts'));
     }
 
     /**

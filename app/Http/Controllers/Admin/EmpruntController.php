@@ -7,182 +7,304 @@ use App\Models\Emprunt;
 use App\Models\User;
 use App\Models\Catalogue;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class EmpruntController extends Controller
 {
+    /**
+     * Affiche la page admin des emprunts
+     */
     public function index()
     {
-        // Liste des livres/empruntables
-        $livres = Catalogue::all();
-        $cataloguesEmprunt = Catalogue::where('type_categorie', 'emprunt')->get();
+        // Récupérer tous les emprunts avec leurs relations
+        $emprunts = Emprunt::with(['user', 'livre'])
+            ->orderByDesc('created_at')
+            ->paginate(15);
 
-        // Charger les utilisateurs ayant des emprunts, triés par date du dernier emprunt
-        $usersQuery = User::whereHas('emprunts')
-            ->withCount(['emprunts as last_emprunt_at' => function ($q) {
-                $q->select(DB::raw('MAX(created_at)'));
-            }])
-            ->orderByDesc('last_emprunt_at');
+        // Récupérer tous les utilisateurs pour le formulaire
+        $users = User::orderBy('name')->get();
 
-        $users = $usersQuery->paginate(20);
+        // Récupérer tous les livres empruntables
+        $livresEmpruntables = Catalogue::where('type_categorie', 'emprunt')
+            ->orderBy('titre')
+            ->get();
 
-        // Pour chaque utilisateur, charger ses emprunts actifs (non 'retourne') et archives ('retourne')
-        foreach ($users as $user) {
-            $activeQuery = $user->emprunts()->with('livre')->where('statut','<>','retourne');
-            $activeQuery->orderByDesc('created_at');
-            $active = $activeQuery->take(10)->get();
-            $user->setRelation('emprunts_active', $active);
+        // Récupérer tous les livres pour le formulaire d'ajout de livre empruntable
+        $allCatalogues = Catalogue::all();
 
-            $archiveQuery = $user->emprunts()->with('livre')->where('statut','retourne')->orderByDesc('created_at');
-            $archives = $archiveQuery->take(50)->get();
-            $user->setRelation('emprunts_archives', $archives);
-        }
-
-        return view('admin.emprunts', compact('users', 'livres', 'cataloguesEmprunt'));
+        return view('admin.emprunts', compact('emprunts', 'users', 'livresEmpruntables', 'allCatalogues'));
     }
 
     /**
-     * Mettre à jour le statut d'un emprunt (ex: marquer comme 'retourne')
+     * Afficher le formulaire de création (optionnel, car on utilise un modal)
      */
-    public function updateStatus(Request $request, Emprunt $emprunt)
-    {
-        $request->validate([
-            'statut' => 'required|string',
-            'date_retour' => 'nullable|date',
-        ]);
-
-        $statut = $request->input('statut');
-        $emprunt->statut = $statut;
-
-        // Normaliser la date_retour : si fournie, stocker au format date (Y-m-d).
-        // Si le statut devient 'retourne' et qu'aucune date n'est fournie, utiliser la date du jour.
-        $dateRetourInput = $request->input('date_retour');
-        if ($dateRetourInput) {
-            try {
-                $emprunt->date_retour = \Carbon\Carbon::parse($dateRetourInput)->toDateString();
-            } catch (\Exception $e) {
-                // en cas d'erreur de parsing, laisser la valeur précédente
-            }
-        } elseif ($statut === 'retourne' || strtolower($statut) === 'retourné' || strtolower($statut) === 'retourne') {
-            $emprunt->date_retour = now()->toDateString();
-        }
-
-        $emprunt->save();
-        return redirect()->back()->with('success', 'Statut de l\'emprunt mis à jour.');
-    }
-
-    /**
-     * Actions groupées : mettre à jour le statut de tous les emprunts d'un utilisateur
-     */
-    public function bulkUpdateStatus(Request $request, User $user)
-    {
-        $request->validate(['statut' => 'required|string']);
-        $statut = $request->input('statut');
-        Emprunt::where('user_id', $user->id)->update(['statut' => $statut]);
-        return redirect()->back()->with('success', 'Statuts des emprunts utilisateur mis à jour.');
-    }
-
-    public function addBooks(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'livre_id' => 'required|exists:catalogues,id',
-            'date_emprunt' => 'required|date',
-            'date_retour' => 'nullable|date',
-            'statut' => 'required|string',
-        ]);
-
-        $user_id = $request->input('user_id');
-        $livre_id = $request->input('livre_id');
-        $date_emprunt = $request->input('date_emprunt');
-        $date_retour = $request->input('date_retour');
-        $statut = $request->input('statut');
-
-        $livre = Catalogue::find($livre_id);
-        if ($livre && $livre->quantite > 0) {
-            Emprunt::create([
-                'user_id' => $user_id,
-                'livre_id' => $livre_id,
-                'date_emprunt' => $date_emprunt,
-                'date_retour' => $date_retour,
-                'statut' => $statut,
-            ]);
-            // Décrémenter la quantité
-            $livre->quantite--;
-            $livre->type = 'emprunt';
-            $livre->save();
-            return redirect()->route('admin.emprunts.index')
-                ->with('success', "Livre emprunté avec succès.");
-        } else {
-            return redirect()->route('admin.emprunts.index')
-                ->with('error', "Ce livre n'est pas disponible.");
-        }
-    }
-
-    public function edit($id)
-    {
-        // ...
-    }
-
-    public function update(Request $request, $id)
-    {
-        // ...
-    }
-
-    public function destroy($id)
-    {
-        $emprunt = \App\Models\Emprunt::findOrFail($id);
-        $emprunt->delete();
-        return redirect()->route('admin.emprunts.index')->with('success', 'Emprunt supprimé avec succès.');
-    }
-
     public function create()
     {
-        // ...
+        $users = User::orderBy('name')->get();
+        $livresEmpruntables = Catalogue::where('type_categorie', 'emprunt')->get();
+        return view('admin.emprunts.create', compact('users', 'livresEmpruntables'));
     }
 
+    /**
+     * Stocker un nouveau livre empruntable dans le catalogue
+     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'titre' => 'required|string|max:255',
             'auteur' => 'required|string|max:255',
             'categorie' => 'required|string|max:255',
-            'prix' => 'required|integer|min:0',
+            'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
-            'resumer' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'pdf' => 'required|mimes:pdf|max:10000',
+            'resumer' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'pdf' => 'nullable|mimes:pdf|max:10000',
         ]);
 
-        // Gestion image
-        $imagePath = 'img/livres';
-        if (!file_exists(public_path($imagePath))) {
-            mkdir(public_path($imagePath), 0775, true);
+        // Gestion de l'image
+        $imageUrl = null;
+        if ($request->hasFile('image')) {
+            $imagePath = 'img/livres';
+            if (!file_exists(public_path($imagePath))) {
+                mkdir(public_path($imagePath), 0775, true);
+            }
+            $imageName = uniqid('img_') . '.' . $request->image->extension();
+            $request->image->move(public_path($imagePath), $imageName);
+            $imageUrl = $imagePath . '/' . $imageName;
         }
-        $imageName = uniqid('img_') . '.' . $request->image->extension();
-        $request->image->move(public_path($imagePath), $imageName);
-        $imageUrl = $imagePath . '/' . $imageName;
 
-        // Gestion PDF
-        $pdfPath = 'pdf/emprunt';
-        if (!file_exists(public_path($pdfPath))) {
-            mkdir(public_path($pdfPath), 0775, true);
+        // Gestion du PDF
+        $pdfUrl = null;
+        if ($request->hasFile('pdf')) {
+            $pdfPath = 'pdf/emprunt';
+            if (!file_exists(public_path($pdfPath))) {
+                mkdir(public_path($pdfPath), 0775, true);
+            }
+            $pdfName = uniqid('pdf_') . '.' . $request->pdf->extension();
+            $request->pdf->move(public_path($pdfPath), $pdfName);
+            $pdfUrl = $pdfPath . '/' . $pdfName;
         }
-        $pdfName = uniqid('pdf_') . '.' . $request->pdf->extension();
-        $request->pdf->move(public_path($pdfPath), $pdfName);
-        $pdfUrl = $pdfPath . '/' . $pdfName;
 
-        $catalogue = Catalogue::create([
-            'titre' => $request->titre,
-            'auteur' => $request->auteur,
-            'categorie' => $request->categorie,
-            'prix' => $request->prix,
-            'quantite' => $request->quantite,
+        Catalogue::create([
+            'titre' => $validated['titre'],
+            'auteur' => $validated['auteur'],
+            'categorie' => $validated['categorie'],
+            'prix' => $validated['prix'],
+            'quantite' => $validated['quantite'],
             'type_categorie' => 'emprunt',
-            'resumer' => $request->resumer,
+            'type' => 'emprunt',
+            'resumer' => $validated['resumer'] ?? '',
             'image' => $imageUrl,
             'pdf' => $pdfUrl,
         ]);
 
-        return redirect()->route('admin.emprunts.index')->with('success', 'Livre ajouté avec succès !');
+        return redirect()->route('admin.emprunts.index')
+            ->with('success', 'Livre empruntable ajouté avec succès !');
+    }
+
+    /**
+     * Afficher un emprunt spécifique
+     */
+    public function show(Emprunt $emprunt)
+    {
+        $emprunt->load(['user', 'livre']);
+        return view('admin.emprunts.show', compact('emprunt'));
+    }
+
+    /**
+     * Afficher le formulaire d'édition
+     */
+    public function edit(Emprunt $emprunt)
+    {
+        $users = User::orderBy('name')->get();
+        $livresEmpruntables = Catalogue::where('type_categorie', 'emprunt')->get();
+        return view('admin.emprunts.edit', compact('emprunt', 'users', 'livresEmpruntables'));
+    }
+
+    /**
+     * Mettre à jour un livre empruntable (Catalogue)
+     */
+    public function update(Request $request, $id)
+    {
+        $livre = Catalogue::findOrFail($id);
+
+        $validated = $request->validate([
+            'titre' => 'required|string|max:255',
+            'auteur' => 'required|string|max:255',
+            'categorie' => 'required|string|max:255',
+            'prix' => 'required|numeric|min:0',
+            'quantite' => 'required|integer|min:0',
+            'resumer' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'pdf' => 'nullable|mimes:pdf|max:10000',
+        ]);
+
+        // Gestion de l'image
+        if ($request->hasFile('image')) {
+            // Supprimer l'ancienne image si elle existe
+            if ($livre->image && file_exists(public_path($livre->image))) {
+                unlink(public_path($livre->image));
+            }
+
+            $imagePath = 'img/livres';
+            if (!file_exists(public_path($imagePath))) {
+                mkdir(public_path($imagePath), 0775, true);
+            }
+            $imageName = uniqid('img_') . '.' . $request->image->extension();
+            $request->image->move(public_path($imagePath), $imageName);
+            $validated['image'] = $imagePath . '/' . $imageName;
+        }
+
+        // Gestion du PDF
+        if ($request->hasFile('pdf')) {
+            // Supprimer l'ancien PDF si il existe
+            if ($livre->pdf && file_exists(public_path($livre->pdf))) {
+                unlink(public_path($livre->pdf));
+            }
+
+            $pdfPath = 'pdf/emprunt';
+            if (!file_exists(public_path($pdfPath))) {
+                mkdir(public_path($pdfPath), 0775, true);
+            }
+            $pdfName = uniqid('pdf_') . '.' . $request->pdf->extension();
+            $request->pdf->move(public_path($pdfPath), $pdfName);
+            $validated['pdf'] = $pdfPath . '/' . $pdfName;
+        }
+
+        $livre->update($validated);
+
+        return redirect()->route('admin.emprunts.index')
+            ->with('success', 'Livre empruntable mis à jour avec succès !');
+    }
+
+    /**
+     * Supprimer un livre empruntable (Catalogue)
+     */
+    public function destroy($id)
+    {
+        $livre = Catalogue::findOrFail($id);
+
+        // Vérifier qu'il n'y a pas d'emprunts en cours pour ce livre
+        $empruntsEnCours = Emprunt::where('livre_id', $livre->id)
+            ->whereIn('statut', ['en_cours', 'en_retard'])
+            ->count();
+
+        if ($empruntsEnCours > 0) {
+            return redirect()->route('admin.emprunts.index')
+                ->with('error', "Impossible de supprimer ce livre car il y a {$empruntsEnCours} emprunt(s) en cours.");
+        }
+
+        // Supprimer les fichiers associés
+        if ($livre->image && file_exists(public_path($livre->image))) {
+            unlink(public_path($livre->image));
+        }
+        if ($livre->pdf && file_exists(public_path($livre->pdf))) {
+            unlink(public_path($livre->pdf));
+        }
+
+        $livre->delete();
+
+        return redirect()->route('admin.emprunts.index')
+            ->with('success', 'Livre empruntable supprimé avec succès !');
+    }
+
+    /**
+     * Ajouter un nouvel emprunt (créer une relation emprunt entre un user et un livre)
+     */
+    public function addBooks(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'livre_id' => 'required|exists:catalogues,id',
+            'date_emprunt' => 'required|date',
+            'date_retour' => 'nullable|date|after_or_equal:date_emprunt',
+            'statut' => 'required|in:en_cours,retourne,en_retard',
+        ]);
+
+        $livre = Catalogue::findOrFail($validated['livre_id']);
+
+        // Vérifier la disponibilité
+        if ($livre->quantite <= 0) {
+            return redirect()->route('admin.emprunts.index')
+                ->with('error', "Le livre '{$livre->titre}' n'est plus disponible à l'emprunt.");
+        }
+
+        // Créer l'emprunt
+        Emprunt::create([
+            'user_id' => $validated['user_id'],
+            'livre_id' => $validated['livre_id'],
+            'date_emprunt' => $validated['date_emprunt'],
+            'date_retour' => $validated['date_retour'],
+            'statut' => $validated['statut'],
+        ]);
+
+        // Décrémenter la quantité du livre
+        $livre->decrement('quantite');
+
+        return redirect()->route('admin.emprunts.index')
+            ->with('success', "Emprunt créé avec succès pour '{$livre->titre}'.");
+    }
+
+    /**
+     * Mettre à jour le statut d'un emprunt unique
+     */
+    public function updateStatus(Request $request, Emprunt $emprunt)
+    {
+        $validated = $request->validate([
+            'statut' => 'required|in:en_cours,retourne,en_retard',
+            'date_retour' => 'nullable|date',
+        ]);
+
+        $oldStatut = $emprunt->statut;
+        $newStatut = $validated['statut'];
+
+        $emprunt->statut = $newStatut;
+
+        // Si le livre est retourné, mettre la date de retour et incrémenter le stock
+        if ($newStatut === 'retourne') {
+            $emprunt->date_retour = $validated['date_retour'] ?? now()->toDateString();
+
+            // Incrémenter le stock du livre si le statut passe de en_cours à retourné
+            if ($oldStatut !== 'retourne' && $emprunt->livre) {
+                $emprunt->livre->increment('quantite');
+            }
+        }
+
+        $emprunt->save();
+
+        return redirect()->back()->with('success', 'Statut de l\'emprunt mis à jour avec succès.');
+    }
+
+    /**
+     * Mettre à jour en masse les statuts des emprunts d'un utilisateur
+     */
+    public function bulkUpdateStatus(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'statut' => 'required|in:en_cours,retourne,en_retard',
+        ]);
+
+        $statut = $validated['statut'];
+
+        // Récupérer tous les emprunts de l'utilisateur qui ne sont pas déjà au statut demandé
+        $emprunts = $user->emprunts()->where('statut', '!=', $statut)->get();
+
+        foreach ($emprunts as $emprunt) {
+            $oldStatut = $emprunt->statut;
+            $emprunt->statut = $statut;
+
+            if ($statut === 'retourne' && !$emprunt->date_retour) {
+                $emprunt->date_retour = now()->toDateString();
+
+                // Incrémenter le stock si passage de en_cours à retourné
+                if ($oldStatut !== 'retourne' && $emprunt->livre) {
+                    $emprunt->livre->increment('quantite');
+                }
+            }
+
+            $emprunt->save();
+        }
+
+        return redirect()->back()->with('success', "Statuts des emprunts de {$user->name} mis à jour avec succès.");
     }
 }

@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Registration Token
+    |--------------------------------------------------------------------------
+    |
+    | Token secret pour sécuriser l'accès à la page d'enregistrement admin.
+    | Ne jamais partager ce token publiquement.
+    |
+    */
+
+    'admin_register_token' => env('ADMIN_REGISTER_TOKEN'),
+
 ];

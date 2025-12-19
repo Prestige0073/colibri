@@ -204,6 +204,17 @@
                     </div>
                 </div>
 
+                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.15s">
+                    <div class="team-item text-center p-4">
+                        <div class="team-img mb-3">
+                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/Hervé.png') }}"
+                                alt="Hervé AYEMENE">
+                        </div>
+                        <h5 class="mb-1">Hervé AYEMENE</h5>
+                        <p class="text-muted">Point focal Côte d'Ivoire</p>
+                    </div>
+                </div>
+
                 <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.2s">
                     <div class="team-item text-center p-4">
                         <div class="team-img mb-3">

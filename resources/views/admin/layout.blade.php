@@ -95,7 +95,7 @@
                         <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link text-white{{ request()->routeIs('admin.dashboard') ? ' active' : '' }}"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a></li>
                         <li class="nav-item"><a href="{{ route('admin.users.index') }}" class="nav-link text-white{{ request()->routeIs('admin.users.index') ? ' active' : '' }}"><i class="fa fa-users me-2"></i>Utilisateurs</a></li>
                         <li class="nav-item"><a href="{{ route('admin.catalogue.index') }}" class="nav-link text-white{{ request()->routeIs('admin.catalogue.index') ? ' active' : '' }}"><i class="fa fa-book me-2"></i>Catalogue</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.emprunts.index') }}" class="nav-link text-white{{ request()->routeIs('admin.emprunts.index') ? ' active' : '' }}"><i class="fa fa-book me-2"></i>Emprunts</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.emprunts.index') }}" class="nav-link text-white{{ request()->routeIs('admin.emprunts.*') ? ' active' : '' }}"><i class="fa fa-book-reader me-2"></i>Emprunts</a></li>
                         <li class="nav-item">
                             <a href="{{ route('admin.commandes.index') }}" class="nav-link text-white{{ request()->routeIs('admin.commandes.*') ? ' active' : '' }}">
                                 <i class="fa fa-truck me-2"></i>Commandes
@@ -124,6 +124,7 @@
                         <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link text-white{{ request()->routeIs('admin.dashboard') ? ' active' : '' }}"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a></li>
                         <li class="nav-item"><a href="{{ route('admin.users.index') }}" class="nav-link text-white{{ request()->routeIs('admin.users.index') ? ' active' : '' }}"><i class="fa fa-users me-2"></i>Utilisateurs</a></li>
                         <li class="nav-item"><a href="{{ route('admin.catalogue.index') }}" class="nav-link text-white{{ request()->routeIs('admin.catalogue.index') ? ' active' : '' }}"><i class="fa fa-book me-2"></i>Catalogue</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.emprunts.index') }}" class="nav-link text-white{{ request()->routeIs('admin.emprunts.*') ? ' active' : '' }}"><i class="fa fa-book-reader me-2"></i>Emprunts</a></li>
                         <li class="nav-item">
                             <a href="{{ route('admin.commandes.index') }}" class="nav-link text-white{{ request()->routeIs('admin.commandes.*') ? ' active' : '' }}">
                                 <i class="fa fa-truck me-2"></i>Commandes

@@ -35,6 +35,7 @@ use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\Admin\EmpruntController;
 use App\Http\Controllers\BibliothequeController;
 use App\Http\Controllers\Admin\FormationController as AdminFormationController;
+use App\Http\Controllers\EmpruntUserController;
 
 // Route d'accueil nommée 'index' pour la page principale
 Route::get('/', [IndexController::class, 'index'])->name('index');
@@ -56,6 +57,16 @@ Route::get('catalogue/decouvrir', [CatalogueController::class, 'decouvrir'])->na
 Route::get('catalogue/acheter', [CatalogueController::class, 'acheter'])->name('catalogue.acheter');
 // Route index compatible avec les appels existants
 Route::get('catalogue', [CatalogueController::class, 'decouvrir'])->name('catalogue.index');
+
+// Routes pour Emprunts (utilisateurs)
+Route::get('emprunts', [EmpruntUserController::class, 'index'])->name('emprunts.index');
+Route::get('emprunts/{id}', [EmpruntUserController::class, 'show'])->name('emprunts.show');
+
+// Routes protégées pour les emprunts utilisateur
+Route::middleware('auth')->group(function () {
+    Route::get('mes-emprunts', [EmpruntUserController::class, 'mesEmprunts'])->name('emprunts.mes-emprunts');
+    Route::post('emprunts/demander', [EmpruntUserController::class, 'demander'])->name('emprunts.demander');
+});
 
 // Routes resource pour chaque page principale
 Route::resource('about', AboutController::class);
@@ -81,9 +92,17 @@ Route::get('/paiement', [PanierController::class, 'showPaiement'])->name('paieme
 Route::post('/commande/cod', [CommandeController::class, 'storeCod'])->name('commande.cod');
 Route::get('/commandes/{commande}', [CommandeController::class, 'show'])->name('commandes.show');
 
+// Routes pour l'authentification admin (AVANT le middleware)
+Route::get('admin/login', [\App\Http\Controllers\Admin\AuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('admin/login', [\App\Http\Controllers\Admin\AuthController::class, 'login'])->name('admin.login.post');
+Route::post('admin/logout', [\App\Http\Controllers\Admin\AuthController::class, 'logout'])->name('admin.logout');
+
+// Route d'enregistrement admin ULTRA-SÉCURISÉE avec token secret
+Route::get('admin/register/{token}', [\App\Http\Controllers\Admin\AuthController::class, 'showRegisterForm'])->name('admin.register');
+Route::post('admin/register/{token}', [\App\Http\Controllers\Admin\AuthController::class, 'register'])->name('admin.register.post');
 
 // Routes resource pour l'administration avec middleware d'authentification
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function () {
     Route::get('/', [DashboardAdminController::class, 'index'])->name('dashboard');
     Route::post('users/{user}/toggle-block', [UserController::class, 'toggleBlock'])->name('users.toggle-block');
     Route::resource('users', UserController::class);
@@ -98,9 +117,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('modules', ModuleAdminController::class);
     Route::resource('team', TeamAdminController::class); // Pour le lien équipe dans la sidebar
     Route::resource('emprunts', EmpruntController::class);
-        // Actions supplémentaires pour les emprunts
-        Route::post('emprunts/{emprunt}/update-status', [EmpruntController::class, 'updateStatus'])->name('admin.emprunts.updateStatus');
-        Route::post('emprunts/{user}/bulk-update-status', [EmpruntController::class, 'bulkUpdateStatus'])->name('admin.emprunts.bulkUpdateStatus');
+    // Actions supplémentaires pour les emprunts
+    Route::post('emprunts/{emprunt}/update-status', [EmpruntController::class, 'updateStatus'])->name('emprunts.updateStatus');
+    Route::post('emprunts/{user}/bulk-update-status', [EmpruntController::class, 'bulkUpdateStatus'])->name('emprunts.bulkUpdateStatus');
     Route::post('emprunts/add-books', [EmpruntController::class, 'addBooks'])->name('emprunts.addBooks');
     Route::resource('formations', AdminFormationController::class);
     // Admin: commandes management
@@ -115,6 +134,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::middleware('auth')->group(function () {    
     // Routes pour Mon compte
     Route::get('account/profil', [App\Http\Controllers\AccountController::class, 'profil'])->name('account.profil');
+    Route::post('account/avatar', [App\Http\Controllers\AccountController::class, 'updateAvatar'])->name('account.avatar.update');
     Route::get('account/commandes', [App\Http\Controllers\CommandeController::class, 'mesCommandes'])->name('account.commandes');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Catalogue;
+use App\Models\Emprunt;
 
 class IndexController extends Controller
 {
@@ -18,8 +19,11 @@ class IndexController extends Controller
         // Récupérer les livres de la bibliothèque (ici, même source que catalogue)
         $Bibliotheques = Catalogue::all();
 
+        // Récupérer les derniers emprunts (les plus récents en premier)
+        $recentEmprunts = Emprunt::with('livre', 'user')->orderByDesc('created_at')->take(6)->get();
+
         // Passer les Catalogues et Bibliotheques à la vue
-        return view('index', compact('Catalogues', 'Bibliotheques'));
+        return view('index', compact('Catalogues', 'Bibliotheques', 'recentEmprunts'));
     }
 
     /**

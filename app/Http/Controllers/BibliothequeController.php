@@ -46,7 +46,7 @@ class BibliothequeController extends Controller
     {
         $livres = \App\Models\Catalogue::all();
         $user = Auth::user();
-        $emprunts = $user ? $user->emprunts()->with('livre')->get() : collect();
+        $emprunts = $user ? $user->emprunts()->with('livre')->orderByDesc('created_at')->get() : collect();
         return view('catalogue.acheter', compact('livres', 'emprunts'));
     }
 }
