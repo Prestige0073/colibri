@@ -6,38 +6,7 @@
     partager et soutenir.')
 
 @section('content')
-        <!-- Toast notification -->
-        <div aria-live="polite" aria-atomic="true"
-            style="position: fixed; top: 1.5rem; right: 1.5rem; min-width: 320px; z-index: 1080; pointer-events: none;">
-            @if (session('success'))
-                <div id="toast-success"
-                    class="toast align-items-center border-0 shadow-lg show animate__animated animate__slideInDown"
-                    role="alert" aria-live="assertive" aria-atomic="true"
-                    style="pointer-events:auto; background:#1bc47d; color:#fff; font-weight:500;">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="fa fa-check-circle me-2"></i> {{ session('success') }}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                            aria-label="Fermer"></button>
-                    </div>
-                </div>
-            @endif
-            @if (session('error'))
-                <div id="toast-error"
-                    class="toast align-items-center border-0 shadow-lg show animate__animated animate__slideInDown"
-                    role="alert" aria-live="assertive" aria-atomic="true"
-                    style="pointer-events:auto; background:#e53935; color:#fff; font-weight:500;">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="fa fa-exclamation-triangle me-2"></i> {{ session('error') }}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                            aria-label="Fermer"></button>
-                    </div>
-                </div>
-            @endif
-        </div>
+    @include('partials.notifications')
 
     <!-- Catalogue Start -->
     <div class="container-fluid py-5">

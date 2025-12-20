@@ -12,6 +12,14 @@ class Emprunt extends Model
         'date_emprunt',
         'date_retour',
         'statut',
+        'valide_par',
+        'valide_le',
+        'access_expires_at',
+    ];
+
+    protected $casts = [
+        'valide_le' => 'datetime',
+        'access_expires_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -22,5 +30,10 @@ class Emprunt extends Model
     public function livre(): BelongsTo
     {
         return $this->belongsTo(Catalogue::class, 'livre_id');
+    }
+
+    public function validateur(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'valide_par');
     }
 }

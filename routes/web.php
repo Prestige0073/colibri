@@ -36,6 +36,8 @@ use App\Http\Controllers\Admin\EmpruntController;
 use App\Http\Controllers\BibliothequeController;
 use App\Http\Controllers\Admin\FormationController as AdminFormationController;
 use App\Http\Controllers\EmpruntUserController;
+use App\Http\Controllers\SecurePdfController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 // Route d'accueil nommée 'index' pour la page principale
 Route::get('/', [IndexController::class, 'index'])->name('index');
@@ -54,7 +56,7 @@ Route::get('formation/{formation}/module/{module}', [FormationController::class,
 
 // Routes pour Catalogue
 Route::get('catalogue/decouvrir', [CatalogueController::class, 'decouvrir'])->name('catalogue.decouvrir');
-Route::get('catalogue/acheter', [CatalogueController::class, 'acheter'])->name('catalogue.acheter');
+Route::get('catalogue/emprunts', [CatalogueController::class, 'acheter'])->name('catalogue.acheter');
 // Route index compatible avec les appels existants
 Route::get('catalogue', [CatalogueController::class, 'decouvrir'])->name('catalogue.index');
 
@@ -67,6 +69,10 @@ Route::middleware('auth')->group(function () {
     Route::get('mes-emprunts', [EmpruntUserController::class, 'mesEmprunts'])->name('emprunts.mes-emprunts');
     Route::post('emprunts/demander', [EmpruntUserController::class, 'demander'])->name('emprunts.demander');
 });
+
+// Routes pour la visualisation sécurisée des PDFs
+Route::get('secure-pdf/view/{id}', [SecurePdfController::class, 'view'])->name('secure-pdf.view');
+Route::get('secure-pdf/serve/{id}', [SecurePdfController::class, 'serve'])->name('secure-pdf.serve');
 
 // Routes resource pour chaque page principale
 Route::resource('about', AboutController::class);
@@ -103,7 +109,10 @@ Route::post('admin/register/{token}', [\App\Http\Controllers\Admin\AuthControlle
 
 // Routes resource pour l'administration avec middleware d'authentification
 Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function () {
-    Route::get('/', [DashboardAdminController::class, 'index'])->name('dashboard');
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/users', [AdminDashboardController::class, 'getUsers'])->name('dashboard.users');
+    Route::get('/dashboard/sales', [AdminDashboardController::class, 'getSales'])->name('dashboard.sales');
+    Route::get('/dashboard/emprunts', [AdminDashboardController::class, 'getEmprunts'])->name('dashboard.emprunts');
     Route::post('users/{user}/toggle-block', [UserController::class, 'toggleBlock'])->name('users.toggle-block');
     Route::resource('users', UserController::class);
     Route::resource('events', EventAdminController::class);
@@ -121,6 +130,13 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::post('emprunts/{emprunt}/update-status', [EmpruntController::class, 'updateStatus'])->name('emprunts.updateStatus');
     Route::post('emprunts/{user}/bulk-update-status', [EmpruntController::class, 'bulkUpdateStatus'])->name('emprunts.bulkUpdateStatus');
     Route::post('emprunts/add-books', [EmpruntController::class, 'addBooks'])->name('emprunts.addBooks');
+    // Gestion des livres empruntables (catalogue)
+    Route::put('emprunts/livre/{id}', [EmpruntController::class, 'updateLivre'])->name('emprunts.updateLivre');
+    Route::delete('emprunts/livre/{id}', [EmpruntController::class, 'destroyLivre'])->name('emprunts.destroyLivre');
+    // Validation des demandes d'emprunt
+    Route::post('emprunts/{emprunt}/valider', [EmpruntController::class, 'validerDemande'])->name('emprunts.valider');
+    Route::post('emprunts/{emprunt}/rejeter', [EmpruntController::class, 'rejeterDemande'])->name('emprunts.rejeter');
+    Route::post('emprunts/{emprunt}/renew-access', [EmpruntController::class, 'renewAccess'])->name('emprunts.renew-access');
     Route::resource('formations', AdminFormationController::class);
     // Admin: commandes management
     Route::get('commandes', [\App\Http\Controllers\Admin\CommandeController::class, 'index'])->name('commandes.index');

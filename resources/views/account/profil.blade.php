@@ -6,6 +6,8 @@
     Littéraire.')
 
 @section('content')
+    @include('partials.notifications')
+
     @php
         $cartItems = Auth::user()->cartItems()->with('catalogue')->get();
         $cartCount = $cartItems->sum('quantite');
@@ -35,12 +37,6 @@
                             <input type="file" name="avatar" id="avatarInput" accept="image/*" style="display:none;">
                         </form>
 
-                        @if(session('success'))
-                            <div class="alert alert-success alert-sm mt-2">{{ session('success') }}</div>
-                        @endif
-                        @if(session('error'))
-                            <div class="alert alert-danger alert-sm mt-2">{{ session('error') }}</div>
-                        @endif
                         <h4 class="fw-bold text-success mb-1">{{ Auth::user()->name }}</h4>
 
                         <div class="mt-2 d-flex align-items-center gap-2">
@@ -177,50 +173,141 @@
             <hr class="my-2">
             <div class="row g-3 mb-4 shadow p-4 rounded-4 profile-card">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="mb-0 text-secondary"><i class="fa fa-book-reader me-2"></i>Mes emprunts</h5>
-                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#emprunts" aria-expanded="true" aria-controls="emprunts">
-                        <i class="fa fa-chevron-up purchases-chevron"></i>
-                    </button>
+                    <h5 class="mb-0 text-secondary"><i class="fa fa-book-reader me-2"></i>Mes emprunts ({{ $emprunts->count() }})</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-sm btn-success rounded-pill">
+                            <i class="fa fa-list me-1"></i>Voir tout
+                        </a>
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#emprunts" aria-expanded="true" aria-controls="emprunts">
+                            <i class="fa fa-chevron-up purchases-chevron"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="collapse show" id="emprunts">
-                    <div class="table-responsive">
-                        <table class="table align-middle">
-                        <thead>
-                            <tr>
-                                <th>Livre</th>
-                                <th>Date d'emprunt</th>
-                                <th>Date de retour</th>
-                                <th>Statut</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($emprunts as $emprunt)
-                                <tr>
-                                    <td><strong>{{ $emprunt->livre ? $emprunt->livre->titre : 'Livre inconnu' }}</strong>
-                                    </td>
-                                    <td>{{ $emprunt->date_emprunt ? \Carbon\Carbon::parse($emprunt->date_emprunt)->format('d/m/Y') : 'date inconnue' }}
-                                    </td>
-                                    <td>{{ $emprunt->date_retour ? \Carbon\Carbon::parse($emprunt->date_retour)->format('d/m/Y') : 'Non rendu' }}
-                                    </td>
-                                        <td>
-                                            @php
-                                                $statusLabel = $emprunt->date_retour ? 'Livré' : 'En cours';
-                                                if (!$emprunt->date_retour && $emprunt->date_emprunt) {
-                                                    $statusLabel = 'En préparation';
-                                                }
-                                            @endphp
-                                            <span class="badge {{ $emprunt->date_retour ? 'bg-success' : 'bg-warning text-dark' }}">{{ $statusLabel }}</span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center">Aucun emprunt enregistré.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                        </table>
-                    </div>
+                    @php
+                        $empruntsActifs = $emprunts->whereIn('statut', ['en_cours', 'en_retard'])->take(6);
+                    @endphp
+
+                    @if($empruntsActifs->isEmpty())
+                        <div class="text-center py-5">
+                            <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
+                            <h6 class="text-muted">Aucun emprunt en cours</h6>
+                            <p class="text-muted small">Explorez notre bibliothèque pour emprunter des livres</p>
+                            <a href="{{ route('emprunts.index') }}" class="btn btn-success btn-sm rounded-pill mt-2">
+                                <i class="fa fa-search me-1"></i>Parcourir la bibliothèque
+                            </a>
+                        </div>
+                    @else
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                            @foreach($empruntsActifs as $emprunt)
+                                <div class="col">
+                                    <div class="card h-100 emprunt-card-profile border-0 shadow-sm">
+                                        <!-- Image du livre -->
+                                        <div class="emprunt-image-wrapper position-relative" style="height: 200px; overflow: hidden; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                                            @if($emprunt->livre && $emprunt->livre->image)
+                                                <img src="{{ asset($emprunt->livre->image) }}"
+                                                     alt="{{ $emprunt->livre->titre }}"
+                                                     class="card-img-top"
+                                                     style="width: 100%; height: 100%; object-fit: cover;"
+                                                     loading="lazy">
+                                            @else
+                                                <div class="d-flex align-items-center justify-content-center h-100">
+                                                    <i class="fas fa-book fa-4x text-muted"></i>
+                                                </div>
+                                            @endif
+
+                                            <!-- Badge statut -->
+                                            <div class="position-absolute top-0 end-0 m-2">
+                                                @php
+                                                    $now = now();
+                                                    $dateRetour = $emprunt->date_retour ? \Carbon\Carbon::parse($emprunt->date_retour) : null;
+                                                    $joursRestants = $dateRetour ? $now->diffInDays($dateRetour, false) : null;
+
+                                                    // Vérifier d'abord si l'emprunt est validé
+                                                    if ($emprunt->statut === 'en_attente' || !$emprunt->valide_le) {
+                                                        $badgeClass = 'bg-warning text-dark';
+                                                        $badgeText = 'Non validé';
+                                                    } elseif ($emprunt->statut === 'retourne') {
+                                                        $badgeClass = 'bg-success';
+                                                        $badgeText = 'Retourné';
+                                                    } elseif ($emprunt->statut === 'en_retard' || ($joursRestants !== null && $joursRestants < 0)) {
+                                                        $badgeClass = 'bg-danger';
+                                                        $badgeText = 'En retard';
+                                                    } elseif ($joursRestants !== null && $joursRestants <= 2) {
+                                                        $badgeClass = 'bg-warning text-dark';
+                                                        $badgeText = $joursRestants . 'j restants';
+                                                    } else {
+                                                        $badgeClass = 'bg-primary';
+                                                        $badgeText = 'En cours';
+                                                    }
+                                                @endphp
+                                                <span class="badge {{ $badgeClass }} shadow-sm">{{ $badgeText }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Informations du livre -->
+                                        <div class="card-body d-flex flex-column">
+                                            <h6 class="card-title mb-1 fw-bold" title="{{ $emprunt->livre ? $emprunt->livre->titre : 'Livre inconnu' }}">
+                                                {{ $emprunt->livre ? Str::limit($emprunt->livre->titre, 35) : 'Livre inconnu' }}
+                                            </h6>
+                                            <p class="text-muted small mb-2">
+                                                <i class="fas fa-user-pen me-1 text-success"></i>
+                                                {{ $emprunt->livre ? Str::limit($emprunt->livre->auteur, 25) : 'N/A' }}
+                                            </p>
+
+                                            <div class="mb-2 small text-muted">
+                                                <div><i class="fas fa-calendar me-1 text-success"></i><strong>Emprunté:</strong> {{ \Carbon\Carbon::parse($emprunt->date_emprunt)->format('d/m/Y') }}</div>
+                                                <div><i class="fas fa-calendar-check me-1 text-success"></i><strong>Retour:</strong> {{ $dateRetour ? $dateRetour->format('d/m/Y') : 'N/A' }}</div>
+                                                @if($emprunt->access_expires_at && $emprunt->valide_le)
+                                                    <div class="mt-2">
+                                                        <strong>Accès restant:</strong>
+                                                        <div class="countdown-timer badge bg-info text-dark d-inline-block" data-expires="{{ $emprunt->access_expires_at->toIso8601String() }}">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            <span class="countdown-text">Calcul...</span>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <!-- Actions -->
+                                            <div class="mt-auto d-grid gap-2">
+                                                @if($emprunt->livre && $emprunt->livre->pdf)
+                                                    @if($emprunt->statut === 'en_attente' || !$emprunt->valide_le)
+                                                        <button class="btn btn-warning btn-sm" disabled title="En attente de validation par l'administrateur">
+                                                            <i class="fas fa-clock me-1"></i>Non validé - En attente
+                                                        </button>
+                                                    @elseif($emprunt->valide_le && $emprunt->statut !== 'retourne')
+                                                        @if($emprunt->access_expires_at && now()->greaterThan($emprunt->access_expires_at))
+                                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                                <i class="fas fa-lock me-1"></i>Accès expiré
+                                                            </button>
+                                                        @else
+                                                            <a href="{{ route('secure-pdf.view', $emprunt->livre->id) }}"
+                                                               class="btn btn-success btn-sm">
+                                                                <i class="fas fa-book-reader me-1"></i>Lire le PDF
+                                                            </a>
+                                                        @endif
+                                                    @endif
+                                                @endif
+                                                <a href="{{ route('emprunts.show', $emprunt->livre ? $emprunt->livre->id : '#') }}"
+                                                   class="btn btn-outline-success btn-sm">
+                                                    <i class="fas fa-info-circle me-1"></i>Détails
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        @if($emprunts->count() > 6)
+                            <div class="text-center mt-4">
+                                <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-success rounded-pill">
+                                    <i class="fa fa-eye me-2"></i>Voir tous mes emprunts ({{ $emprunts->count() }})
+                                </a>
+                            </div>
+                        @endif
+                    @endif
                 </div>
             </div>
         </div>
@@ -302,6 +389,34 @@
                 transform: scale(1.04);
             }
 
+            /* Emprunt Cards in Profile */
+            .emprunt-card-profile {
+                border-radius: 12px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .emprunt-card-profile:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 198, 167, 0.2) !important;
+            }
+
+            .emprunt-image-wrapper img {
+                transition: transform 0.3s ease;
+            }
+
+            .emprunt-card-profile:hover .emprunt-image-wrapper img {
+                transform: scale(1.05);
+            }
+
+            .emprunt-card-profile .btn {
+                transition: all 0.3s ease;
+            }
+
+            .emprunt-card-profile .btn:hover {
+                transform: translateY(-2px);
+            }
+
             @media (max-width: 767px) {
                 .profile-card {
                     padding: 1rem;
@@ -315,6 +430,10 @@
                 .stat-box {
                     min-width: 90px;
                     padding: 0.8rem 0.2rem;
+                }
+
+                .emprunt-image-wrapper {
+                    height: 180px !important;
                 }
             }
         </style>
@@ -398,6 +517,49 @@
                     if (avatarForm) avatarForm.submit();
                 });
             }
+
+            // Countdown timer function
+            function updateCountdowns() {
+                const timers = document.querySelectorAll('.countdown-timer');
+                const now = new Date();
+
+                timers.forEach(timer => {
+                    const expiresAt = new Date(timer.getAttribute('data-expires'));
+                    const textElement = timer.querySelector('.countdown-text');
+
+                    const diff = expiresAt - now;
+
+                    if (diff <= 0) {
+                        textElement.textContent = 'Expiré';
+                        timer.classList.remove('bg-info', 'bg-warning');
+                        timer.classList.add('bg-danger', 'text-white');
+
+                        // Reload page to update UI when expired
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                        textElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+
+                        // Change color based on remaining time
+                        if (hours < 1) {
+                            timer.classList.remove('bg-info');
+                            timer.classList.add('bg-danger', 'text-white');
+                        } else if (hours < 2) {
+                            timer.classList.remove('bg-info');
+                            timer.classList.add('bg-warning');
+                        }
+                    }
+                });
+            }
+
+            // Update immediately
+            updateCountdowns();
+
+            // Update every second
+            setInterval(updateCountdowns, 1000);
         });
     </script>
 @endpush

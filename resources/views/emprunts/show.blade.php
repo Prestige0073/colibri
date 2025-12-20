@@ -3,6 +3,8 @@
 @section('title', $livre->titre . ' - Détails')
 
 @section('content')
+@include('partials.notifications')
+
 <div class="container py-5">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
@@ -11,21 +13,6 @@
             <li class="breadcrumb-item active" aria-current="page">{{ $livre->titre }}</li>
         </ol>
     </nav>
-
-    <!-- Toast notifications -->
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fa fa-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fa fa-exclamation-triangle me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     <div class="row">
         <!-- Image du livre -->
@@ -52,13 +39,62 @@
 
                     <!-- Boutons d'action -->
                     @auth
-                        @if($dejaEmprunte)
+                        @if($enAttente)
                             <div class="alert alert-warning mb-3">
-                                <i class="fa fa-info-circle me-2"></i>Vous avez déjà emprunté ce livre
+                                <i class="fa fa-clock me-2"></i>Votre demande d'emprunt est en attente de validation
                             </div>
-                            <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-primary w-100">
+                            <button class="btn btn-warning btn-lg w-100 mb-2" disabled>
+                                <i class="fa fa-hourglass-half me-2"></i>En attente de validation
+                            </button>
+                            <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-outline-primary w-100">
                                 <i class="fa fa-list me-2"></i>Voir Mes Emprunts
                             </a>
+                        @elseif($dejaEmprunte)
+                            @php
+                                // Récupérer l'emprunt actif pour vérifier s'il est validé
+                                $empruntActif = \App\Models\Emprunt::where('user_id', auth()->id())
+                                    ->where('livre_id', $livre->id)
+                                    ->whereIn('statut', ['en_cours', 'en_retard'])
+                                    ->first();
+                            @endphp
+
+                            @if($empruntActif && $empruntActif->valide_le)
+                                <div class="alert alert-success mb-3">
+                                    <i class="fa fa-check-circle me-2"></i>Vous avez emprunté ce livre (validé)
+                                    @if($empruntActif->access_expires_at)
+                                        <div class="mt-2">
+                                            <strong>Temps d'accès restant:</strong>
+                                            <div class="countdown-timer badge bg-info text-dark d-inline-block" data-expires="{{ $empruntActif->access_expires_at->toIso8601String() }}">
+                                                <i class="fa fa-clock me-1"></i>
+                                                <span class="countdown-text">Calcul...</span>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                @if($livre->pdf)
+                                    @if($empruntActif->access_expires_at && now()->greaterThan($empruntActif->access_expires_at))
+                                        <button class="btn btn-secondary btn-lg w-100 mb-2" disabled>
+                                            <i class="fa fa-lock me-2"></i>Accès expiré
+                                        </button>
+                                    @else
+                                        <a href="{{ route('secure-pdf.view', $livre->id) }}" class="btn btn-success btn-lg w-100 mb-2">
+                                            <i class="fa fa-book-reader me-2"></i>Lire le PDF
+                                        </a>
+                                    @endif
+                                @endif
+
+                                <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-outline-primary w-100">
+                                    <i class="fa fa-list me-2"></i>Voir Mes Emprunts
+                                </a>
+                            @else
+                                <div class="alert alert-info mb-3">
+                                    <i class="fa fa-info-circle me-2"></i>Vous avez emprunté ce livre
+                                </div>
+                                <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-primary w-100">
+                                    <i class="fa fa-list me-2"></i>Voir Mes Emprunts
+                                </a>
+                            @endif
                         @else
                             @if($livre->quantite > 0)
                                 <form action="{{ route('emprunts.demander') }}" method="POST" class="mb-3">
@@ -146,16 +182,60 @@
                         <a href="{{ route('emprunts.index') }}" class="btn btn-outline-secondary">
                             <i class="fa fa-arrow-left me-2"></i>Retour à la bibliothèque
                         </a>
-
-                        @if($livre->pdf)
-                            <a href="{{ asset($livre->pdf) }}" target="_blank" class="btn btn-outline-danger">
-                                <i class="fa fa-file-pdf me-2"></i>Aperçu PDF
-                            </a>
-                        @endif
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Countdown timer function
+        function updateCountdowns() {
+            const timers = document.querySelectorAll('.countdown-timer');
+            const now = new Date();
+
+            timers.forEach(timer => {
+                const expiresAt = new Date(timer.getAttribute('data-expires'));
+                const textElement = timer.querySelector('.countdown-text');
+
+                const diff = expiresAt - now;
+
+                if (diff <= 0) {
+                    textElement.textContent = 'Expiré';
+                    timer.classList.remove('bg-info', 'bg-warning');
+                    timer.classList.add('bg-danger', 'text-white');
+
+                    // Reload page to update UI when expired
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    textElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+
+                    // Change color based on remaining time
+                    if (hours < 1) {
+                        timer.classList.remove('bg-info');
+                        timer.classList.add('bg-danger', 'text-white');
+                    } else if (hours < 2) {
+                        timer.classList.remove('bg-info');
+                        timer.classList.add('bg-warning');
+                    }
+                }
+            });
+        }
+
+        // Update immediately
+        updateCountdowns();
+
+        // Update every second
+        setInterval(updateCountdowns, 1000);
+    });
+</script>
+@endpush
+
 @endsection

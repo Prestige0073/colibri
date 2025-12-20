@@ -28,6 +28,11 @@ class PanierController extends Controller
     }
     public function ajouter(Request $request)
     {
+        // Accepter aussi bien livre_id que catalogue_id
+        $livreId = $request->input('livre_id') ?? $request->input('catalogue_id');
+
+        $request->merge(['catalogue_id' => $livreId]);
+
         $request->validate([
             'catalogue_id' => 'required|exists:catalogues,id',
             'quantite' => 'required|integer|min:1',
@@ -35,6 +40,12 @@ class PanierController extends Controller
 
         $user = Auth::user();
         if (!$user) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous devez être connecté pour ajouter au panier.'
+                ], 401);
+            }
             return redirect()->back()->with('error', 'Vous devez être connecté pour ajouter au panier.');
         }
 
@@ -43,24 +54,69 @@ class PanierController extends Controller
             ->first();
 
         $quantiteAjoutee = $request->quantite;
+        $catalogue = \App\Models\Catalogue::find($request->catalogue_id);
+
+        if (!$catalogue) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Livre introuvable.'
+                ], 404);
+            }
+            return redirect()->back()->with('error', 'Livre introuvable.');
+        }
+
+        $quantiteMax = $catalogue->quantite;
+
         if ($item) {
             // On ne dépasse pas le stock disponible
-            $catalogue = \App\Models\Catalogue::find($request->catalogue_id);
-            $quantiteMax = $catalogue ? $catalogue->quantite : 1;
             $nouvelleQuantite = min($item->quantite + $quantiteAjoutee, $quantiteMax);
+
+            if ($nouvelleQuantite > $quantiteMax) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Stock insuffisant. Disponible: {$quantiteMax}"
+                    ], 400);
+                }
+                return redirect()->back()->with('error', "Stock insuffisant. Disponible: {$quantiteMax}");
+            }
+
             $item->quantite = $nouvelleQuantite;
             $item->save();
+
+            $message = "Quantité mise à jour dans le panier : {$catalogue->titre}";
         } else {
-            $catalogue = \App\Models\Catalogue::find($request->catalogue_id);
-            $quantiteMax = $catalogue ? $catalogue->quantite : 1;
+            if ($quantiteAjoutee > $quantiteMax) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Stock insuffisant. Disponible: {$quantiteMax}"
+                    ], 400);
+                }
+                return redirect()->back()->with('error', "Stock insuffisant. Disponible: {$quantiteMax}");
+            }
+
             CartItem::create([
                 'user_id' => $user->id,
                 'catalogue_id' => $request->catalogue_id,
                 'quantite' => min($quantiteAjoutee, $quantiteMax),
             ]);
+
+            $message = "'{$catalogue->titre}' ajouté au panier avec succès !";
         }
 
-        return redirect()->back()->with('success', 'Livre ajouté au panier !');
+        // Réponse JSON pour AJAX
+        if ($request->wantsJson() || $request->ajax()) {
+            $cartCount = $user->cartItems()->sum('quantite');
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'cartCount' => $cartCount
+            ]);
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
     public function index()

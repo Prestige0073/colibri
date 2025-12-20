@@ -5,6 +5,8 @@
 @section('meta_description', 'Connectez-vous à votre compte Colibri Littéraire pour accéder à toutes les fonctionnalités.')
 
 @section('content')
+@include('partials.notifications')
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-6 col-md-9">
@@ -13,9 +15,6 @@
                     <h2 class="fw-bold text-success mb-2">Connexion</h2>
                     <p class="text-muted">Accédez à votre espace personnel et profitez de la plateforme.</p>
                 </div>
-                @if(session('status'))
-                    <div class="alert alert-success mb-3">{{ session('status') }}</div>
-                @endif
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
                     <div class="mb-3">

@@ -16,8 +16,15 @@ class EmpruntController extends Controller
      */
     public function index()
     {
-        // Récupérer tous les emprunts avec leurs relations
+        // Récupérer les demandes en attente de validation
+        $demandesEnAttente = Emprunt::with(['user', 'livre'])
+            ->where('statut', 'en_attente')
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Récupérer tous les emprunts (hors attente)
         $emprunts = Emprunt::with(['user', 'livre'])
+            ->where('statut', '!=', 'en_attente')
             ->orderByDesc('created_at')
             ->paginate(15);
 
@@ -32,7 +39,7 @@ class EmpruntController extends Controller
         // Récupérer tous les livres pour le formulaire d'ajout de livre empruntable
         $allCatalogues = Catalogue::all();
 
-        return view('admin.emprunts', compact('emprunts', 'users', 'livresEmpruntables', 'allCatalogues'));
+        return view('admin.emprunts', compact('demandesEnAttente', 'emprunts', 'users', 'livresEmpruntables', 'allCatalogues'));
     }
 
     /**
@@ -122,9 +129,28 @@ class EmpruntController extends Controller
     }
 
     /**
+     * Mettre à jour un emprunt
+     */
+    public function update(Request $request, Emprunt $emprunt)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'livre_id' => 'required|exists:catalogues,id',
+            'date_emprunt' => 'required|date',
+            'date_retour' => 'nullable|date|after_or_equal:date_emprunt',
+            'statut' => 'required|in:en_cours,retourne,en_retard',
+        ]);
+
+        $emprunt->update($validated);
+
+        return redirect()->route('admin.emprunts.index')
+            ->with('success', 'Emprunt mis à jour avec succès !');
+    }
+
+    /**
      * Mettre à jour un livre empruntable (Catalogue)
      */
-    public function update(Request $request, $id)
+    public function updateLivre(Request $request, $id)
     {
         $livre = Catalogue::findOrFail($id);
 
@@ -178,9 +204,25 @@ class EmpruntController extends Controller
     }
 
     /**
-     * Supprimer un livre empruntable (Catalogue)
+     * Supprimer un emprunt (relation user-livre)
      */
-    public function destroy($id)
+    public function destroy(Emprunt $emprunt)
+    {
+        // Incrémenter le stock du livre si l'emprunt n'était pas déjà retourné
+        if ($emprunt->statut !== 'retourne' && $emprunt->livre) {
+            $emprunt->livre->increment('quantite');
+        }
+
+        $emprunt->delete();
+
+        return redirect()->route('admin.emprunts.index')
+            ->with('success', 'Emprunt supprimé avec succès !');
+    }
+
+    /**
+     * Supprimer un livre empruntable du catalogue
+     */
+    public function destroyLivre($id)
     {
         $livre = Catalogue::findOrFail($id);
 
@@ -306,5 +348,64 @@ class EmpruntController extends Controller
         }
 
         return redirect()->back()->with('success', "Statuts des emprunts de {$user->name} mis à jour avec succès.");
+    }
+
+    /**
+     * Valider une demande d'emprunt
+     */
+    public function validerDemande(Emprunt $emprunt)
+    {
+        if ($emprunt->statut !== 'en_attente') {
+            return redirect()->back()->with('error', 'Cette demande a déjà été traitée.');
+        }
+
+        // Vérifier la disponibilité du livre
+        if ($emprunt->livre->quantite <= 0) {
+            return redirect()->back()->with('error', 'Le livre n\'est plus disponible en stock.');
+        }
+
+        // Valider la demande avec accès de 6 heures
+        $emprunt->update([
+            'statut' => 'en_cours',
+            'valide_par' => auth()->id(),
+            'valide_le' => now(),
+            'access_expires_at' => now()->addHours(6),
+        ]);
+
+        // Décrémenter le stock
+        $emprunt->livre->decrement('quantite');
+
+        return redirect()->back()->with('success', "La demande d'emprunt de {$emprunt->user->name} pour \"{$emprunt->livre->titre}\" a été validée.");
+    }
+
+    /**
+     * Rejeter une demande d'emprunt
+     */
+    public function rejeterDemande(Emprunt $emprunt)
+    {
+        if ($emprunt->statut !== 'en_attente') {
+            return redirect()->back()->with('error', 'Cette demande a déjà été traitée.');
+        }
+
+        $userName = $emprunt->user->name;
+        $livreTitre = $emprunt->livre->titre;
+
+        // Supprimer la demande
+        $emprunt->delete();
+
+        return redirect()->back()->with('info', "La demande d'emprunt de {$userName} pour \"{$livreTitre}\" a été rejetée.");
+    }
+
+    /**
+     * Prolonger l'accès PDF de 6 heures
+     */
+    public function renewAccess(Emprunt $emprunt)
+    {
+        // Prolonger l'accès de 6 heures
+        $emprunt->update([
+            'access_expires_at' => now()->addHours(6),
+        ]);
+
+        return redirect()->back()->with('success', "L'accès PDF pour \"{$emprunt->livre->titre}\" a été prolongé de 6 heures pour {$emprunt->user->name}.");
     }
 }

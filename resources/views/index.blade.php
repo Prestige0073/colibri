@@ -55,37 +55,7 @@
     </div>
     <!-- Carousel End -->
 
-    <!-- Toast notification -->
-    <div aria-live="polite" aria-atomic="true" class="toast-container-custom">
-        @if (session('success'))
-            <div id="toast-success"
-                class="toast align-items-center border-0 shadow-lg show animate__animated animate__slideInDown"
-                role="alert" aria-live="assertive" aria-atomic="true"
-                style="pointer-events:auto; background:#1bc47d; color:#fff; font-weight:500;">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="fa fa-check-circle me-2"></i> {{ session('success') }}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                        aria-label="Fermer"></button>
-                </div>
-            </div>
-        @endif
-        @if (session('error'))
-            <div id="toast-error"
-                class="toast align-items-center border-0 shadow-lg show animate__animated animate__slideInDown"
-                role="alert" aria-live="assertive" aria-atomic="true"
-                style="pointer-events:auto; background:#e53935; color:#fff; font-weight:500;">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="fa fa-exclamation-triangle me-2"></i> {{ session('error') }}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                        aria-label="Fermer"></button>
-                </div>
-            </div>
-        @endif
-    </div>
+    @include('partials.notifications')
 
     <!-- Video Start -->
     <div class="container-fluid bg-success mb-5 wow fadeIn" data-wow-delay="0.1s">
@@ -369,7 +339,7 @@
                             <div class="catalogue-item card h-100 border-0 shadow-lg"
                                 style="background: transparent; backdrop-filter: blur(6px); border-top-left-radius: 12px; border-top-right-radius: 12px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
                                 <img class="card-img-top" src="{{ asset($livre->image) }}" alt="{{ $livre->titre }}"
-                                    style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                                    style="width: 100%; height: 280px; object-fit: cover; border-top-left-radius: 12px; border-top-right-radius: 12px;">
                                 <div class="card-body d-flex flex-column justify-content-between"
                                     style="padding: 1.2rem;">
                                     <h5 class="card-title mb-2 d-flex align-items-center"
@@ -453,35 +423,7 @@
         </div>
     </div>
     <!-- Bibliothèque End -->
-    <!-- Emprunts récents Start -->
-    @if(isset($recentEmprunts) && $recentEmprunts->isNotEmpty())
-        <div class="container-fluid py-5">
-            <div class="container">
-                <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
-                    <p class="section-title bg-white text-center text-success px-3">Derniers Emprunts</p>
-                    <h1 class="display-6 mb-4">Emprunts récents</h1>
-                </div>
-                <div class="row g-4">
-                    @foreach($recentEmprunts as $emprunt)
-                        @if($emprunt->livre)
-                            <div class="col-md-6 col-lg-4 col-xl-4 wow fadeIn" data-wow-delay="0.1s">
-                                <div class="catalogue-item card h-100 border-0 shadow-lg">
-                                    <img class="card-img-top" src="{{ asset($emprunt->livre->image) }}" alt="{{ $emprunt->livre->titre }}">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ $emprunt->livre->titre }}</h5>
-                                        <p class="mb-1 text-muted">Par {{ $emprunt->livre->auteur ?? 'Inconnu' }}</p>
-                                        <p class="mb-2">Emprunté par <strong>{{ $emprunt->user->name ?? 'Utilisateur' }}</strong> le {{ \Carbon\Carbon::parse($emprunt->date_emprunt)->format('d/m/Y') }}</p>
-                                        <a href="{{ route('emprunts.show', $emprunt->livre->id) }}" class="btn btn-outline-primary btn-sm">Voir</a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    @endif
-    <!-- Emprunts récents End -->
+
     <!-- Partner (OIF) Start -->
     <div class="container-fluid py-4 bg-light">
         <div class="container">

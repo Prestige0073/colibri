@@ -178,7 +178,7 @@ $cartCount = Auth::check() ? Auth::user()->cartItems->sum('quantite') : 0;
                                         class="fa fa-search me-1"></i> Découvrir les livres</a>
                                 <a href="{{ route('catalogue.acheter') }}"
                                     class="dropdown-item{{ request()->routeIs('catalogue.acheter') ? ' active' : '' }}"><i
-                                        class="fa fa-shopping-bag me-1"></i> Acheter / Emprunter</a>
+                                        class="fa fa-shopping-bag me-1"></i>Emprunter</a>
                             </div>
                         </div>
                         <a href="{{ route('about.index') }}"
@@ -243,6 +243,9 @@ $cartCount = Auth::check() ? Auth::user()->cartItems->sum('quantite') : 0;
         </div>
     </div>
     <!-- Ticker (statique) End -->
+
+    <!-- Alertes d'accès expiré pour les utilisateurs -->
+    @include('partials.expired-access-alert')
 
     <!-- Contenu de la page -->
     @yield('content')
