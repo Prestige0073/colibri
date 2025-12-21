@@ -1,25 +1,41 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Formation;
-use App\Models\Video;
-use App\Models\Suivi;
 
 class Module extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'formation_id', 'titre', 'description', 'ordre', 'image', 'video_path', 'video_url'
+        'formation_id',
+        'titre',
+        'description',
+        'ordre',
+        'duree',
+        'active',
     ];
-    public function formation() {
+
+    protected $casts = [
+        'active' => 'boolean',
+        'ordre' => 'integer',
+    ];
+
+    // Relations
+    public function formation()
+    {
         return $this->belongsTo(Formation::class);
     }
-    public function videos() {
-        return $this->hasMany(Video::class);
+
+    public function contenus()
+    {
+        return $this->hasMany(ModuleContenu::class)->orderBy('ordre');
     }
-    public function suivis() {
-        return $this->hasMany(Suivi::class);
+
+    public function quizzes()
+    {
+        return $this->hasMany(Quiz::class)->orderBy('created_at', 'desc');
     }
 }

@@ -19,12 +19,14 @@ class FormationController extends Controller
      */
     public function show(Formation $formation)
     {
-        $formation->load('modules');
+        $formation->load(['modules.contenus', 'quizzes' => function($query) {
+            $query->where('active', true)->with('questions');
+        }]);
         return view('formation.show', compact('formation'));
     }
 
     /**
-     * Permet à un utilisateur connecté d'acheter une formation (création d'un Achat)
+     * Permet à un utilisateur connecté d'acheter une formation (création d'une inscription)
      */
     public function acheter(Request $request, Formation $formation)
     {
@@ -34,12 +36,14 @@ class FormationController extends Controller
 
         $user = \Illuminate\Support\Facades\Auth::user();
 
-        $achat = \App\Models\Achat::create([
+        $inscription = \App\Models\FormationInscription::create([
             'user_id' => $user->id,
             'formation_id' => $formation->id,
-            'date_achat' => now(),
-            'montant' => $formation->prix ?? 0,
+            'date_inscription' => now(),
+            'montant_paye' => $formation->prix ?? 0,
             'statut' => 'pending',
+            'progression' => 0,
+            'paiement_valide' => false,
         ]);
 
         // Ici on pourrait rediriger vers une page de paiement

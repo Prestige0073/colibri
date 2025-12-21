@@ -15,11 +15,16 @@ class AccountController extends Controller
         if ($user) {
             $emprunts = Emprunt::where('user_id', $user->id)->get();
             // Récupérer commandes en cours de livraison (statut pending ou en_livraison)
-            $commandesEnLivraison = \App\Models\Commande::where('user_id', $user->id)
-                ->whereIn('statut', ['pending', 'en_livraison'])
-                ->with('items')
-                ->orderByDesc('created_at')
-                ->get();
+            // Vérifier si la table commandes existe
+            if (\Schema::hasTable('commandes') && class_exists(\App\Models\Commande::class)) {
+                $commandesEnLivraison = \App\Models\Commande::where('user_id', $user->id)
+                    ->whereIn('statut', ['pending', 'en_livraison'])
+                    ->with('items')
+                    ->orderByDesc('created_at')
+                    ->get();
+            } else {
+                $commandesEnLivraison = collect();
+            }
         } else {
             $emprunts = collect();
             $commandesEnLivraison = collect();

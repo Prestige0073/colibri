@@ -135,4 +135,16 @@ return [
 
     'admin_register_token' => env('ADMIN_REGISTER_TOKEN'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Contact Information
+    |--------------------------------------------------------------------------
+    |
+    | Contact phone and email for customer support and order notifications.
+    |
+    */
+
+    'contact_phone' => env('CONTACT_PHONE', '+22912345678'),
+    'contact_email' => env('CONTACT_EMAIL', 'contact@colibri-litteraire.com'),
+
 ];

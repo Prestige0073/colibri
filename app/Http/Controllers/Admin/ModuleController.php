@@ -26,7 +26,9 @@ class ModuleController extends Controller
             'formation_id' => 'required|exists:formations,id',
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'duree' => 'nullable|string',
             'ordre' => 'required|integer',
+            'active' => 'boolean',
         ]);
         Module::create($validated);
         return redirect()->route('admin.modules.index')->with('success', 'Module créé avec succès.');
@@ -49,7 +51,9 @@ class ModuleController extends Controller
             'formation_id' => 'required|exists:formations,id',
             'titre' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'duree' => 'nullable|string',
             'ordre' => 'required|integer',
+            'active' => 'boolean',
         ]);
         $module->update($validated);
         return redirect()->route('admin.modules.index')->with('success', 'Module modifié avec succès.');

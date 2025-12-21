@@ -534,8 +534,11 @@
                         timer.classList.remove('bg-info', 'bg-warning');
                         timer.classList.add('bg-danger', 'text-white');
 
-                        // Reload page to update UI when expired
-                        setTimeout(() => location.reload(), 2000);
+                        // Ne recharger qu'une seule fois en utilisant sessionStorage
+                        if (!sessionStorage.getItem('countdown_reload_' + timer.getAttribute('data-expires'))) {
+                            sessionStorage.setItem('countdown_reload_' + timer.getAttribute('data-expires'), 'true');
+                            setTimeout(() => location.reload(), 2000);
+                        }
                     } else {
                         const hours = Math.floor(diff / (1000 * 60 * 60));
                         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));

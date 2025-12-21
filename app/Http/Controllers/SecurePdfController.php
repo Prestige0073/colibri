@@ -47,9 +47,9 @@ class SecurePdfController extends Controller
             abort(403, 'Vous devez emprunter ce livre avant de pouvoir le lire.');
         }
 
-        // Vérifier que l'accès de 6 heures n'a pas expiré
+        // Vérifier que l'accès de 14 jours n'a pas expiré
         if ($empruntValide->access_expires_at && now()->greaterThan($empruntValide->access_expires_at)) {
-            abort(403, 'Votre période d\'accès de 6 heures a expiré. Veuillez contacter l\'administration pour prolonger votre accès.');
+            abort(403, 'Votre période d\'accès de 14 jours a expiré. Veuillez contacter l\'administration pour prolonger votre accès.');
         }
 
         // Générer un token unique pour cette session de visualisation
@@ -57,7 +57,18 @@ class SecurePdfController extends Controller
         session(['pdf_token_' . $id => $token]);
         session(['pdf_access_time_' . $id => now()]);
 
-        return view('secure-pdf.viewer', compact('livre', 'token'));
+        // Headers de sécurité pour bloquer la capture d'écran
+        return response()
+            ->view('secure-pdf.viewer', compact('livre', 'token'))
+            ->header('X-Frame-Options', 'DENY')
+            ->header('X-Content-Type-Options', 'nosniff')
+            ->header('X-XSS-Protection', '1; mode=block')
+            ->header('Referrer-Policy', 'no-referrer')
+            ->header('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), screen-wake-lock=(), display-capture=(), web-share=()')
+            ->header('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; img-src 'self' data: blob:; media-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self';")
+            ->header('Cache-Control', 'private, no-cache, no-store, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     /**

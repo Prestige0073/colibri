@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\CartItem;
 use App\Models\Emprunt;
 use App\Models\Catalogue;
+use App\Services\EmpruntService;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -17,6 +18,10 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        // Mettre à jour automatiquement les emprunts expirés
+        EmpruntService::markLateEmprunts();
+        EmpruntService::updateExpiredEmprunts();
+
         // Statistiques utilisateurs
         $totalUsers = User::count();
         $newUsersThisMonth = User::whereMonth('created_at', now()->month)

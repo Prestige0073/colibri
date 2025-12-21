@@ -1,29 +1,72 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Module;
-use App\Models\Achat;
-use App\Models\Examen;
-use App\Models\Certification;
 
 class Formation extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'titre', 'description', 'prix', 'duree', 'niveau', 'image'
+        'titre',
+        'description',
+        'objectifs',
+        'image',
+        'prix',
+        'niveau',
+        'duree',
+        'nombre_modules',
+        'active',
+        'categorie',
+        'prerequis',
+        'note_minimale_certification',
+        'inscrits_count',
     ];
-    public function modules() {
-        return $this->hasMany(Module::class);
+
+    protected $casts = [
+        'active' => 'boolean',
+        'prix' => 'decimal:2',
+        'nombre_modules' => 'integer',
+        'note_minimale_certification' => 'integer',
+        'inscrits_count' => 'integer',
+    ];
+
+    // Relations
+    public function modules()
+    {
+        return $this->hasMany(Module::class)->orderBy('ordre');
     }
-    public function achats() {
-        return $this->hasMany(Achat::class);
+
+    public function inscriptions()
+    {
+        return $this->hasMany(FormationInscription::class);
     }
-    public function examens() {
-        return $this->hasMany(Examen::class);
+
+    public function evaluations()
+    {
+        return $this->hasMany(Evaluation::class);
     }
-    public function certifications() {
-        return $this->hasMany(Certification::class);
+
+    public function certificats()
+    {
+        return $this->hasMany(Certificat::class);
+    }
+
+    public function quizzes()
+    {
+        return $this->hasMany(Quiz::class)->orderBy('created_at', 'desc');
+    }
+
+    // Accesseurs
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? asset($this->image) : asset('img/default-formation.jpg');
+    }
+
+    public function getIsActiveAttribute()
+    {
+        return $this->active;
     }
 }

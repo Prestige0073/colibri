@@ -141,7 +141,18 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editLivreModal{{ $livre->id }}" title="Modifier">
+                                            <button type="button" class="btn btn-sm btn-warning btn-edit-livre"
+                                                    data-livre-id="{{ $livre->id }}"
+                                                    data-livre-titre="{{ $livre->titre }}"
+                                                    data-livre-auteur="{{ $livre->auteur }}"
+                                                    data-livre-categorie="{{ $livre->categorie }}"
+                                                    data-livre-prix="{{ $livre->prix }}"
+                                                    data-livre-quantite="{{ $livre->quantite }}"
+                                                    data-livre-resumer="{{ $livre->resumer ?? '' }}"
+                                                    data-livre-image="{{ $livre->image ? asset($livre->image) : '' }}"
+                                                    data-livre-has-pdf="{{ $livre->pdf ? 'oui' : 'non' }}"
+                                                    data-update-url="{{ route('admin.emprunts.updateLivre', $livre->id) }}"
+                                                    title="Modifier">
                                                 <i class="fa fa-edit"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLivreModal{{ $livre->id }}" title="Supprimer">
@@ -150,72 +161,6 @@
                                         </div>
                                     </td>
                                 </tr>
-
-                                <!-- Modal de modification -->
-                                <div class="modal fade" id="editLivreModal{{ $livre->id }}" tabindex="-1" aria-labelledby="editLivreModalLabel{{ $livre->id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-warning text-dark">
-                                                <h5 class="modal-title" id="editLivreModalLabel{{ $livre->id }}">
-                                                    <i class="fa fa-edit me-2"></i>Modifier le livre: {{ $livre->titre }}
-                                                </h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <form method="POST" action="{{ route('admin.emprunts.updateLivre', $livre->id) }}" enctype="multipart/form-data">
-                                                @csrf
-                                                @method('PUT')
-                                                <div class="modal-body">
-                                                    <div class="row g-3">
-                                                        <div class="col-md-6">
-                                                            <label for="edit_titre_{{ $livre->id }}" class="form-label fw-bold">Titre</label>
-                                                            <input type="text" class="form-control" id="edit_titre_{{ $livre->id }}" name="titre" value="{{ $livre->titre }}" required>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label for="edit_auteur_{{ $livre->id }}" class="form-label fw-bold">Auteur</label>
-                                                            <input type="text" class="form-control" id="edit_auteur_{{ $livre->id }}" name="auteur" value="{{ $livre->auteur }}" required>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <label for="edit_categorie_{{ $livre->id }}" class="form-label fw-bold">Catégorie</label>
-                                                            <input type="text" class="form-control" id="edit_categorie_{{ $livre->id }}" name="categorie" value="{{ $livre->categorie }}" required>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <label for="edit_prix_{{ $livre->id }}" class="form-label fw-bold">Prix (FCFA)</label>
-                                                            <input type="number" class="form-control" id="edit_prix_{{ $livre->id }}" name="prix" value="{{ $livre->prix }}" min="0" required>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <label for="edit_quantite_{{ $livre->id }}" class="form-label fw-bold">Stock</label>
-                                                            <input type="number" class="form-control" id="edit_quantite_{{ $livre->id }}" name="quantite" value="{{ $livre->quantite }}" min="0" required>
-                                                        </div>
-                                                        <div class="col-12">
-                                                            <label for="edit_resumer_{{ $livre->id }}" class="form-label fw-bold">Résumé</label>
-                                                            <textarea class="form-control" id="edit_resumer_{{ $livre->id }}" name="resumer" rows="3">{{ $livre->resumer }}</textarea>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label for="edit_image_{{ $livre->id }}" class="form-label fw-bold">Image (optionnel)</label>
-                                                            <input type="file" class="form-control" id="edit_image_{{ $livre->id }}" name="image" accept="image/*">
-                                                            @if($livre->image)
-                                                                <small class="text-muted">Image actuelle: <img src="{{ asset($livre->image) }}" alt="Image" style="height: 30px;"></small>
-                                                            @endif
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label for="edit_pdf_{{ $livre->id }}" class="form-label fw-bold">PDF (optionnel)</label>
-                                                            <input type="file" class="form-control" id="edit_pdf_{{ $livre->id }}" name="pdf" accept="application/pdf">
-                                                            @if($livre->pdf)
-                                                                <small class="text-muted">PDF actuel disponible</small>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                                    <button type="submit" class="btn btn-warning">
-                                                        <i class="fa fa-save me-2"></i>Enregistrer les modifications
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <!-- Modal de suppression -->
                                 <div class="modal fade" id="deleteLivreModal{{ $livre->id }}" tabindex="-1" aria-labelledby="deleteLivreModalLabel{{ $livre->id }}" aria-hidden="true">
@@ -650,6 +595,68 @@
         </div>
     </div>
 
+    <!-- Modal unique de modification de livre -->
+    <div class="modal fade" id="editLivreModal" tabindex="-1" aria-labelledby="editLivreModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="editLivreModalLabel">
+                        <i class="fa fa-edit me-2"></i>Modifier le livre
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editLivreForm" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="edit_titre" class="form-label fw-bold">Titre</label>
+                                <input type="text" class="form-control" id="edit_titre" name="titre" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_auteur" class="form-label fw-bold">Auteur</label>
+                                <input type="text" class="form-control" id="edit_auteur" name="auteur" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_categorie" class="form-label fw-bold">Catégorie</label>
+                                <input type="text" class="form-control" id="edit_categorie" name="categorie" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_prix" class="form-label fw-bold">Prix (FCFA)</label>
+                                <input type="number" class="form-control" id="edit_prix" name="prix" min="0" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_quantite" class="form-label fw-bold">Stock</label>
+                                <input type="number" class="form-control" id="edit_quantite" name="quantite" min="0" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="edit_resumer" class="form-label fw-bold">Résumé</label>
+                                <textarea class="form-control" id="edit_resumer" name="resumer" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_image" class="form-label fw-bold">Image (optionnel)</label>
+                                <input type="file" class="form-control" id="edit_image" name="image" accept="image/*">
+                                <small class="text-muted" id="current_image_info"></small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_pdf" class="form-label fw-bold">PDF (optionnel)</label>
+                                <input type="file" class="form-control" id="edit_pdf" name="pdf" accept="application/pdf">
+                                <small class="text-muted" id="current_pdf_info"></small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fa fa-save me-2"></i>Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal unique de suppression (dynamique) -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -759,14 +766,67 @@
         const rejeterModalContent = document.getElementById('rejeterModalContent');
         const rejeterForm = document.getElementById('rejeterForm');
 
+        const editLivreModal = document.getElementById('editLivreModal');
+        const editLivreForm = document.getElementById('editLivreForm');
+
         // Initialiser les instances des modals
         let deleteModalInstance = null;
         let validerModalInstance = null;
         let rejeterModalInstance = null;
+        let editLivreModalInstance = null;
 
         if (deleteModal) deleteModalInstance = new bootstrap.Modal(deleteModal);
         if (validerModal) validerModalInstance = new bootstrap.Modal(validerModal);
         if (rejeterModal) rejeterModalInstance = new bootstrap.Modal(rejeterModal);
+        if (editLivreModal) editLivreModalInstance = new bootstrap.Modal(editLivreModal);
+
+        // Gestion des boutons de modification de livre
+        document.querySelectorAll('.btn-edit-livre').forEach(button => {
+            button.addEventListener('click', function() {
+                const livreId = this.getAttribute('data-livre-id');
+                const titre = this.getAttribute('data-livre-titre');
+                const auteur = this.getAttribute('data-livre-auteur');
+                const categorie = this.getAttribute('data-livre-categorie');
+                const prix = this.getAttribute('data-livre-prix');
+                const quantite = this.getAttribute('data-livre-quantite');
+                const resumer = this.getAttribute('data-livre-resumer');
+                const image = this.getAttribute('data-livre-image');
+                const hasPdf = this.getAttribute('data-livre-has-pdf');
+                const updateUrl = this.getAttribute('data-update-url');
+
+                // Remplir le formulaire
+                document.getElementById('edit_titre').value = titre;
+                document.getElementById('edit_auteur').value = auteur;
+                document.getElementById('edit_categorie').value = categorie;
+                document.getElementById('edit_prix').value = prix;
+                document.getElementById('edit_quantite').value = quantite;
+                document.getElementById('edit_resumer').value = resumer;
+
+                // Mettre à jour le titre du modal
+                document.getElementById('editLivreModalLabel').innerHTML = '<i class="fa fa-edit me-2"></i>Modifier le livre: ' + titre;
+
+                // Afficher les infos sur les fichiers existants
+                if (image) {
+                    document.getElementById('current_image_info').innerHTML = 'Image actuelle: <img src="' + image + '" alt="Image" style="height: 30px;">';
+                } else {
+                    document.getElementById('current_image_info').innerHTML = '';
+                }
+
+                if (hasPdf === 'oui') {
+                    document.getElementById('current_pdf_info').innerHTML = 'PDF actuel disponible';
+                } else {
+                    document.getElementById('current_pdf_info').innerHTML = '';
+                }
+
+                // Définir l'action du formulaire
+                editLivreForm.setAttribute('action', updateUrl);
+
+                // Afficher le modal
+                if (editLivreModalInstance) {
+                    editLivreModalInstance.show();
+                }
+            });
+        });
 
         // Gestion des actions pour les demandes en attente
         document.querySelectorAll('.action-select-demande').forEach(select => {

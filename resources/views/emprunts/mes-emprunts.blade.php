@@ -147,7 +147,7 @@
                                 @if($emprunt->access_expires_at)
                                     <div class="mt-2">
                                         <strong>Temps d'accès restant:</strong>
-                                        <div class="countdown-timer badge bg-info text-dark" data-expires="{{ $emprunt->access_expires_at->toIso8601String() }}">
+                                        <div class="countdown-timer badge bg-success text-white" data-expires="{{ $emprunt->access_expires_at->toIso8601String() }}">
                                             <i class="fas fa-clock me-1"></i>
                                             <span class="countdown-text">Calcul...</span>
                                         </div>
@@ -380,22 +380,37 @@
                             timer.classList.remove('bg-info', 'bg-warning');
                             timer.classList.add('bg-danger', 'text-white');
 
-                            // Reload page to update UI when expired
-                            setTimeout(() => location.reload(), 2000);
+                            // Ne recharger qu'une seule fois en utilisant sessionStorage
+                            if (!sessionStorage.getItem('countdown_reload_' + timer.getAttribute('data-expires'))) {
+                                sessionStorage.setItem('countdown_reload_' + timer.getAttribute('data-expires'), 'true');
+                                setTimeout(() => location.reload(), 2000);
+                            }
                         } else {
-                            const hours = Math.floor(diff / (1000 * 60 * 60));
+                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-                            textElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+                            // Format d'affichage selon le temps restant
+                            if (days > 0) {
+                                textElement.textContent = `${days}j ${hours}h ${minutes}m ${seconds}s`;
+                            } else {
+                                textElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+                            }
 
                             // Change color based on remaining time
-                            if (hours < 1) {
-                                timer.classList.remove('bg-info');
+                            if (days === 0 && hours < 1) {
+                                timer.classList.remove('bg-info', 'bg-warning');
                                 timer.classList.add('bg-danger', 'text-white');
-                            } else if (hours < 2) {
-                                timer.classList.remove('bg-info');
-                                timer.classList.add('bg-warning');
+                            } else if (days === 0 && hours < 24) {
+                                timer.classList.remove('bg-info', 'bg-danger');
+                                timer.classList.add('bg-warning', 'text-dark');
+                            } else if (days < 2) {
+                                timer.classList.remove('bg-info', 'bg-danger');
+                                timer.classList.add('bg-warning', 'text-dark');
+                            } else {
+                                timer.classList.remove('bg-warning', 'bg-danger');
+                                timer.classList.add('bg-success', 'text-white');
                             }
                         }
                     });

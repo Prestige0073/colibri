@@ -35,7 +35,8 @@
                 <div class="row g-5 align-items-center">
                     <div class="col-lg-6">
                         <div class="carousel-text">
-                            <h1 class="display-4 text-uppercase mb-3">Contribuer à dynamiser le marché du livre africain</h1>
+                            <h1 class="display-4 text-uppercase mb-3">Contribuer à dynamiser le marché du livre africain
+                            </h1>
                             <p class="fs-5 mb-5"></p>
                             <div class="d-flex mt-4">
                                 <a class="btn btn-success py-3 px-4 me-3" href="{{ route('contact.index') }}">Faire un
@@ -151,6 +152,39 @@
                 <p class="section-title bg-white text-center text-success px-3">Catalogue</p>
                 <h1 class="display-6 mb-4">Découvrez notre sélection de livres africains</h1>
             </div>
+
+            <style>
+                /* Truncate résumé text responsively for catalogue cards - max 3 lines */
+                .catalogue-resumer {
+                    line-height: 1.2em; /* control line height */
+                    max-height: calc(1.2em * 3); /* fallback for non-webkit browsers: 3 lines */
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 3; /* number of lines to show (webkit) */
+                    word-wrap: break-word;
+                    word-break: break-word;
+                    hyphens: auto;
+                    text-align: justify;
+                    flex: 1 1 auto;
+                }
+
+                /* Slight adjustment for icon alignment */
+                .catalogue-resumer-icon {
+                    margin-top: 4px;
+                    flex: 0 0 auto;
+                }
+
+                /* Ensure still 3 lines on very small screens */
+                @media (max-width: 576px) {
+                    .catalogue-resumer {
+                        -webkit-line-clamp: 3;
+                        max-height: calc(1.2em * 3);
+                    }
+                }
+            </style>
+
             <div class="row g-4">
                 @foreach ($Catalogues as $catalogue)
                     @if ($catalogue->type_categorie === 'catalogue')
@@ -159,7 +193,7 @@
                                 style="background: transparent; backdrop-filter: blur(6px); border-top-left-radius: 12px; border-top-right-radius: 12px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
                                 <img class="card-img-top" src="{{ asset($catalogue->image) }}"
                                     alt="{{ $catalogue->titre }}"
-                                    style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                                    style="border-top-left-radius: 12px; border-top-right-radius: 12px; width:100%; height:240px; object-fit:cover;">
                                 <div class="card-body d-flex flex-column justify-content-between"
                                     style="padding: 1.2rem;">
                                     <h5 class="card-title mb-2 d-flex align-items-center"
@@ -172,11 +206,11 @@
                                         {{ $catalogue->auteur }} &bull; {{ $catalogue->categorie }}
                                     </p>
                                     <hr style="margin: 0.5rem 0; padding: 0;">
-                                    <p class="mb-2 d-flex align-items-center"
+                                    <p class="mb-2 d-flex align-items-start"
                                         style="color: #6d838fff; font-size: 1.05rem;">
-                                        <i class="fa fa-star" style="color: #FFAC00; margin-right: 0.5em;"></i>
-                                        <span style="text-align: justify; display: block;">
-                                            {{ Str::limit(strip_tags($catalogue->resumer), 100) }}
+                                        <i class="fa fa-star catalogue-resumer-icon" style="color: #FFAC00; margin-right: 0.5em;"></i>
+                                        <span class="catalogue-resumer">
+                                            {{ Str::limit(strip_tags($catalogue->resumer), 300) }}
                                         </span>
                                     </p>
                                     <div class="mb-3 d-flex justify-content-between align-items-center">
@@ -332,6 +366,30 @@
                 <p class="section-title bg-white text-center text-success px-3">Bibliothèque</p>
                 <h1 class="display-6 mb-4">Empruntez nos livres</h1>
             </div>
+
+            <style>
+                /* Truncate résumé text to at most 3 lines across all viewports */
+                .livre-resumer {
+                    line-height: 1.2em; /* control line height */
+                    max-height: calc(1.2em * 3); /* fallback for non-webkit browsers: 3 lines */
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 3; /* number of lines to show (webkit) */
+                    word-wrap: break-word;
+                    word-break: break-word;
+                    hyphens: auto;
+                    text-align: justify;
+                }
+
+                /* Slight adjustment for icon alignment */
+                .livre-resumer-icon {
+                    margin-top: 4px;
+                    flex: 0 0 auto;
+                }
+            </style>
+
             <div class="row g-4">
                 @foreach ($Bibliotheques as $livre)
                     @if ($livre->type_categorie === 'emprunt')
@@ -352,11 +410,11 @@
                                         {{ $livre->auteur }} &bull; {{ $livre->categorie }}
                                     </p>
                                     <hr style="margin: 0.5rem 0; padding: 0;">
-                                    <p class="mb-2 d-flex align-items-center"
-                                        style="color: #6d838fff; font-size: 1.05rem;">
-                                        <i class="fa fa-star" style="color: #FFAC00; margin-right: 0.5em;"></i>
-                                        <span style="text-align: justify; display: block;">
-                                            {{ Str::limit(strip_tags($livre->resumer), 100) }}
+                                    <p class="mb-2 d-flex" style="color: #6d838fff; font-size: 1.05rem;">
+                                        <i class="fa fa-star livre-resumer-icon"
+                                            style="color: #FFAC00; margin-right: 0.5em;"></i>
+                                        <span class="livre-resumer" style="display:block; text-align: justify; flex:1;">
+                                            {{ Str::limit(strip_tags($livre->resumer), 300) }}
                                         </span>
                                     </p>
                                     <div class="mb-3">
@@ -429,7 +487,8 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-12 col-md-3 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0">
-                    <img src="{{ asset('img/Logo_OIF.png') }}" alt="OIF" class="img-fluid" style="max-height:80px;">
+                    <img src="{{ asset('img/Logo_OIF.png') }}" alt="OIF" class="img-fluid"
+                        style="max-height:80px;">
                 </div>
                 <div class="col-12 col-md-9 text-center text-md-start">
                     <p class="section-title bg-white text-start text-success pe-3">Partenaire</p>

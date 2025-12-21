@@ -364,12 +364,12 @@ class EmpruntController extends Controller
             return redirect()->back()->with('error', 'Le livre n\'est plus disponible en stock.');
         }
 
-        // Valider la demande avec accès de 6 heures
+        // Valider la demande avec accès de 14 jours
         $emprunt->update([
             'statut' => 'en_cours',
             'valide_par' => auth()->id(),
             'valide_le' => now(),
-            'access_expires_at' => now()->addHours(6),
+            'access_expires_at' => now()->addDays(14),
         ]);
 
         // Décrémenter le stock
@@ -397,15 +397,15 @@ class EmpruntController extends Controller
     }
 
     /**
-     * Prolonger l'accès PDF de 6 heures
+     * Prolonger l'accès PDF de 14 jours
      */
     public function renewAccess(Emprunt $emprunt)
     {
-        // Prolonger l'accès de 6 heures
+        // Prolonger l'accès de 14 jours
         $emprunt->update([
-            'access_expires_at' => now()->addHours(6),
+            'access_expires_at' => now()->addDays(14),
         ]);
 
-        return redirect()->back()->with('success', "L'accès PDF pour \"{$emprunt->livre->titre}\" a été prolongé de 6 heures pour {$emprunt->user->name}.");
+        return redirect()->back()->with('success', "L'accès PDF pour \"{$emprunt->livre->titre}\" a été prolongé de 14 jours pour {$emprunt->user->name}.");
     }
 }

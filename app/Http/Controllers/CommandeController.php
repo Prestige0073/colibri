@@ -168,7 +168,12 @@ class CommandeController extends Controller
             return redirect()->route('login');
         }
 
-        $commandes = Commande::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        // Vérifier si la table commandes existe
+        if (\Schema::hasTable('commandes') && class_exists(Commande::class)) {
+            $commandes = Commande::where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
+        } else {
+            $commandes = collect();
+        }
 
         return view('account.commandes', compact('commandes'));
     }

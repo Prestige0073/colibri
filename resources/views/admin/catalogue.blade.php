@@ -57,17 +57,17 @@
                         </thead>
                         <tbody>
                             @forelse($catalogues as $cat)
-                                <tr class="catalogue-row" data-catalogue='{!! json_encode([
-                                    'id' => $cat->id,
-                                    'titre' => $cat->titre,
-                                    'auteur' => $cat->auteur,
-                                    'categorie' => $cat->categorie,
-                                    'prix' => number_format($cat->prix, 0, ',', ' ') . ' FCFA',
-                                    'quantite' => $cat->quantite,
-                                    'image' => $cat->image ? asset($cat->image) : null,
-                                    'pdf' => $cat->pdf ? asset($cat->pdf) : null,
-                                    'resumer' => strip_tags($cat->resumer),
-                                ]) !!}'>
+                                <tr class="catalogue-row"
+                                    data-id="{{ $cat->id }}"
+                                    data-titre="{{ $cat->titre }}"
+                                    data-auteur="{{ $cat->auteur }}"
+                                    data-categorie="{{ $cat->categorie }}"
+                                    data-prix="{{ $cat->prix }}"
+                                    data-prix-formatted="{{ number_format($cat->prix, 0, ',', ' ') }} FCFA"
+                                    data-quantite="{{ $cat->quantite }}"
+                                    data-image="{{ $cat->image ? asset($cat->image) : '' }}"
+                                    data-pdf="{{ $cat->pdf ? asset($cat->pdf) : '' }}"
+                                    data-resumer="{{ strip_tags($cat->resumer ?? '') }}">
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $cat->titre }}</td>
                                     <td>{{ $cat->auteur }}</td>
@@ -103,7 +103,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-gradient-blue"><i class="fa fa-edit"></i>
+                                        <button class="btn btn-sm btn-gradient-blue btn-edit-catalogue"><i class="fa fa-edit"></i>
                                             Modifier</button>
                                     </td>
                                     <td>
@@ -325,8 +325,8 @@
             if (textarea) {
                 ClassicEditor.create(textarea, {
                     toolbar: [
-                        'undo', 'redo', '|', 'bold', 'italic', 'underline', 'bulletedList',
-                        'numberedList', 'link', 'removeFormat'
+                        'undo', 'redo', '|', 'bold', 'italic', 'bulletedList',
+                        'numberedList', 'link'
                     ],
                     language: 'fr',
                 }).then(editor => {
@@ -381,19 +381,21 @@
             });
 
             // Bouton Modifier : pré-remplit le formulaire
-            document.querySelectorAll('.btn-gradient-blue').forEach(function(btn) {
+            document.querySelectorAll('.btn-edit-catalogue').forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     const row = this.closest('tr');
-                    if (!row || !row.dataset.catalogue) return;
-                    const data = JSON.parse(row.dataset.catalogue);
+                    if (!row) return;
+
                     editMode = true;
-                    editId = data.id;
+                    editId = row.dataset.id;
                     document.getElementById('catalogue_id').value = editId;
-                    document.getElementById('titre').value = data.titre;
-                    document.getElementById('auteur').value = data.auteur;
-                    document.getElementById('categorie').value = data.categorie;
-                    document.getElementById('prix').value = parseInt(data.prix);
-                    if (catalogueEditorInstance) catalogueEditorInstance.setData(data.resumer);
+                    document.getElementById('titre').value = row.dataset.titre || '';
+                    document.getElementById('auteur').value = row.dataset.auteur || '';
+                    document.getElementById('categorie').value = row.dataset.categorie || '';
+                    document.getElementById('prix').value = row.dataset.prix || '';
+                    document.getElementById('quantite').value = row.dataset.quantite || '';
+                    if (catalogueEditorInstance) catalogueEditorInstance.setData(row.dataset.resumer || '');
                     submitText.textContent = 'Modifier';
                     submitBtn.classList.remove('btn-gradient-blue');
                     submitBtn.classList.add('btn-warning');
@@ -410,18 +412,18 @@
                 row.addEventListener('click', function(e) {
                     // Ignore click on action buttons
                     if (e.target.closest('button')) return;
-                    const data = JSON.parse(this.dataset.catalogue);
-                    document.getElementById('modalTitre').textContent = data.titre;
-                    document.getElementById('modalAuteur').textContent = data.auteur;
-                    document.getElementById('modalCategorie').textContent = data.categorie;
-                    document.getElementById('modalPrix').textContent = data.prix;
-                    document.getElementById('modalImage').src = data.image || '';
-                    document.getElementById('modalQuantite').textContent = data.quantite;
+
+                    document.getElementById('modalTitre').textContent = this.dataset.titre || '';
+                    document.getElementById('modalAuteur').textContent = this.dataset.auteur || '';
+                    document.getElementById('modalCategorie').textContent = this.dataset.categorie || '';
+                    document.getElementById('modalPrix').textContent = this.dataset.prixFormatted || '';
+                    document.getElementById('modalImage').src = this.dataset.image || '';
+                    document.getElementById('modalQuantite').textContent = this.dataset.quantite || '';
                     // Statut dynamique simplifié : 0 = Épuisé, sinon OK
                     let statut = '';
                     let badgeClass = '';
                     let blink = '';
-                    let q = parseInt(data.quantite);
+                    let q = parseInt(this.dataset.quantite);
                     if (q === 0) {
                         statut = 'Épuisé';
                         badgeClass = 'bg-danger text-white';
@@ -432,14 +434,14 @@
                         blink = '';
                     }
                     document.getElementById('modalStatut').innerHTML = `<span class='badge ${badgeClass} ${blink}'>${statut}</span>`;
-                    if (data.pdf) {
+                    if (this.dataset.pdf) {
                         document.getElementById('modalPdfLink').innerHTML =
-                            `<a href="${data.pdf}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-file-pdf"></i> PDF</a>`;
+                            `<a href="${this.dataset.pdf}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-file-pdf"></i> PDF</a>`;
                     } else {
                         document.getElementById('modalPdfLink').innerHTML = '';
                     }
                     // Résumé tronqué et dépliable
-                    const resumer = data.resumer || '';
+                    const resumer = this.dataset.resumer || '';
                     const short = resumer.substring(0, 50);
                     const full = resumer.substring(50);
                     document.getElementById('modalResumerShort').textContent = short;

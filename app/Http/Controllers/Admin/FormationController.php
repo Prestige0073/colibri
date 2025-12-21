@@ -9,61 +9,76 @@ class FormationController extends Controller
 {
     public function index()
     {
-        $formations = \App\Models\Formation::all();
-        return view('admin.formations', compact('formations'));
+        $formations = Formation::withCount(['modules', 'inscriptions'])->orderBy('created_at', 'desc')->paginate(10);
+        return view('admin.formations.index', compact('formations'));
     }
 
     public function create()
     {
-        
+        return view('admin.formations.create');
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'titre' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'prix' => 'required|numeric',
-            'duree' => 'required|string',
-            'niveau' => 'required|string',
+            'description' => 'required|string',
+            'objectifs' => 'nullable|string',
+            'prix' => 'required|numeric|min:0',
+            'duree' => 'nullable|string',
+            'niveau' => 'required|in:debutant,intermediaire,avance',
+            'categorie' => 'nullable|string',
+            'prerequis' => 'nullable|string',
+            'note_minimale_certification' => 'nullable|integer|min:0|max:100',
             'image' => 'nullable|image|max:2048',
+            'active' => 'boolean',
         ]);
+
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = uniqid('formation_').'.'.$file->getClientOriginalExtension();
-            $file->move(public_path('formations'), $filename);
-            $validated['image'] = 'formations/'.$filename;
+            $file->move(public_path('img/formations'), $filename);
+            $validated['image'] = 'img/formations/'.$filename;
         }
+
         Formation::create($validated);
         return redirect()->route('admin.formations.index')->with('success', 'Formation créée avec succès.');
     }
 
     public function show(Formation $formation)
     {
-        
+        $formation->load(['modules.contenus', 'inscriptions.user']);
+        return view('admin.formations.show', compact('formation'));
     }
 
     public function edit(Formation $formation)
     {
-        
+        return view('admin.formations.edit', compact('formation'));
     }
 
     public function update(Request $request, Formation $formation)
     {
         $validated = $request->validate([
             'titre' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'prix' => 'required|numeric',
-            'duree' => 'required|string',
-            'niveau' => 'required|string',
+            'description' => 'required|string',
+            'objectifs' => 'nullable|string',
+            'prix' => 'required|numeric|min:0',
+            'duree' => 'nullable|string',
+            'niveau' => 'required|in:debutant,intermediaire,avance',
+            'categorie' => 'nullable|string',
+            'prerequis' => 'nullable|string',
+            'note_minimale_certification' => 'nullable|integer|min:0|max:100',
             'image' => 'nullable|image|max:2048',
+            'active' => 'boolean',
         ]);
+
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = uniqid('formation_').'.'.$file->getClientOriginalExtension();
-            $file->move(public_path('formations'), $filename);
-            $validated['image'] = 'formations/'.$filename;
+            $file->move(public_path('img/formations'), $filename);
+            $validated['image'] = 'img/formations/'.$filename;
         }
+
         $formation->update($validated);
         return redirect()->route('admin.formations.index')->with('success', 'Formation modifiée avec succès.');
     }

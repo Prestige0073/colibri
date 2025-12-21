@@ -16,6 +16,16 @@ class CommandeController extends Controller
 
     public function index(Request $request)
     {
+        // Vérifier si la table commandes existe
+        if (!\Schema::hasTable('commandes')) {
+            // Créer un paginator vide pour éviter l'erreur de links()
+            $users = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
+            return view('admin.commandes', [
+                'users' => $users,
+                'sort' => 'date'
+            ])->with('error', 'Le système de commandes n\'est pas encore configuré.');
+        }
+
         // Regrouper les commandes par utilisateur pour l'interface admin
         $sort = $request->input('sort', 'date'); // 'date' or 'amount'
 

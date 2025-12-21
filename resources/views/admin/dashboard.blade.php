@@ -23,9 +23,14 @@
 
     <!-- Alertes Accès Expirés -->
     @if($empruntsAccesExpire->isNotEmpty())
+    @php
+        // Créer une clé unique basée sur les IDs des emprunts expirés
+        $expiredIds = $empruntsAccesExpire->pluck('id')->sort()->join('-');
+        $adminAlertKey = 'admin_expired_alert_dismissed_' . $expiredIds;
+    @endphp
     <div class="row mb-4">
         <div class="col-12">
-            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" id="admin-expired-access-alert" data-alert-key="{{ $adminAlertKey }}" style="display: none;">
                 <div class="d-flex align-items-start">
                     <div class="me-3">
                         <i class="fas fa-exclamation-triangle fa-2x"></i>
@@ -34,7 +39,7 @@
                         <h5 class="alert-heading mb-2">
                             <i class="fas fa-clock me-2"></i>{{ $empruntsAccesExpire->count() }} Accès PDF expiré(s)
                         </h5>
-                        <p class="mb-2">Les utilisateurs suivants ont dépassé leur période d'accès de 6 heures et ne peuvent plus consulter les PDFs :</p>
+                        <p class="mb-2">Les utilisateurs suivants ont dépassé leur période d'accès de 14 jours et ne peuvent plus consulter les PDFs :</p>
                         <div class="table-responsive">
                             <table class="table table-sm table-borderless mb-0">
                                 <thead>
@@ -64,8 +69,8 @@
                                             <td>
                                                 <form action="{{ route('admin.emprunts.renew-access', $emprunt->id) }}" method="POST" style="display: inline;">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success" title="Prolonger l'accès de 6 heures">
-                                                        <i class="fas fa-redo me-1"></i>Prolonger 6h
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Prolonger l'accès de 14 jours">
+                                                        <i class="fas fa-redo me-1"></i>Prolonger 14j
                                                     </button>
                                                 </form>
                                             </td>
@@ -639,7 +644,7 @@
             <div class="modal-body">
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    Ces utilisateurs ont dépassé leur période d'accès de 6 heures. Vous pouvez prolonger leur accès ou les contacter.
+                    Ces utilisateurs ont dépassé leur période d'accès de 14 jours. Vous pouvez prolonger leur accès ou les contacter.
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -705,8 +710,8 @@
                                     <td>
                                         <form action="{{ route('admin.emprunts.renew-access', $emprunt->id) }}" method="POST" style="display: inline;">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" title="Prolonger l'accès de 6 heures">
-                                                <i class="fas fa-redo me-1"></i>+6h
+                                            <button type="submit" class="btn btn-sm btn-success" title="Prolonger l'accès de 14 jours">
+                                                <i class="fas fa-redo me-1"></i>+14j
                                             </button>
                                         </form>
                                     </td>
@@ -755,6 +760,33 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Gestion de l'alerte d'accès expiré avec persistance
+        const expiredAlert = document.getElementById('admin-expired-access-alert');
+        if (expiredAlert) {
+            const alertKey = expiredAlert.getAttribute('data-alert-key');
+
+            // Vérifier si l'alerte a déjà été fermée
+            if (localStorage.getItem(alertKey)) {
+                expiredAlert.remove();
+            } else {
+                // Afficher l'alerte si elle n'a pas été fermée
+                expiredAlert.style.display = 'block';
+
+                // Sauvegarder la fermeture lorsque l'utilisateur ferme manuellement l'alerte
+                expiredAlert.addEventListener('close.bs.alert', function() {
+                    localStorage.setItem(alertKey, 'true');
+                });
+
+                // Auto-fermeture après 15 secondes
+                setTimeout(function() {
+                    const bsAlert = new bootstrap.Alert(expiredAlert);
+                    bsAlert.close();
+                    // Sauvegarder aussi lors de la fermeture automatique
+                    localStorage.setItem(alertKey, 'true');
+                }, 15000);
+            }
+        }
+
         // Graphique des ventes
         const salesCtx = document.getElementById('salesChart');
         if (salesCtx) {

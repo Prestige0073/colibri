@@ -20,9 +20,12 @@ use App\Http\Controllers\Admin\DonationAdminController;
 use App\Http\Controllers\Admin\ContactAdminController;
 use App\Http\Controllers\Admin\TestimonialAdminController;
 use App\Http\Controllers\Admin\QuizAdminController;
+use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\Admin\QuizQuestionController;
+use App\Http\Controllers\QuizController as FrontQuizController;
 use App\Http\Controllers\Admin\CertificationAdminController;
 use App\Http\Controllers\Admin\CatalogueAdminController;
-use App\Http\Controllers\Admin\AchatAdminController;
+use App\Http\Controllers\Admin\AchatController as AchatAdminController;
 use App\Http\Controllers\Admin\ModuleAdminController;
 use App\Http\Controllers\Admin\TeamAdminController;
 use App\Http\Controllers\Admin\DashboardAdminController;
@@ -119,7 +122,13 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::resource('donations', DonationAdminController::class);
     Route::resource('contacts', ContactAdminController::class);
     Route::resource('testimonials', TestimonialAdminController::class);
-    Route::resource('quiz', QuizAdminController::class);
+    // Route::resource('quiz', QuizAdminController::class); // Ancien contrôleur
+    // Nouveau système de quiz
+    Route::resource('quizzes', QuizController::class);
+    Route::post('quizzes/{quiz}/questions', [QuizQuestionController::class, 'store'])->name('quizzes.questions.store');
+    Route::put('quiz-questions/{question}', [QuizQuestionController::class, 'update'])->name('quiz-questions.update');
+    Route::delete('quiz-questions/{question}', [QuizQuestionController::class, 'destroy'])->name('quiz-questions.destroy');
+    Route::post('quizzes/{quiz}/questions/reorder', [QuizQuestionController::class, 'reorder'])->name('quizzes.questions.reorder');
     Route::resource('certifications', CertificationAdminController::class);
     Route::resource('catalogue', CatalogueAdminController::class);
     Route::resource('achats', AchatAdminController::class);
@@ -137,7 +146,14 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::post('emprunts/{emprunt}/valider', [EmpruntController::class, 'validerDemande'])->name('emprunts.valider');
     Route::post('emprunts/{emprunt}/rejeter', [EmpruntController::class, 'rejeterDemande'])->name('emprunts.rejeter');
     Route::post('emprunts/{emprunt}/renew-access', [EmpruntController::class, 'renewAccess'])->name('emprunts.renew-access');
+
+    // Gestion des utilisateurs
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    Route::post('users/{user}/toggle-block', [\App\Http\Controllers\Admin\UserController::class, 'toggleBlock'])->name('users.toggle-block');
+    Route::post('users/{user}/change-role', [\App\Http\Controllers\Admin\UserController::class, 'changeRole'])->name('users.change-role');
     Route::resource('formations', AdminFormationController::class);
+    Route::resource('modules', \App\Http\Controllers\Admin\ModuleController::class);
+    Route::resource('modules.contenus', \App\Http\Controllers\Admin\ModuleContenuController::class)->shallow();
     // Admin: commandes management
     Route::get('commandes', [\App\Http\Controllers\Admin\CommandeController::class, 'index'])->name('commandes.index');
     Route::get('commandes/{commande}', [\App\Http\Controllers\Admin\CommandeController::class, 'show'])->name('commandes.show');
@@ -152,6 +168,12 @@ Route::middleware('auth')->group(function () {
     Route::get('account/profil', [App\Http\Controllers\AccountController::class, 'profil'])->name('account.profil');
     Route::post('account/avatar', [App\Http\Controllers\AccountController::class, 'updateAvatar'])->name('account.avatar.update');
     Route::get('account/commandes', [App\Http\Controllers\CommandeController::class, 'mesCommandes'])->name('account.commandes');
+
+    // Routes pour les quiz (front-end)
+    Route::get('quiz/{quiz}', [FrontQuizController::class, 'show'])->name('quiz.show');
+    Route::post('quiz/{quiz}/start', [FrontQuizController::class, 'start'])->name('quiz.start');
+    Route::post('quiz/{quiz}/attempt/{attempt}/submit', [FrontQuizController::class, 'submit'])->name('quiz.submit');
+    Route::get('quiz/{quiz}/attempt/{attempt}/result', [FrontQuizController::class, 'result'])->name('quiz.result');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin - Colibri Littéraire')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -99,14 +100,20 @@
                         <li class="nav-item">
                             <a href="{{ route('admin.commandes.index') }}" class="nav-link text-white{{ request()->routeIs('admin.commandes.*') ? ' active' : '' }}">
                                 <i class="fa fa-truck me-2"></i>Commandes
-                                @php $pendingCount = \App\Models\Commande::where('statut','pending')->count(); @endphp
+                                @php
+                                    $pendingCount = 0;
+                                    if (Schema::hasTable('commandes') && class_exists(\App\Models\Commande::class)) {
+                                        $pendingCount = \App\Models\Commande::where('statut','pending')->count();
+                                    }
+                                @endphp
                                 @if($pendingCount > 0)
                                     <span class="badge bg-danger ms-2">{{ $pendingCount }}</span>
                                 @endif
                             </a>
                         </li>
-                        <li class="nav-item"><a href="{{ route('admin.modules.index') }}" class="nav-link text-white{{ request()->routeIs('admin.modules.index') ? ' active' : '' }}"><i class="fa fa-graduation-cap me-2"></i>Modules</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.quiz.index') }}" class="nav-link text-white{{ request()->routeIs('admin.quiz.index') ? ' active' : '' }}"><i class="fa fa-question-circle me-2"></i>Quiz</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.formations.index') }}" class="nav-link text-white{{ request()->routeIs('admin.formations.*') ? ' active' : '' }}"><i class="fa fa-chalkboard-teacher me-2"></i>Formations</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.modules.index') }}" class="nav-link text-white{{ request()->routeIs('admin.modules.*') ? ' active' : '' }}"><i class="fa fa-graduation-cap me-2"></i>Modules</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.quizzes.index') }}" class="nav-link text-white{{ request()->routeIs('admin.quizzes.*') ? ' active' : '' }}"><i class="fa fa-question-circle me-2"></i>Quiz</a></li>
                         <li class="nav-item"><a href="{{ route('admin.certifications.index') }}" class="nav-link text-white{{ request()->routeIs('admin.certifications.index') ? ' active' : '' }}"><i class="fa fa-award me-2"></i>Certifications</a></li>
                         <li class="nav-item"><a href="{{ route('admin.achats.index') }}" class="nav-link text-white{{ request()->routeIs('admin.achats.index') ? ' active' : '' }}"><i class="fa fa-shopping-bag me-2"></i>Achats/Emprunts</a></li>
                         <li class="nav-item"><a href="{{ route('admin.contacts.index') }}" class="nav-link text-white{{ request()->routeIs('admin.contacts.index') ? ' active' : '' }}"><i class="fa fa-envelope me-2"></i>Contacts</a></li>
@@ -128,15 +135,20 @@
                         <li class="nav-item">
                             <a href="{{ route('admin.commandes.index') }}" class="nav-link text-white{{ request()->routeIs('admin.commandes.*') ? ' active' : '' }}">
                                 <i class="fa fa-truck me-2"></i>Commandes
-                                @php $pendingCount = \App\Models\Commande::where('statut','pending')->count(); @endphp
+                                @php
+                                    $pendingCount = 0;
+                                    if (Schema::hasTable('commandes') && class_exists(\App\Models\Commande::class)) {
+                                        $pendingCount = \App\Models\Commande::where('statut','pending')->count();
+                                    }
+                                @endphp
                                 @if($pendingCount > 0)
                                     <span class="badge bg-danger ms-2">{{ $pendingCount }}</span>
                                 @endif
                             </a>
                         </li>
-                        <li class="nav-item"><a href="{{ route('admin.formations.index') }}" class="nav-link text-white{{ request()->routeIs('admin.formations.index') ? ' active' : '' }}"><i class="fa fa-chalkboard-teacher me-2"></i>Formations</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.modules.index') }}" class="nav-link text-white{{ request()->routeIs('admin.modules.index') ? ' active' : '' }}"><i class="fa fa-graduation-cap me-2"></i>Modules</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.quiz.index') }}" class="nav-link text-white{{ request()->routeIs('admin.quiz.index') ? ' active' : '' }}"><i class="fa fa-question-circle me-2"></i>Quiz</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.formations.index') }}" class="nav-link text-white{{ request()->routeIs('admin.formations.*') ? ' active' : '' }}"><i class="fa fa-chalkboard-teacher me-2"></i>Formations</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.modules.index') }}" class="nav-link text-white{{ request()->routeIs('admin.modules.*') ? ' active' : '' }}"><i class="fa fa-graduation-cap me-2"></i>Modules</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.quizzes.index') }}" class="nav-link text-white{{ request()->routeIs('admin.quizzes.*') ? ' active' : '' }}"><i class="fa fa-question-circle me-2"></i>Quiz</a></li>
                         <li class="nav-item"><a href="{{ route('admin.certifications.index') }}" class="nav-link text-white{{ request()->routeIs('admin.certifications.index') ? ' active' : '' }}"><i class="fa fa-award me-2"></i>Certifications</a></li>
                         <li class="nav-item"><a href="{{ route('admin.achats.index') }}" class="nav-link text-white{{ request()->routeIs('admin.achats.index') ? ' active' : '' }}"><i class="fa fa-shopping-bag me-2"></i>Achats/Emprunts</a></li>
                         <li class="nav-item"><a href="{{ route('admin.contacts.index') }}" class="nav-link text-white{{ request()->routeIs('admin.contacts.index') ? ' active' : '' }}"><i class="fa fa-envelope me-2"></i>Contacts</a></li>
