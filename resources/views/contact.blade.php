@@ -84,36 +84,51 @@
                 </div>
                 <div class="col-lg-7 wow fadeIn" data-wow-delay="0.3s">
                     <h3>Formulaire de contact</h3>
-                    <p class="mb-4">Pour toute demande d’information, suggestion ou partenariat, merci de remplir le
+                    <p class="mb-4">Pour toute demande d'information, suggestion ou partenariat, merci de remplir le
                         formulaire ci-dessous. Notre équipe vous répondra dans les meilleurs délais.</p>
-                    <form>
+                    <form method="POST" action="{{ route('contact.store') }}">
+                        @csrf
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="name" placeholder="Votre nom">
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" placeholder="Votre nom" value="{{ old('name') }}" required>
                                     <label for="name">Votre nom</label>
+                                    @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="email" class="form-control" id="email" placeholder="Votre email">
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" placeholder="Votre email" value="{{ old('email') }}" required>
                                     <label for="email">Votre email</label>
+                                    @error('email')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="subject" placeholder="Sujet">
+                                    <input type="text" class="form-control @error('subject') is-invalid @enderror" id="subject" name="subject" placeholder="Sujet" value="{{ old('subject') }}" required>
                                     <label for="subject">Sujet</label>
+                                    @error('subject')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <textarea class="form-control" placeholder="Votre message ici" id="message" style="height: 250px"></textarea>
+                                    <textarea class="form-control @error('message') is-invalid @enderror" placeholder="Votre message ici" id="message" name="message" style="height: 250px" required>{{ old('message') }}</textarea>
                                     <label for="message">Message</label>
+                                    @error('message')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-12">
-                                <button class="btn btn-success text-white py-3 px-4" type="submit">Envoyer le message</button>
+                                <button class="btn btn-success text-white py-3 px-4" type="submit">
+                                    <i class="fas fa-paper-plane me-2"></i>Envoyer le message
+                                </button>
                             </div>
                         </div>
                     </form>

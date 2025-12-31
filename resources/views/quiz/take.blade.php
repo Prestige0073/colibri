@@ -115,7 +115,7 @@
                 <!-- Bouton de soumission sticky -->
                 <div class="sticky-footer p-3 mt-4">
                     <div class="d-flex justify-content-between align-items-center">
-                        <button type="button" class="btn btn-outline-secondary" onclick="if(confirm('Êtes-vous sûr de vouloir abandonner ce quiz ?')) window.location.href='{{ route('quiz.show', $quiz->id) }}'">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#abandonModal">
                             <i class="fas fa-times me-2"></i>Abandonner
                         </button>
                         <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
@@ -124,6 +124,57 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'abandon -->
+<div class="modal fade" id="abandonModal" tabindex="-1" aria-labelledby="abandonModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="abandonModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmer l'abandon
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Êtes-vous sûr de vouloir abandonner ce quiz ?</p>
+                <p class="text-muted mb-0"><small>Vos réponses ne seront pas enregistrées.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-arrow-left me-2"></i>Continuer le quiz
+                </button>
+                <a href="{{ route('quiz.show', $quiz->id) }}" class="btn btn-danger" id="confirmAbandon">
+                    <i class="fas fa-times me-2"></i>Abandonner
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation avant de quitter la page -->
+<div class="modal fade" id="confirmLeaveModal" tabindex="-1" aria-labelledby="confirmLeaveModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmLeaveModalLabel">
+                    <i class="fas fa-exclamation-circle me-2"></i>Attention !
+                </h5>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Vous êtes sur le point de quitter cette page.</p>
+                <p class="text-muted mb-0"><small>Les modifications que vous avez apportées ne seront peut-être pas enregistrées.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelLeave">
+                    <i class="fas fa-arrow-left me-2"></i>Rester sur la page
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmLeave">
+                    <i class="fas fa-sign-out-alt me-2"></i>Quitter
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -163,15 +214,49 @@
         const timerInterval = setInterval(updateTimer, 1000);
     @endif
 
-    // Confirmation avant de quitter la page
-    window.addEventListener('beforeunload', function (e) {
-        e.preventDefault();
-        e.returnValue = '';
+    // Gestion du modal de confirmation avant de quitter la page
+    let allowNavigation = false;
+    let pendingNavigationUrl = null;
+
+    // Intercepter les clics sur les liens
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (link && !allowNavigation && link.id !== 'confirmAbandon') {
+            // Ignorer les liens qui ouvrent des modals ou qui sont des ancres
+            if (link.getAttribute('data-bs-toggle') || link.getAttribute('href').startsWith('#')) {
+                return;
+            }
+
+            e.preventDefault();
+            pendingNavigationUrl = link.href;
+            const modal = new bootstrap.Modal(document.getElementById('confirmLeaveModal'));
+            modal.show();
+        }
     });
 
-    // Ne pas demander confirmation après soumission
+    // Bouton pour rester sur la page
+    document.getElementById('cancelLeave').addEventListener('click', function() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmLeaveModal'));
+        modal.hide();
+        pendingNavigationUrl = null;
+    });
+
+    // Bouton pour confirmer le départ
+    document.getElementById('confirmLeave').addEventListener('click', function() {
+        allowNavigation = true;
+        if (pendingNavigationUrl) {
+            window.location.href = pendingNavigationUrl;
+        }
+    });
+
+    // Permettre la navigation après soumission du formulaire
     document.getElementById('quiz-form').addEventListener('submit', function() {
-        window.removeEventListener('beforeunload', null);
+        allowNavigation = true;
+    });
+
+    // Permettre la navigation après abandon confirmé
+    document.getElementById('confirmAbandon').addEventListener('click', function() {
+        allowNavigation = true;
     });
 
     // Scroll smooth vers les questions

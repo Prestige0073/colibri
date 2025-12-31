@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Equipe;
 use Illuminate\Http\Request;
 
 class TeamAdminController extends Controller
@@ -12,7 +13,8 @@ class TeamAdminController extends Controller
      */
     public function index()
     {
-        return view('admin.team');
+        // Rediriger vers la nouvelle page de gestion d'équipe
+        return redirect()->route('admin.equipe.index');
     }
 
     /**

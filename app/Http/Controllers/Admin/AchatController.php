@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
-use App\Models\FormationInscription;
+use App\Models\Commande;
 use App\Models\User;
 use App\Models\Formation;
 use Illuminate\Http\Request;
@@ -11,8 +11,12 @@ class AchatController extends Controller
 {
     public function index()
     {
-        $achats = FormationInscription::with(['user', 'formation'])->get();
-        return view('admin.achats.index', compact('achats'));
+        // Récupérer toutes les commandes de livres avec leurs items et catalogues
+        $commandes = Commande::with(['items.catalogue'])
+            ->latest()
+            ->get();
+
+        return view('admin.achats', compact('commandes'));
     }
 
     public function create()

@@ -125,7 +125,7 @@
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.1s">
                                 <div class="text-center bg-success py-5 px-4 h-100">
                                     <i class="fa fa-users fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">10</h1>
+                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">{{ $totalMembres ?? 11 }}</h1>
                                     <span class="text-white">Membres de l'équipe</span>
                                 </div>
                             </div>
@@ -182,126 +182,149 @@
                 <p class="mx-auto" style="max-width:700px">Rencontrez les personnes qui portent Colibri Littéraire.</p>
             </div>
             <div class="row g-4">
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.1s">
-                    <div class="team-item team-lead text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/camille.png') }}"
-                                alt="Camille SEGNIGBINDE">
+                @forelse($membres as $index => $membre)
+                    <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="{{ 0.1 + ($index * 0.05) }}s">
+                        <div class="team-item {{ $index < 3 ? 'team-lead' : '' }} text-center p-4">
+                            <div class="team-img mb-3">
+                                <img class="img-fluid rounded-circle" src="{{ asset($membre->photo) }}"
+                                    alt="{{ $membre->nom }}">
+                            </div>
+                            <h5 class="mb-1">{{ $membre->nom }}</h5>
+                            <span class="text-muted">{{ $membre->poste }}</span>
+                            @if($membre->bio)
+                                <p class="mt-2 small text-muted" title="{{ $membre->bio }}">
+                                    {{ Str::limit($membre->bio, 80) }}
+                                </p>
+                            @endif
                         </div>
-                        <h5 class="mb-1">Camille SEGNIGBINDE</h5>
-                        <p class="text-muted">Coordonnateur - point focal Bénin</p>
                     </div>
-                </div>
+                @empty
+                    <div class="col-12 text-center">
+                        <p class="text-muted">Aucun membre de l'équipe pour le moment</p>
+                    </div>
+                @endforelse
+            </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.15s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/catira.png') }}"
-                                alt="Catira DODO">
-                        </div>
-                        <h5 class="mb-1">Catira DODO</h5>
-                        <p class="text-muted">Responsable en charge du curricula</p>
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.15s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/Hervé.png') }}"
-                                alt="Hervé AYEMENE">
-                        </div>
-                        <h5 class="mb-1">Hervé AYEMENE</h5>
-                        <p class="text-muted">Point focal Côte d'Ivoire</p>
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.2s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/prudentienne.jpg') }}"
-                                alt="Prudentienne GBAGUIDI">
-                        </div>
-                        <h5 class="mb-1">Prudentienne GBAGUIDI</h5>
-                        <p class="text-muted">Libraire – Formatrice</p>
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.25s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/augustino.jpg') }}"
-                                alt="Augustino AGBEMAVO">
-                        </div>
-                        <h5 class="mb-1">Augustino AGBEMAVO</h5>
-                        <p class="text-muted">Libraire - Formateur</p>
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.3s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/rodrigue.jpg') }}"
-                                alt="Rodrigue ATCHAOUE">
-                        </div>
-                        <h5 class="mb-1">Rodrigue ATCHAOUE</h5>
-                        <p class="text-muted">Éditeur – Formateur - Bénin</p>
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.35s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/adele.png') }}"
-                                alt="Adèle KIEMA">
-                        </div>
-                        <h5 class="mb-1">Adèle KIEMA</h5>
-                        <p class="text-muted">Diffuseur – Formatrice – Point focal Niger</p>
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.4s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/idrissa.jpg') }}"
-                                alt="Idrissa SOW">
-                        </div>
-                        <h5 class="mb-1">Idrissa SOW</h5>
-                        <p class="text-muted">Éditeur – Point focal Sénégal</p>
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.45s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/yawavi.png') }}"
-                                alt="Yawavi MBOUKE">
-                        </div>
-                        <h5 class="mb-1">Yawavi MBOUKE</h5>
-                        <p class="text-muted">Libraire – Point focal Togo</p>
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.5s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/vivien.png') }}"
-                                alt="Vivien Zanou">
-                        </div>
-                        <h5 class="mb-1">Vivien Zanou</h5>
-                        <p class="text-muted">Chargé de la Logistique</p>
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 wow fadeIn" data-wow-delay="0.55s">
-                    <div class="team-item text-center p-4">
-                        <div class="team-img mb-3">
-                            <img class="img-fluid rounded-circle" src="{{ asset('img/team/corneille.png') }}"
-                                alt="Corneille ANOUMON">
-                        </div>
-                        <h5 class="mb-1">Corneille ANOUMON</h5>
-                        <p class="text-muted">Chargé de la Communication</p>
-                    </div>
-                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             </div>
         </div>
     </div>

@@ -24,6 +24,44 @@ class QuizController extends Controller
 
         // Vérifier si l'utilisateur peut encore passer le quiz
         $user = Auth::user();
+
+        // Vérifier si le quiz appartient à une formation et si l'utilisateur a payé
+        if ($quiz->formation_id) {
+            $inscription = \App\Models\FormationInscription::where('user_id', $user->id)
+                ->where('formation_id', $quiz->formation_id)
+                ->where('paiement_valide', true)
+                ->first();
+
+            if (!$inscription) {
+                return redirect()->route('formation.show', $quiz->formation_id)
+                    ->with('error', 'Vous devez vous inscrire et valider votre paiement pour accéder aux quiz de cette formation.');
+            }
+        }
+
+        // Vérifier si le quiz appartient à un module et si tous les contenus sont complétés
+        if ($quiz->module_id) {
+            $module = \App\Models\Module::find($quiz->module_id);
+            if ($module) {
+                $allContenusCompleted = true;
+                $userProgressions = \App\Models\UserModuleProgression::where('user_id', $user->id)
+                    ->where('module_id', $module->id)
+                    ->get()
+                    ->keyBy('module_contenu_id');
+
+                foreach ($module->contenus as $contenu) {
+                    if (!$userProgressions->has($contenu->id) || !$userProgressions[$contenu->id]->completed) {
+                        $allContenusCompleted = false;
+                        break;
+                    }
+                }
+
+                if (!$allContenusCompleted) {
+                    return redirect()->route('formation.module.show', [$quiz->formation_id, $quiz->module_id])
+                        ->with('error', 'Vous devez compléter tous les contenus du module avant d\'accéder au quiz.');
+                }
+            }
+        }
+
         $attemptsCount = $quiz->attempts()->where('user_id', $user->id)->count();
         $canAttempt = $quiz->userCanAttempt($user->id);
         $bestScore = $quiz->getUserBestScore($user->id);
@@ -43,6 +81,19 @@ class QuizController extends Controller
     public function start(Request $request, Quiz $quiz)
     {
         $user = Auth::user();
+
+        // Vérifier si le quiz appartient à une formation et si l'utilisateur a payé
+        if ($quiz->formation_id) {
+            $inscription = \App\Models\FormationInscription::where('user_id', $user->id)
+                ->where('formation_id', $quiz->formation_id)
+                ->where('paiement_valide', true)
+                ->first();
+
+            if (!$inscription) {
+                return redirect()->route('formation.show', $quiz->formation_id)
+                    ->with('error', 'Vous devez vous inscrire et valider votre paiement pour accéder aux quiz de cette formation.');
+            }
+        }
 
         // Vérifier que l'utilisateur peut passer le quiz
         if (!$quiz->userCanAttempt($user->id)) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Equipe;
 use Illuminate\Http\Request;
 
 class AboutController extends Controller
@@ -11,7 +12,10 @@ class AboutController extends Controller
      */
     public function index()
     {
-        return view('about');
+        $membres = Equipe::where('actif', true)->orderBy('ordre')->get();
+        $totalMembres = $membres->count();
+
+        return view('about', compact('membres', 'totalMembres'));
     }
 
     /**

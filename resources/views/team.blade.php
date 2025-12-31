@@ -74,78 +74,57 @@
                 <h1 class="display-6 mb-4">Découvrez les membres passionnés de Colibri Littéraire</h1>
             </div>
             <div class="row g-4">
+                @forelse($membres as $index => $membre)
+                    <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="{{ 0.1 + ($index % 3) * 0.2 }}s">
+                        <div class="team-item d-flex h-100 p-4">
+                            <div class="team-detail pe-4">
+                                @if($membre->photo)
+                                    @if(str_starts_with($membre->photo, 'http') || str_starts_with($membre->photo, 'img/'))
+                                        <img class="img-fluid mb-4" src="{{ asset($membre->photo) }}" alt="{{ $membre->nom }}">
+                                    @else
+                                        <img class="img-fluid mb-4" src="{{ asset('storage/' . $membre->photo) }}" alt="{{ $membre->nom }}">
+                                    @endif
+                                @else
+                                    <img class="img-fluid mb-4" src="{{ asset('img/team-default.jpg') }}" alt="{{ $membre->nom }}">
+                                @endif
+                                <h3>{{ $membre->nom }}</h3>
+                                <span>{{ $membre->poste }}</span>
+                                @if($membre->bio)
+                                    <p class="mt-3 text-muted small">{{ Str::limit($membre->bio, 100) }}</p>
+                                @endif
+                            </div>
+                            <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
+                                @if($membre->facebook)
+                                    <a class="btn btn-square btn-primary my-2" href="{{ $membre->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                                @endif
+                                @if($membre->twitter)
+                                    <a class="btn btn-square btn-primary my-2" href="https://twitter.com/{{ ltrim($membre->twitter, '@') }}" target="_blank"><i class="fab fa-x-twitter"></i></a>
+                                @endif
+                                @if($membre->linkedin)
+                                    <a class="btn btn-square btn-primary my-2" href="{{ $membre->linkedin }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                                @endif
+                                @if($membre->email)
+                                    <a class="btn btn-square btn-primary my-2" href="mailto:{{ $membre->email }}"><i class="fas fa-envelope"></i></a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Aucun membre de l'équipe pour le moment</p>
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Ancienne section - à retirer après vérification
+            <div class="row g-4">
                 <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.1s">
                     <div class="team-item d-flex h-100 p-4">
                         <div class="team-detail pe-4">
                             <img class="img-fluid mb-4" src="{{ asset('img/team-1.jpg') }}" alt="">
                             <h3>Élodie Martin</h3>
                             <span>Fondatrice & Présidente</span>
-                        </div>
-                        <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-x-twitter"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-instagram"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-youtube"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.3s">
-                    <div class="team-item d-flex h-100 p-4">
-                        <div class="team-detail pe-4">
-                            <img class="img-fluid mb-4" src="{{ asset('img/team-2.jpg') }}" alt="">
-                            <h3>Samuel Dupuis</h3>
-                            <span>Responsable des projets</span>
-                        </div>
-                        <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-x-twitter"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-instagram"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-youtube"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.5s">
-                    <div class="team-item d-flex h-100 p-4">
-                        <div class="team-detail pe-4">
-                            <img class="img-fluid mb-4" src="{{ asset('img/team-3.jpg') }}" alt="">
-                            <h3>Fatima Benali</h3>
-                            <span>Bénévole</span>
-                        </div>
-                        <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i
-                                    class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i
-                                    class="fab fa-x-twitter"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i
-                                    class="fab fa-instagram"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-youtube"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.1s">
-                    <div class="team-item d-flex h-100 p-4">
-                        <div class="team-detail pe-4">
-                            <img class="img-fluid mb-4" src="{{ asset('img/team-1.jpg') }}" alt="">
-                            <h3>Élodie Martin</h3>
-                            <span>Fondatrice & Présidente</span>
-                        </div>
-                        <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i
-                                    class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i
-                                    class="fab fa-x-twitter"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i
-                                    class="fab fa-instagram"></i></a>
-                            <a class="btn btn-square btn-primary my-2" href="#!"><i class="fab fa-youtube"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.3s">
-                    <div class="team-item d-flex h-100 p-4">
-                        <div class="team-detail pe-4">
-                            <img class="img-fluid mb-4" src="{{ asset('img/team-2.jpg') }}" alt="">
-                            <h3>Samuel Dupuis</h3>
-                            <span>Responsable des projets</span>
                         </div>
                         <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
                             <a class="btn btn-square btn-primary my-2" href="#!"><i

@@ -167,7 +167,146 @@ class PanierController extends Controller
         }
 
         $cartItems = $user->cartItems()->with('catalogue')->get();
+
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('panier.index')->with('error', 'Votre panier est vide.');
+        }
+
         $total = $cartItems->sum(fn($i) => $i->catalogue->prix * $i->quantite);
-        return view('paiement.show', compact('cartItems', 'total'));
+        return view('panier.paiement', compact('cartItems', 'total'));
+    }
+
+    public function traiterPaiement(Request $request)
+    {
+        $request->validate([
+            'payment_method' => 'required|in:kkiapay,lygos,paypal,livraison',
+        ]);
+
+        $user = Auth::user();
+        if (! $user) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Veuillez vous connecter pour continuer.'
+                ], 401);
+            }
+            return redirect()->route('login')->with('error', 'Veuillez vous connecter pour continuer.');
+        }
+
+        $cartItems = $user->cartItems()->with('catalogue')->get();
+
+        if ($cartItems->isEmpty()) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Votre panier est vide.'
+                ], 400);
+            }
+            return redirect()->route('panier.index')->with('error', 'Votre panier est vide.');
+        }
+
+        $paymentMethod = $request->payment_method;
+
+        // Si livraison, créer automatiquement une commande COD
+        if ($paymentMethod === 'livraison') {
+            try {
+                // Préparer les données de la commande
+                $total = $cartItems->sum(fn($i) => $i->catalogue->prix * $i->quantite);
+
+                // Préparer les items pour la commande
+                $commandeItems = [];
+                foreach ($cartItems as $cartItem) {
+                    $commandeItems[] = [
+                        'catalogue_id' => $cartItem->catalogue_id,
+                        'titre' => $cartItem->catalogue->titre,
+                        'quantite' => $cartItem->quantite,
+                        'prix' => $cartItem->catalogue->prix,
+                    ];
+                }
+
+                // Créer la commande COD
+                $commande = \App\Models\Commande::create([
+                    'user_id' => $user->id,
+                    'nom' => $user->name,
+                    'telephone' => $user->phone ?? '',
+                    'adresse' => $user->address ?? '',
+                    'total' => $total,
+                    'statut' => 'pending',
+                    'idempotency_key' => uniqid('cod_', true), // Clé unique pour éviter les doublons
+                ]);
+
+                // Créer les items de la commande
+                foreach ($commandeItems as $itemData) {
+                    \App\Models\CommandeItem::create([
+                        'commande_id' => $commande->id,
+                        'catalogue_id' => $itemData['catalogue_id'],
+                        'titre' => $itemData['titre'],
+                        'quantite' => $itemData['quantite'],
+                        'prix' => $itemData['prix'],
+                    ]);
+                }
+
+                // Vider le panier de l'utilisateur
+                \App\Models\CartItem::where('user_id', $user->id)->delete();
+
+                // Si requête AJAX, retourner une réponse JSON
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Commande enregistrée avec succès ! Vous payerez à la réception. Notre équipe vous contactera bientôt.',
+                        'commande_id' => $commande->id,
+                        'redirect_url' => route('account.commandes')
+                    ]);
+                }
+
+                // Sinon, rediriger vers la page des commandes avec un message de succès
+                return redirect()->route('account.commandes')
+                    ->with('success', 'Commande #' . $commande->id . ' enregistrée avec succès ! Vous payerez à la réception. Notre équipe vous contactera bientôt.');
+            } catch (\Exception $e) {
+                \Log::error('Erreur création commande livraison: ' . $e->getMessage());
+
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Une erreur est survenue lors de la création de votre commande. Veuillez réessayer.'
+                    ], 500);
+                }
+
+                return redirect()->route('paiement.show')
+                    ->with('error', 'Une erreur est survenue. Veuillez réessayer.');
+            }
+        }
+
+        // Créer une commande pour le paiement en ligne
+        $commande = \App\Models\Commande::create([
+            'user_id' => $user->id,
+            'total' => $cartItems->sum(fn($i) => $i->catalogue->prix * $i->quantite),
+            'statut' => 'en_attente',
+            'mode_paiement' => $paymentMethod,
+            'paiement_valide' => false,
+        ]);
+
+        // Créer les items de commande
+        foreach ($cartItems as $cartItem) {
+            \App\Models\CommandeItem::create([
+                'commande_id' => $commande->id,
+                'catalogue_id' => $cartItem->catalogue_id,
+                'quantite' => $cartItem->quantite,
+                'prix_unitaire' => $cartItem->catalogue->prix,
+            ]);
+        }
+
+        // Rediriger vers le gestionnaire de paiement approprié
+        switch ($paymentMethod) {
+            case 'kkiapay':
+                return redirect()->route('paiement.catalogue.kkiapay', ['commande' => $commande->id]);
+            case 'lygos':
+                return redirect()->route('paiement.catalogue.lygos', ['commande' => $commande->id]);
+            case 'paypal':
+                return redirect()->route('paiement.catalogue.paypal', ['commande' => $commande->id]);
+            default:
+                return redirect()->route('paiement.show')
+                    ->with('error', 'Méthode de paiement non reconnue.');
+        }
     }
 }

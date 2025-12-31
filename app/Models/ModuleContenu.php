@@ -16,6 +16,7 @@ class ModuleContenu extends Model
         'description',
         'fichier',
         'contenu',
+        'transcription',
         'duree',
         'ordre',
     ];

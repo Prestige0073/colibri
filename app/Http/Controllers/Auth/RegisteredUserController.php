@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Mail\User\WelcomeEmail;
+use App\Mail\Admin\NewUserRegistration;
+use Illuminate\Support\Facades\Mail;
 
 class RegisteredUserController extends Controller
 {
@@ -46,6 +49,14 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+
+        // Envoyer les emails de notification
+        try {
+            Mail::to($user->email)->queue(new WelcomeEmail($user));
+            Mail::to(config('mail.from.address'))->queue(new NewUserRegistration($user));
+        } catch (\Exception $e) {
+            \Log::error('Erreur envoi email inscription: ' . $e->getMessage());
+        }
 
         Auth::login($user);
 

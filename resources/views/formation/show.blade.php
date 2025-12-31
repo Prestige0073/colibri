@@ -33,28 +33,42 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <h5 class="mb-2">{{ $module->titre }}</h5>
-                                    <p class="mb-2 text-muted">{{ $module->description ?? '' }}</p>
-                                    <div class="d-flex gap-3 align-items-center">
-                                        @if($module->duree)
-                                            <small class="text-muted">
-                                                <i class="fas fa-clock me-1"></i>{{ $module->duree }}
-                                            </small>
-                                        @endif
-                                        @if($module->contenus && $module->contenus->count() > 0)
-                                            <small class="text-muted">
-                                                <i class="fas fa-file-alt me-1"></i>{{ $module->contenus->count() }} contenu(s)
-                                            </small>
-                                        @endif
-                                        @if($module->quizzes && $module->quizzes->count() > 0)
-                                            <small class="text-success">
-                                                <i class="fas fa-question-circle me-1"></i>{{ $module->quizzes->count() }} quiz
-                                            </small>
-                                        @endif
-                                    </div>
+
+                                    @if($inscription && $inscription->paiement_valide)
+                                        <p class="mb-2 text-muted">{{ $module->description ?? '' }}</p>
+                                        <div class="d-flex gap-3 align-items-center">
+                                            @if($module->duree)
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>{{ $module->duree }}
+                                                </small>
+                                            @endif
+                                            @if($module->contenus && $module->contenus->count() > 0)
+                                                <small class="text-muted">
+                                                    <i class="fas fa-file-alt me-1"></i>{{ $module->contenus->count() }} contenu(s)
+                                                </small>
+                                            @endif
+                                            @if($module->quizzes && $module->quizzes->count() > 0)
+                                                <small class="text-success">
+                                                    <i class="fas fa-question-circle me-1"></i>{{ $module->quizzes->count() }} quiz
+                                                </small>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="alert alert-warning mt-2 mb-2">
+                                            <i class="fas fa-lock me-2"></i>
+                                            <small>Inscrivez-vous et payez pour voir les détails de ce module</small>
+                                        </div>
+                                    @endif
                                 </div>
-                                <a href="{{ route('formation.module.show', [$formation, $module]) }}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-eye me-1"></i>Voir
-                                </a>
+                                @if($inscription && $inscription->paiement_valide)
+                                    <a href="{{ route('formation.module.show', [$formation, $module]) }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Voir
+                                    </a>
+                                @else
+                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#paiementRequiredModal">
+                                        <i class="fas fa-eye me-1"></i>Voir
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     @empty
@@ -81,38 +95,45 @@
                                             @endif
                                         </div>
 
-                                        @if($quiz->description)
-                                            <p class="card-text text-muted small">{{ Str::limit($quiz->description, 100) }}</p>
-                                        @endif
+                                        @if($inscription && $inscription->paiement_valide)
+                                            @if($quiz->description)
+                                                <p class="card-text text-muted small">{{ Str::limit($quiz->description, 100) }}</p>
+                                            @endif
 
-                                        <div class="row g-2 mt-2 mb-3">
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center text-muted small">
-                                                    <i class="fas fa-question text-primary me-2"></i>
-                                                    <span>{{ $quiz->questions->count() }} questions</span>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center text-muted small">
-                                                    <i class="fas fa-star text-warning me-2"></i>
-                                                    <span>{{ $quiz->total_points }} points</span>
-                                                </div>
-                                            </div>
-                                            @if($quiz->duree_minutes)
+                                            <div class="row g-2 mt-2 mb-3">
                                                 <div class="col-6">
                                                     <div class="d-flex align-items-center text-muted small">
-                                                        <i class="fas fa-clock text-info me-2"></i>
-                                                        <span>{{ $quiz->duree_minutes }} min</span>
+                                                        <i class="fas fa-question text-primary me-2"></i>
+                                                        <span>{{ $quiz->questions->count() }} questions</span>
                                                     </div>
                                                 </div>
-                                            @endif
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center text-muted small">
-                                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                                    <span>{{ $quiz->note_passage }}% requis</span>
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center text-muted small">
+                                                        <i class="fas fa-star text-warning me-2"></i>
+                                                        <span>{{ $quiz->total_points }} points</span>
+                                                    </div>
+                                                </div>
+                                                @if($quiz->duree_minutes)
+                                                    <div class="col-6">
+                                                        <div class="d-flex align-items-center text-muted small">
+                                                            <i class="fas fa-clock text-info me-2"></i>
+                                                            <span>{{ $quiz->duree_minutes }} min</span>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                                <div class="col-6">
+                                                    <div class="d-flex align-items-center text-muted small">
+                                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                                        <span>{{ $quiz->note_passage }}% requis</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        @else
+                                            <div class="alert alert-warning mt-3 mb-3">
+                                                <i class="fas fa-lock me-2"></i>
+                                                <small>Inscrivez-vous et payez pour voir les détails de ce quiz</small>
+                                            </div>
+                                        @endif
 
                                         @auth
                                             @php
@@ -131,10 +152,17 @@
                                             @endif
 
                                             @if($canAttempt)
-                                                <a href="{{ route('quiz.show', $quiz->id) }}" class="btn btn-primary btn-sm w-100">
-                                                    <i class="fas fa-play me-1"></i>
-                                                    {{ $userAttempts > 0 ? 'Reprendre le quiz' : 'Commencer le quiz' }}
-                                                </a>
+                                                @if($inscription && $inscription->paiement_valide)
+                                                    <a href="{{ route('quiz.show', $quiz->id) }}" class="btn btn-primary btn-sm w-100">
+                                                        <i class="fas fa-play me-1"></i>
+                                                        {{ $userAttempts > 0 ? 'Reprendre le quiz' : 'Commencer le quiz' }}
+                                                    </a>
+                                                @else
+                                                    <button class="btn btn-primary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#paiementRequiredModal">
+                                                        <i class="fas fa-play me-1"></i>
+                                                        {{ $userAttempts > 0 ? 'Reprendre le quiz' : 'Commencer le quiz' }}
+                                                    </button>
+                                                @endif
                                             @else
                                                 <button class="btn btn-secondary btn-sm w-100" disabled>
                                                     <i class="fas fa-ban me-1"></i>Tentatives épuisées ({{ $userAttempts }}/{{ $quiz->nombre_tentatives }})
@@ -248,6 +276,45 @@
                         </div>
                     @endif
                 @endauth
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour informer que le paiement est requis -->
+    <div class="modal fade" id="paiementRequiredModal" tabindex="-1" aria-labelledby="paiementRequiredModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="paiementRequiredModalLabel">
+                        <i class="fas fa-lock me-2"></i>Paiement requis
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center py-3">
+                        <i class="fas fa-credit-card fa-4x text-warning mb-3"></i>
+                        <h5 class="mb-3">Inscription et paiement requis</h5>
+                        <p class="text-muted mb-4">
+                            Pour accéder aux modules, quiz et à l'ensemble du contenu de cette formation, vous devez d'abord finaliser votre inscription et effectuer le paiement.
+                        </p>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small><strong>Formation:</strong> {{ $formation->titre }}</small><br>
+                            <small><strong>Prix:</strong> {{ number_format($formation->prix ?? 0, 2, ',', ' ') }}€</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Fermer
+                    </button>
+                    <form method="POST" action="{{ route('formation.acheter', $formation) }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-shopping-cart me-2"></i>Procéder au paiement
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

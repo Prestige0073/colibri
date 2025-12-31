@@ -152,22 +152,10 @@ $cartCount = Auth::check() ? Auth::user()->cartItems->sum('quantite') : 0;
                             class="nav-item nav-link{{ request()->routeIs('index') ? ' active' : '' }}"><i
                                 class="fa fa-home me-1"></i>
                             Accueil</a>
-                        <div class="nav-item dropdown">
-                            <a href="#"
-                                class="nav-link dropdown-toggle{{ request()->routeIs('formation.*') ? ' active' : '' }}"
-                                data-bs-toggle="dropdown"><i class="fa fa-graduation-cap me-1"></i> Apprendre</a>
-                            <div class="dropdown-menu bg-light m-0">
-                                <a href="{{ route('formation.modules') }}"
-                                    class="dropdown-item{{ request()->routeIs('formation.modules') ? ' active' : '' }}"><i
-                                        class="fa fa-book me-1"></i> Modules de formation</a>
-                                <a href="{{ route('formation.quiz') }}"
-                                    class="dropdown-item{{ request()->routeIs('formation.quiz') ? ' active' : '' }}"><i
-                                        class="fa fa-question-circle me-1"></i> Quiz & évaluations</a>
-                                <a href="{{ route('formation.certification') }}"
-                                    class="dropdown-item{{ request()->routeIs('formation.certification') ? ' active' : '' }}"><i
-                                        class="fa fa-certificate me-1"></i> Certification</a>
-                            </div>
-                        </div>
+                        <a href="{{ route('formation.modules') }}"
+                            class="nav-item nav-link{{ request()->routeIs('formation.*') ? ' active' : '' }}">
+                            <i class="fa fa-graduation-cap me-1"></i> Apprendre
+                        </a>
                         <div class="nav-item dropdown">
                             <a href="#"
                                 class="nav-link dropdown-toggle{{ request()->routeIs('catalogue.*') ? ' active' : '' }}"
@@ -329,6 +317,11 @@ $cartCount = Auth::check() ? Auth::user()->cartItems->sum('quantite') : 0;
         </div>
     </div>
     <!-- Footer End -->
+
+    <!-- Bouton flottant WhatsApp -->
+    <a href="https://wa.me/2290166547808" target="_blank" class="whatsapp-float" aria-label="Contactez-nous sur WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
     <!-- Back to Top -->
     @php

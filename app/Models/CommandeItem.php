@@ -13,4 +13,9 @@ class CommandeItem extends Model
     {
         return $this->belongsTo(Commande::class);
     }
+
+    public function catalogue()
+    {
+        return $this->belongsTo(Catalogue::class);
+    }
 }

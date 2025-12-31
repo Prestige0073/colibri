@@ -499,6 +499,239 @@
         </div>
     </div>
     <!-- Partner (OIF) End -->
+    <!-- Testimonials Start -->
+    <div class="container-fluid py-5">
+        <div class="container">
+            <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 600px;">
+                <p class="section-title bg-white text-center text-success px-3">Témoignages</p>
+                <h1 class="display-6 mb-4">Ce que nos membres disent de nous</h1>
+            </div>
+
+            @php
+                $testimonials = \App\Models\Testimonial::approved()->latest('approved_at')->limit(6)->get();
+            @endphp
+
+            @if($testimonials->isEmpty())
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-comment-dots fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucun témoignage pour le moment</h5>
+                        <p class="text-muted mb-3">Soyez le premier à partager votre expérience !</p>
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#testimonialModal">
+                            <i class="fas fa-star me-2"></i>Laisser un témoignage
+                        </button>
+                    </div>
+                </div>
+            @else
+                <div class="row g-4 mb-4">
+                    @foreach($testimonials as $testimonial)
+                        <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.{{ $loop->iteration }}s">
+                            <div class="card h-100 border-0 shadow-sm testimonial-card">
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Étoiles en haut -->
+                                    <div class="text-warning mb-3">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="fas fa-star{{ $i <= $testimonial->rating ? '' : ' opacity-25' }}"></i>
+                                        @endfor
+                                    </div>
+
+                                    <!-- Message -->
+                                    <p class="mb-4 flex-grow-1" style="font-style: italic; color: #555;">
+                                        "{{ $testimonial->message }}"
+                                    </p>
+
+                                    <!-- Profil en bas -->
+                                    <div class="d-flex align-items-center mt-auto">
+                                        @if($testimonial->photo)
+                                            <img src="{{ asset('storage/' . $testimonial->photo) }}"
+                                                 alt="{{ $testimonial->name }}"
+                                                 class="rounded-circle me-3"
+                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                        @else
+                                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3"
+                                                 style="width: 50px; height: 50px; font-size: 18px;">
+                                                {{ $testimonial->initials }}
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <div class="fw-bold">{{ $testimonial->name }}</div>
+                                            @if($testimonial->role)
+                                                <small class="text-muted">{{ $testimonial->role }}</small>
+                                            @endif
+                                            @if($testimonial->company)
+                                                <br><small class="text-muted">{{ $testimonial->company }}</small>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Bouton pour ajouter un témoignage -->
+                <div class="text-center mt-4 wow fadeIn" data-wow-delay="0.5s">
+                    <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#testimonialModal">
+                        <i class="fas fa-star me-2"></i>Partager votre expérience
+                    </button>
+                </div>
+            @endif
+        </div>
+    </div>
+    <!-- Testimonials End -->
+
+    <!-- Modal Témoignage -->
+    <div class="modal fade" id="testimonialModal" tabindex="-1" aria-labelledby="testimonialModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="testimonialModalLabel">
+                        <i class="fas fa-comment-dots me-2"></i>Partagez votre témoignage
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('testimonials.store') }}" method="POST" enctype="multipart/form-data" id="testimonialForm">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <!-- Nom (obligatoire) -->
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">
+                                    Nom complet <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control @error('name') is-invalid @enderror"
+                                       id="name"
+                                       name="name"
+                                       value="{{ old('name', Auth::check() ? Auth::user()->name : '') }}"
+                                       required
+                                       placeholder="Votre nom complet">
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Email (optionnel) -->
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email"
+                                       class="form-control @error('email') is-invalid @enderror"
+                                       id="email"
+                                       name="email"
+                                       value="{{ old('email', Auth::check() ? Auth::user()->email : '') }}"
+                                       placeholder="votre@email.com">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Fonction (optionnel) -->
+                            <div class="col-md-6">
+                                <label for="role" class="form-label">Fonction</label>
+                                <input type="text"
+                                       class="form-control @error('role') is-invalid @enderror"
+                                       id="role"
+                                       name="role"
+                                       value="{{ old('role') }}"
+                                       placeholder="Ex: Écrivain, Éditeur, Lecteur...">
+                                @error('role')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Organisation (optionnel) -->
+                            <div class="col-md-6">
+                                <label for="company" class="form-label">Organisation</label>
+                                <input type="text"
+                                       class="form-control @error('company') is-invalid @enderror"
+                                       id="company"
+                                       name="company"
+                                       value="{{ old('company') }}"
+                                       placeholder="Nom de votre organisation">
+                                @error('company')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Note (obligatoire) -->
+                            <div class="col-12">
+                                <label class="form-label">
+                                    Votre évaluation <span class="text-danger">*</span>
+                                </label>
+                                <div class="rating-input">
+                                    @for($i = 5; $i >= 1; $i--)
+                                        <input type="radio"
+                                               name="rating"
+                                               value="{{ $i }}"
+                                               id="star{{ $i }}"
+                                               {{ old('rating') == $i ? 'checked' : ($i == 5 && !old('rating') ? 'checked' : '') }}>
+                                        <label for="star{{ $i }}" class="star">
+                                            <i class="fas fa-star"></i>
+                                        </label>
+                                    @endfor
+                                </div>
+                                @error('rating')
+                                    <div class="text-danger small">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Message (obligatoire) -->
+                            <div class="col-12">
+                                <label for="message" class="form-label">
+                                    Votre témoignage <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control @error('message') is-invalid @enderror"
+                                          id="message"
+                                          name="message"
+                                          rows="4"
+                                          required
+                                          minlength="10"
+                                          maxlength="500"
+                                          placeholder="Partagez votre expérience avec Colibri Littéraire... (10-500 caractères)">{{ old('message') }}</textarea>
+                                <small class="text-muted">
+                                    <span id="charCount">0</span>/500 caractères
+                                </small>
+                                @error('message')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Photo (optionnel) -->
+                            <div class="col-12">
+                                <label for="photo" class="form-label">Photo de profil (optionnel)</label>
+                                <input type="file"
+                                       class="form-control @error('photo') is-invalid @enderror"
+                                       id="photo"
+                                       name="photo"
+                                       accept="image/jpeg,image/png,image/jpg">
+                                <small class="text-muted">Format: JPG, PNG (max 1 Mo)</small>
+                                @error('photo')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Note d'information -->
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Votre témoignage sera publié après validation par notre équipe.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-2"></i>Envoyer mon témoignage
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Newsletter Start -->
     <div class="container-fluid bg-success py-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container">
@@ -523,3 +756,81 @@
     <!-- Newsletter End -->
 
 @endsection
+
+@push('styles')
+<style>
+    /* Testimonial Cards */
+    .testimonial-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Rating Input Stars */
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 5px;
+        font-size: 2rem;
+    }
+
+    .rating-input input[type="radio"] {
+        display: none;
+    }
+
+    .rating-input label.star {
+        cursor: pointer;
+        color: #ddd;
+        transition: color 0.2s;
+    }
+
+    .rating-input input[type="radio"]:checked ~ label.star,
+    .rating-input label.star:hover,
+    .rating-input label.star:hover ~ label.star {
+        color: #ffc107;
+    }
+
+    .rating-input input[type="radio"]:checked ~ label.star {
+        color: #ffc107;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+    // Compteur de caractères pour le message
+    document.addEventListener('DOMContentLoaded', function() {
+        const messageTextarea = document.getElementById('message');
+        const charCount = document.getElementById('charCount');
+
+        if (messageTextarea && charCount) {
+            // Initialiser le compteur
+            charCount.textContent = messageTextarea.value.length;
+
+            // Mettre à jour lors de la saisie
+            messageTextarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+
+                // Changer la couleur selon la progression
+                if (this.value.length < 10) {
+                    charCount.style.color = '#dc3545';
+                } else if (this.value.length > 450) {
+                    charCount.style.color = '#ffc107';
+                } else {
+                    charCount.style.color = '#198754';
+                }
+            });
+        }
+
+        // Si des erreurs de validation, rouvrir le modal
+        @if($errors->any() && (old('name') || old('message')))
+            var testimonialModal = new bootstrap.Modal(document.getElementById('testimonialModal'));
+            testimonialModal.show();
+        @endif
+    });
+</script>
+@endpush

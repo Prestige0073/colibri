@@ -115,11 +115,31 @@
                         <li class="nav-item"><a href="{{ route('admin.modules.index') }}" class="nav-link text-white{{ request()->routeIs('admin.modules.*') ? ' active' : '' }}"><i class="fa fa-graduation-cap me-2"></i>Modules</a></li>
                         <li class="nav-item"><a href="{{ route('admin.quizzes.index') }}" class="nav-link text-white{{ request()->routeIs('admin.quizzes.*') ? ' active' : '' }}"><i class="fa fa-question-circle me-2"></i>Quiz</a></li>
                         <li class="nav-item"><a href="{{ route('admin.certifications.index') }}" class="nav-link text-white{{ request()->routeIs('admin.certifications.index') ? ' active' : '' }}"><i class="fa fa-award me-2"></i>Certifications</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.achats.index') }}" class="nav-link text-white{{ request()->routeIs('admin.achats.index') ? ' active' : '' }}"><i class="fa fa-shopping-bag me-2"></i>Achats/Emprunts</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.contacts.index') }}" class="nav-link text-white{{ request()->routeIs('admin.contacts.index') ? ' active' : '' }}"><i class="fa fa-envelope me-2"></i>Contacts</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.achats.index') }}" class="nav-link text-white{{ request()->routeIs('admin.achats.index') ? ' active' : '' }}"><i class="fa fa-shopping-bag me-2"></i>Les Achats</a></li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.contacts.index') }}" class="nav-link text-white{{ request()->routeIs('admin.contacts.*') ? ' active' : '' }}">
+                                <i class="fa fa-envelope me-2"></i>Contacts
+                                @php
+                                    $unreadContactsCount = \App\Models\Contact::unread()->count();
+                                @endphp
+                                @if($unreadContactsCount > 0)
+                                    <span class="badge bg-danger rounded-pill ms-2">{{ $unreadContactsCount }}</span>
+                                @endif
+                            </a>
+                        </li>
                         <li class="nav-item"><a href="{{ route('admin.team.index') }}" class="nav-link text-white{{ request()->routeIs('admin.team.index') ? ' active' : '' }}"><i class="fa fa-users-cog me-2"></i>Équipe</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.testimonials.index') }}" class="nav-link text-white{{ request()->routeIs('admin.testimonials.index') ? ' active' : '' }}"><i class="fa fa-comment-dots me-2"></i>Témoignages</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.events.index') }}" class="nav-link text-white{{ request()->routeIs('admin.events.index') ? ' active' : '' }}"><i class="fa fa-calendar-alt me-2"></i>Événements</a></li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.testimonials.index') }}" class="nav-link text-white{{ request()->routeIs('admin.testimonials.*') ? ' active' : '' }}">
+                                <i class="fa fa-comment-dots me-2"></i>Témoignages
+                                @php
+                                    $pendingTestimonialsCount = \App\Models\Testimonial::pending()->count();
+                                @endphp
+                                @if($pendingTestimonialsCount > 0)
+                                    <span class="badge bg-warning text-dark rounded-pill ms-2">{{ $pendingTestimonialsCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li class="nav-item"><a href="{{ route('admin.blog.index') }}" class="nav-link text-white{{ request()->routeIs('admin.blog.*') ? ' active' : '' }}"><i class="fa fa-newspaper me-2"></i>Blog</a></li>
                         <li class="nav-item"><a href="{{ route('admin.donations.index') }}" class="nav-link text-white{{ request()->routeIs('admin.donations.index') ? ' active' : '' }}"><i class="fa fa-hand-holding-heart me-2"></i>Dons</a></li>
                     </ul>
                 </div>
@@ -150,11 +170,31 @@
                         <li class="nav-item"><a href="{{ route('admin.modules.index') }}" class="nav-link text-white{{ request()->routeIs('admin.modules.*') ? ' active' : '' }}"><i class="fa fa-graduation-cap me-2"></i>Modules</a></li>
                         <li class="nav-item"><a href="{{ route('admin.quizzes.index') }}" class="nav-link text-white{{ request()->routeIs('admin.quizzes.*') ? ' active' : '' }}"><i class="fa fa-question-circle me-2"></i>Quiz</a></li>
                         <li class="nav-item"><a href="{{ route('admin.certifications.index') }}" class="nav-link text-white{{ request()->routeIs('admin.certifications.index') ? ' active' : '' }}"><i class="fa fa-award me-2"></i>Certifications</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.achats.index') }}" class="nav-link text-white{{ request()->routeIs('admin.achats.index') ? ' active' : '' }}"><i class="fa fa-shopping-bag me-2"></i>Achats/Emprunts</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.contacts.index') }}" class="nav-link text-white{{ request()->routeIs('admin.contacts.index') ? ' active' : '' }}"><i class="fa fa-envelope me-2"></i>Contacts</a></li>
+                        <li class="nav-item"><a href="{{ route('admin.achats.index') }}" class="nav-link text-white{{ request()->routeIs('admin.achats.index') ? ' active' : '' }}"><i class="fa fa-shopping-bag me-2"></i>Les Achats</a></li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.contacts.index') }}" class="nav-link text-white{{ request()->routeIs('admin.contacts.*') ? ' active' : '' }}">
+                                <i class="fa fa-envelope me-2"></i>Contacts
+                                @php
+                                    $unreadContactsCount = \App\Models\Contact::unread()->count();
+                                @endphp
+                                @if($unreadContactsCount > 0)
+                                    <span class="badge bg-danger rounded-pill ms-2">{{ $unreadContactsCount }}</span>
+                                @endif
+                            </a>
+                        </li>
                         <li class="nav-item"><a href="{{ route('admin.team.index') }}" class="nav-link text-white{{ request()->routeIs('admin.team.index') ? ' active' : '' }}"><i class="fa fa-users-cog me-2"></i>Équipe</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.testimonials.index') }}" class="nav-link text-white{{ request()->routeIs('admin.testimonials.index') ? ' active' : '' }}"><i class="fa fa-comment-dots me-2"></i>Témoignages</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.events.index') }}" class="nav-link text-white{{ request()->routeIs('admin.events.index') ? ' active' : '' }}"><i class="fa fa-calendar-alt me-2"></i>Événements</a></li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.testimonials.index') }}" class="nav-link text-white{{ request()->routeIs('admin.testimonials.*') ? ' active' : '' }}">
+                                <i class="fa fa-comment-dots me-2"></i>Témoignages
+                                @php
+                                    $pendingTestimonialsCount = \App\Models\Testimonial::pending()->count();
+                                @endphp
+                                @if($pendingTestimonialsCount > 0)
+                                    <span class="badge bg-warning text-dark rounded-pill ms-2">{{ $pendingTestimonialsCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li class="nav-item"><a href="{{ route('admin.blog.index') }}" class="nav-link text-white{{ request()->routeIs('admin.blog.*') ? ' active' : '' }}"><i class="fa fa-newspaper me-2"></i>Blog</a></li>
                         <li class="nav-item"><a href="{{ route('admin.donations.index') }}" class="nav-link text-white{{ request()->routeIs('admin.donations.index') ? ' active' : '' }}"><i class="fa fa-hand-holding-heart me-2"></i>Dons</a></li>
                     </ul>
                 </div>

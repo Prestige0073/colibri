@@ -12,6 +12,8 @@ class Certificat extends Model
     protected $fillable = [
         'formation_inscription_id',
         'user_id',
+        'nom_manuel',
+        'email_manuel',
         'formation_id',
         'numero_certificat',
         'fichier_pdf',

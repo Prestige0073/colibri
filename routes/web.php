@@ -8,6 +8,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\EquipeController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\ErrorController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Admin\CatalogueAdminController;
 use App\Http\Controllers\Admin\AchatController as AchatAdminController;
 use App\Http\Controllers\Admin\ModuleAdminController;
 use App\Http\Controllers\Admin\TeamAdminController;
+use App\Http\Controllers\Admin\EquipeAdminController;
 use App\Http\Controllers\Admin\DashboardAdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormationController;
@@ -41,12 +43,18 @@ use App\Http\Controllers\Admin\FormationController as AdminFormationController;
 use App\Http\Controllers\EmpruntUserController;
 use App\Http\Controllers\SecurePdfController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\PaiementController;
+use App\Http\Controllers\Admin\BlogAdminController;
 
 // Route d'accueil nommée 'index' pour la page principale
 Route::get('/', [IndexController::class, 'index'])->name('index');
 
 // Blog
 Route::get('blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+// Testimonials (public)
+Route::post('testimonials', [TestimonialController::class, 'store'])->name('testimonials.store');
 
 // Routes pour Apprendre
 Route::get('formation/modules', [FormationController::class, 'modules'])->name('formation.modules');
@@ -55,7 +63,11 @@ Route::get('formation/certification', [FormationController::class, 'certificatio
 // Route de détail d'une formation
 Route::get('formation/{formation}', [FormationController::class, 'show'])->name('formation.show');
 Route::post('formation/{formation}/acheter', [FormationController::class, 'acheter'])->name('formation.acheter');
+Route::get('formation/{formation}/paiement', [FormationController::class, 'paiement'])->name('formation.paiement');
+Route::post('formation/{formation}/traiter-paiement', [FormationController::class, 'traiterPaiement'])->name('formation.traiter-paiement');
 Route::get('formation/{formation}/module/{module}', [FormationController::class, 'moduleShow'])->name('formation.module.show');
+Route::post('formation/{formation}/module/{module}/contenu/{contenu}/complete', [FormationController::class, 'markContenuCompleted'])->middleware('auth')->name('formation.module.contenu.complete');
+Route::post('formation/{formation}/module/{module}/contenu/{contenu}/update-video-progress', [FormationController::class, 'updateVideoProgress'])->middleware('auth')->name('formation.module.contenu.update-video-progress');
 
 // Routes pour Catalogue
 Route::get('catalogue/decouvrir', [CatalogueController::class, 'decouvrir'])->name('catalogue.decouvrir');
@@ -77,6 +89,33 @@ Route::middleware('auth')->group(function () {
 Route::get('secure-pdf/view/{id}', [SecurePdfController::class, 'view'])->name('secure-pdf.view');
 Route::get('secure-pdf/serve/{id}', [SecurePdfController::class, 'serve'])->name('secure-pdf.serve');
 
+// Routes pour les paiements
+Route::middleware('auth')->group(function () {
+    // Paiements pour formations
+    Route::get('paiement/kkiapay/{inscription}', [PaiementController::class, 'kkiapay'])->name('paiement.kkiapay');
+    Route::get('paiement/kkiapay/callback', [PaiementController::class, 'kkiapayCallback'])->name('paiement.kkiapay.callback');
+
+    Route::get('paiement/lygos/{inscription}', [PaiementController::class, 'lygos'])->name('paiement.lygos');
+    Route::post('paiement/lygos/process', [PaiementController::class, 'lygosCallback'])->name('paiement.lygos.process');
+    Route::get('paiement/lygos/callback', [PaiementController::class, 'lygosCallback'])->name('paiement.lygos.callback');
+
+    Route::get('paiement/paypal/{inscription}', [PaiementController::class, 'paypal'])->name('paiement.paypal');
+    Route::get('paiement/paypal/callback', [PaiementController::class, 'paypalCallback'])->name('paiement.paypal.callback');
+
+    Route::get('paiement/annuler/{inscription}', [PaiementController::class, 'annuler'])->name('paiement.annuler');
+
+    // Paiements pour commandes (catalogue)
+    Route::get('paiement/catalogue/kkiapay/{commande}', [PaiementController::class, 'catalogueKkiapay'])->name('paiement.catalogue.kkiapay');
+    Route::get('paiement/catalogue/kkiapay/callback', [PaiementController::class, 'catalogueKkiapayCallback'])->name('paiement.catalogue.kkiapay.callback');
+
+    Route::get('paiement/catalogue/lygos/{commande}', [PaiementController::class, 'catalogueLygos'])->name('paiement.catalogue.lygos');
+    Route::post('paiement/catalogue/lygos/process', [PaiementController::class, 'catalogueLygosCallback'])->name('paiement.catalogue.lygos.process');
+    Route::get('paiement/catalogue/lygos/callback', [PaiementController::class, 'catalogueLygosCallback'])->name('paiement.catalogue.lygos.callback');
+
+    Route::get('paiement/catalogue/paypal/{commande}', [PaiementController::class, 'cataloguePaypal'])->name('paiement.catalogue.paypal');
+    Route::get('paiement/catalogue/paypal/callback', [PaiementController::class, 'cataloguePaypalCallback'])->name('paiement.catalogue.paypal.callback');
+});
+
 // Routes resource pour chaque page principale
 Route::resource('about', AboutController::class);
 Route::resource('contact', ContactController::class);
@@ -85,6 +124,7 @@ Route::resource('event', EventController::class);
 Route::resource('feature', FeatureController::class);
 Route::resource('service', ServiceController::class);
 Route::resource('team', TeamController::class);
+Route::get('equipe', [EquipeController::class, 'index'])->name('equipe.index');
 Route::resource('testimonial', TestimonialController::class);
 Route::resource('error', ErrorController::class); // pour 404
 Route::post('bibliotheque/emprunter', [BibliothequeController::class, 'emprunter'])->name('bibliotheque.emprunter');
@@ -92,11 +132,13 @@ Route::delete('emprunts/{emprunt}', [BibliothequeController::class, 'destroy'])-
 
 
 // Routes pour le panier d'achat
+Route::get('/panier', [PanierController::class, 'index'])->name('panier.index');
 Route::post('/panier/ajouter', [PanierController::class, 'ajouter'])->name('panier.ajouter');
 Route::post('/panier/modifier/{id}', [PanierController::class, 'modifier'])->name('panier.modifier');
 Route::delete('/panier/supprimer/{id}', [PanierController::class, 'supprimer'])->name('panier.supprimer');
 Route::post('/panier/payer', [PanierController::class, 'payer'])->name('panier.payer');
 Route::get('/paiement', [PanierController::class, 'showPaiement'])->name('paiement.show');
+Route::post('/panier/traiter-paiement', [PanierController::class, 'traiterPaiement'])->name('panier.traiter-paiement');
 // Route pour payement Cash on Delivery (autorise aussi les invités)
 Route::post('/commande/cod', [CommandeController::class, 'storeCod'])->name('commande.cod');
 Route::get('/commandes/{commande}', [CommandeController::class, 'show'])->name('commandes.show');
@@ -121,7 +163,16 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::resource('events', EventAdminController::class);
     Route::resource('donations', DonationAdminController::class);
     Route::resource('contacts', ContactAdminController::class);
-    Route::resource('testimonials', TestimonialAdminController::class);
+    Route::post('contacts/{id}/toggle-read', [ContactAdminController::class, 'toggleRead'])->name('contacts.toggleRead');
+    Route::resource('blog', BlogAdminController::class);
+    Route::post('blog/{id}/toggle-status', [BlogAdminController::class, 'toggleStatus'])->name('blog.toggleStatus');
+
+    // Testimonials Admin
+    Route::get('testimonials', [TestimonialAdminController::class, 'index'])->name('testimonials.index');
+    Route::post('testimonials/{id}/approve', [TestimonialAdminController::class, 'approve'])->name('testimonials.approve');
+    Route::post('testimonials/{id}/reject', [TestimonialAdminController::class, 'reject'])->name('testimonials.reject');
+    Route::post('testimonials/{id}/pending', [TestimonialAdminController::class, 'pending'])->name('testimonials.pending');
+    Route::delete('testimonials/{id}', [TestimonialAdminController::class, 'destroy'])->name('testimonials.destroy');
     // Route::resource('quiz', QuizAdminController::class); // Ancien contrôleur
     // Nouveau système de quiz
     Route::resource('quizzes', QuizController::class);
@@ -129,11 +180,21 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::put('quiz-questions/{question}', [QuizQuestionController::class, 'update'])->name('quiz-questions.update');
     Route::delete('quiz-questions/{question}', [QuizQuestionController::class, 'destroy'])->name('quiz-questions.destroy');
     Route::post('quizzes/{quiz}/questions/reorder', [QuizQuestionController::class, 'reorder'])->name('quizzes.questions.reorder');
+    // Certifications
     Route::resource('certifications', CertificationAdminController::class);
+    Route::post('certifications/{inscription}/generate', [CertificationAdminController::class, 'generate'])->name('certifications.generate');
+    Route::post('certifications/generate-manual', [CertificationAdminController::class, 'generateManual'])->name('certifications.generate-manual');
+    Route::get('certifications/{certificat}/download', [CertificationAdminController::class, 'download'])->name('certifications.download');
+    Route::post('certifications/{certificat}/send-email', [CertificationAdminController::class, 'sendEmail'])->name('certifications.send-email');
+    Route::post('certifications/{certificat}/send-email-custom', [CertificationAdminController::class, 'sendEmailCustom'])->name('certifications.send-email-custom');
+    Route::patch('certifications/{certificat}/change-status', [CertificationAdminController::class, 'changeStatus'])->name('certifications.change-status');
+    Route::post('certifications/clear-cache', [CertificationAdminController::class, 'clearCache'])->name('certifications.clear-cache');
+
     Route::resource('catalogue', CatalogueAdminController::class);
     Route::resource('achats', AchatAdminController::class);
     Route::resource('modules', ModuleAdminController::class);
     Route::resource('team', TeamAdminController::class); // Pour le lien équipe dans la sidebar
+    Route::resource('equipe', EquipeAdminController::class); // Nouvelle gestion d'équipe avec BDD
     Route::resource('emprunts', EmpruntController::class);
     // Actions supplémentaires pour les emprunts
     Route::post('emprunts/{emprunt}/update-status', [EmpruntController::class, 'updateStatus'])->name('emprunts.updateStatus');

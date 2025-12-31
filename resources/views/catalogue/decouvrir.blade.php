@@ -26,27 +26,28 @@
                                     style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
                                 <div class="card-body d-flex flex-column justify-content-between"
                                     style="padding: 1.2rem;">
-                                    <h5 class="card-title mb-2 d-flex align-items-center"
-                                        style="color: #212529; font-weight: 700; font-size: 1.15rem;">
+                                    <h5 class="card-title mb-2 d-flex align-items-start"
+                                        style="color: #212529; font-weight: 700; font-size: 1.15rem; line-height: 1.3;">
                                         <i class="fa fa-feather-alt"
-                                            style="color: #000000ff; margin-right: 0.5em;"></i>{{ $catalogue->titre }}
+                                            style="color: #000000ff; margin-right: 0.5em; margin-top: 0.1em; flex-shrink: 0;"></i>
+                                        <span style="word-wrap: break-word; overflow-wrap: break-word;">{{ $catalogue->titre }}</span>
                                     </h5>
-                                    <p class="mb-1 d-flex align-items-center" style="color: #607d8b; font-size: 1rem;">
-                                        <i class="fa fa-user" style="color: #000000ff; margin-right: 0.4em;"></i>
-                                        {{ $catalogue->auteur }} &bull; {{ $catalogue->categorie }}
+                                    <p class="mb-1 d-flex align-items-start" style="color: #607d8b; font-size: 0.95rem; line-height: 1.3;">
+                                        <i class="fa fa-user" style="color: #000000ff; margin-right: 0.4em; margin-top: 0.1em; flex-shrink: 0;"></i>
+                                        <span style="word-wrap: break-word; overflow-wrap: break-word;">{{ $catalogue->auteur }} &bull; {{ $catalogue->categorie }}</span>
                                     </p>
                                     <hr style="margin: 0.5rem 0; padding: 0;">
-                                    <p class="mb-2 d-flex align-items-center"
-                                        style="color: #6d838fff; font-size: 1.05rem;">
-                                        <i class="fa fa-star" style="color: #FFAC00; margin-right: 0.5em;"></i>
-                                        <span style="text-align: justify; display: block;">
+                                    <p class="mb-2 d-flex align-items-start"
+                                        style="color: #6d838fff; font-size: 0.95rem;">
+                                        <i class="fa fa-star" style="color: #FFAC00; margin-right: 0.5em; margin-top: 0.2em; flex-shrink: 0;"></i>
+                                        <span style="text-align: justify; display: block; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.4;">
                                             {{ Str::limit(strip_tags($catalogue->resumer), 100) }}
                                         </span>
                                     </p>
-                                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                         <span class="badge"
-                                            style="background: #ffe7e7ff; color: #b30000ff; font-size: 1.1rem; padding: 0.25em 0.5em; border-radius: 8px;">
-                                            <i class="fa fa-tag me-2" aria-hidden="true"></i>Prix&nbsp;: {{ $catalogue->prix }}&nbsp;FCFA
+                                            style="background: #ffe7e7ff; color: #b30000ff; font-size: 0.95rem; padding: 0.25em 0.5em; border-radius: 8px; word-wrap: break-word;">
+                                            <i class="fa fa-tag me-1" aria-hidden="true"></i>Prix&nbsp;: {{ $catalogue->prix }}&nbsp;FCFA
                                         </span>
                                         @if ($catalogue->quantite > 0)
                                             <span class="badge"
