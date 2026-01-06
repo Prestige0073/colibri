@@ -40,7 +40,7 @@
                                     <p class="mb-2 d-flex align-items-start"
                                         style="color: #6d838fff; font-size: 0.95rem;">
                                         <i class="fa fa-star" style="color: #FFAC00; margin-right: 0.5em; margin-top: 0.2em; flex-shrink: 0;"></i>
-                                        <span style="text-align: justify; display: block; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.4;">
+                                        <span class="catalogue-resume" style="text-align: justify; display: block; line-height: 1.4;">
                                             {{ Str::limit(strip_tags($catalogue->resumer), 100) }}
                                         </span>
                                     </p>
@@ -120,6 +120,25 @@
                                             color: #fff !important;
                                         }
                                     </style>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal résumé (affiche le résumé complet) -->
+                        <div class="modal fade" id="resumeModal{{ $catalogue->id }}" tabindex="-1"
+                            aria-labelledby="resumeModalLabel{{ $catalogue->id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="resumeModalLabel{{ $catalogue->id }}">{{ $catalogue->titre }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                    </div>
+                                    <div class="modal-body" style="white-space:pre-wrap;">
+                                        {!! nl2br(e($catalogue->resumer)) !!}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

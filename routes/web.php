@@ -93,7 +93,7 @@ Route::get('secure-pdf/serve/{id}', [SecurePdfController::class, 'serve'])->name
 Route::middleware('auth')->group(function () {
     // Paiements pour formations
     Route::get('paiement/kkiapay/{inscription}', [PaiementController::class, 'kkiapay'])->name('paiement.kkiapay');
-    Route::get('paiement/kkiapay/callback', [PaiementController::class, 'kkiapayCallback'])->name('paiement.kkiapay.callback');
+    Route::match(['get', 'post'], 'paiement/kkiapay/callback', [PaiementController::class, 'kkiapayCallback'])->name('paiement.kkiapay.callback');
 
     Route::get('paiement/lygos/{inscription}', [PaiementController::class, 'lygos'])->name('paiement.lygos');
     Route::post('paiement/lygos/process', [PaiementController::class, 'lygosCallback'])->name('paiement.lygos.process');

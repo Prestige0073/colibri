@@ -338,7 +338,14 @@
                                             </div>
                                         </div>
                                         <div class="pdf-canvas-wrapper position-relative" style="background: #525659; min-height: 600px;">
-                                            <canvas id="pdf-canvas-{{ $contenu->id }}" style="display: block; margin: 0 auto;"></canvas>
+                                            <!-- Loader to avoid flash while PDF renders -->
+                                            <div class="pdf-loader d-flex align-items-center justify-content-center" id="pdf-loader-{{ $contenu->id }}" style="position:absolute;inset:0;z-index:20;background:rgba(0,0,0,0.35);">
+                                                <div class="text-center text-white">
+                                                    <div class="spinner-border text-light" role="status"></div>
+                                                    <div class="mt-2">Chargement du document…</div>
+                                                </div>
+                                            </div>
+                                            <canvas id="pdf-canvas-{{ $contenu->id }}" style="display: none; margin: 0 auto;"></canvas>
                                             <div class="watermark-overlay" id="watermark-{{ $contenu->id }}"></div>
                                             <!-- Protection overlay invisible -->
                                             <div class="pdf-protection-layer"></div>
@@ -423,17 +430,29 @@
                                                         viewport: viewport
                                                     };
 
-                                                    page.render(renderContext).promise.then(() => {
-                                                        pageIsRendering{{ $contenu->id }} = false;
+                                                            page.render(renderContext).promise.then(() => {
+                                                                pageIsRendering{{ $contenu->id }} = false;
 
-                                                        if (pageNumIsPending{{ $contenu->id }} !== null) {
-                                                            renderPage{{ $contenu->id }}(pageNumIsPending{{ $contenu->id }});
-                                                            pageNumIsPending{{ $contenu->id }} = null;
-                                                        }
+                                                                // Afficher le canvas et masquer le loader une fois le rendu terminé
+                                                                try {
+                                                                    const loaderEl = document.getElementById('pdf-loader-{{ $contenu->id }}');
+                                                                    const canvasEl = document.getElementById('pdf-canvas-{{ $contenu->id }}');
+                                                                    if (canvasEl) {
+                                                                        canvasEl.style.display = 'block';
+                                                                    }
+                                                                    if (loaderEl) {
+                                                                        loaderEl.style.display = 'none';
+                                                                    }
+                                                                } catch (e) {}
 
-                                                        // Ajouter le filigrane après le rendu
-                                                        addWatermark{{ $contenu->id }}();
-                                                    });
+                                                                if (pageNumIsPending{{ $contenu->id }} !== null) {
+                                                                    renderPage{{ $contenu->id }}(pageNumIsPending{{ $contenu->id }});
+                                                                    pageNumIsPending{{ $contenu->id }} = null;
+                                                                }
+
+                                                                // Ajouter le filigrane après le rendu
+                                                                addWatermark{{ $contenu->id }}();
+                                                            });
 
                                                     // Afficher le numéro de page
                                                     document.getElementById('page-num-{{ $contenu->id }}').textContent = num;

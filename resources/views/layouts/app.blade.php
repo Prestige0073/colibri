@@ -77,6 +77,34 @@
             }
         }
     </style>
+    <style>
+        /* Catalogue résumé global: clamp multi-lignes avec ellipsis et prévention du débordement */
+        .catalogue-resume {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+            -webkit-line-clamp: 3; /* default for desktop */
+            max-height: calc(1.4em * 3); /* line-height * lines */
+        }
+
+        /* Ajuster le clamp selon la largeur (responsive) */
+        @media (max-width: 992px) {
+            .catalogue-resume {
+                -webkit-line-clamp: 4;
+                max-height: calc(1.4em * 4);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .catalogue-resume {
+                -webkit-line-clamp: 5;
+                max-height: calc(1.4em * 5);
+            }
+        }
+    </style>
+    @stack('styles')
 </head>
 
 <body>
