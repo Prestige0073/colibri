@@ -157,7 +157,7 @@
                                 <div class="mb-3">
                                     <span class="badge"
                                         style="background: #1976d2; color: #fff; font-size: 1rem; padding: 0.4em 0.8em; border-radius: 8px; font-weight: 600;">
-                                        Prix: {{ number_format($livre->prix, 0, ',', ' ') }} FCFA
+                                        Prix: {{ fcfa($livre->prix) }}
                                     </span>
                                     <span class="badge ms-2"
                                         style="background: #198754; color: #fff; font-size: 0.8rem; padding: 0.25em 0.5em; border-radius: 8px;">

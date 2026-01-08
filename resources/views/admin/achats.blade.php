@@ -79,8 +79,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1 small">Chiffre d'affaires</p>
-                            <h3 class="mb-0 fw-bold">{{ number_format($commandes->sum('total'), 0, ',', ' ') }}</h3>
-                            <small class="text-muted">FCFA</small>
+                            <h3 class="mb-0 fw-bold">{{ fcfa($commandes->sum('total')) }}</h3>
                         </div>
                         <div class="bg-purple bg-opacity-10 rounded-circle p-3">
                             <i class="fas fa-coins fa-2x" style="color: #6f42c1;"></i>
@@ -153,7 +152,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <strong class="text-success">{{ number_format($commande->total, 0, ',', ' ') }} FCFA</strong>
+                                        <strong class="text-success">{{ fcfa($commande->total) }}</strong>
                                     </td>
                                     <td>
                                         @if($commande->statut === 'pending')

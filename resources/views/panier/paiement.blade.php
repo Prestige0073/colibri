@@ -34,16 +34,16 @@
                                                     <strong>{{ $item->catalogue->titre }}</strong><br>
                                                     <small class="text-muted">{{ $item->catalogue->auteur }}</small>
                                                 </td>
-                                                <td>{{ number_format($item->catalogue->prix, 0, ',', ' ') }} FCFA</td>
+                                                <td>{{ fcfa($item->catalogue->prix) }}</td>
                                                 <td>{{ $item->quantite }}</td>
-                                                <td><strong>{{ number_format($item->catalogue->prix * $item->quantite, 0, ',', ' ') }} FCFA</strong></td>
+                                                <td><strong>{{ fcfa($item->catalogue->prix * $item->quantite) }}</strong></td>
                                             </tr>
                                         @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-light">
                                             <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                            <td><strong class="text-success fs-5">{{ number_format($total, 0, ',', ' ') }} FCFA</strong></td>
+                                            <td><strong class="text-success fs-5">{{ fcfa($total) }}</strong></td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -60,40 +60,51 @@
                     <div class="card-body">
                         <form method="POST" action="{{ route('panier.traiter-paiement') }}" id="onlinePaymentForm">
                             @csrf
-                            <div class="row g-3">
-                                <!-- Kkiapay -->
+                            <div class="row g-3 justify-content-center">
+                                <!-- Mode Test -->
                                 <div class="col-md-4">
-                                    <input type="radio" class="btn-check" name="payment_method" id="kkiapay" value="kkiapay" required>
-                                    <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3" for="kkiapay">
-                                        <div class="mb-2">
-                                            <i class="fas fa-mobile-alt fa-3x"></i>
+                                    <input type="radio" class="btn-check" name="payment_method" id="test_online" value="test" required>
+                                    <label class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4" for="test_online">
+                                        <div class="mb-3">
+                                            <i class="fa fa-flask fa-3x text-warning"></i>
                                         </div>
-                                        <strong>Kkiapay</strong>
-                                        <small class="text-center text-muted">Mobile Money & Cartes</small>
+                                        <h5 class="mb-2">Mode Test</h5>
+                                        <small class="text-muted text-center">Paiement fictif pour tester</small>
+                                        <div class="mt-2">
+                                            <span class="badge bg-warning text-dark">SIMULATION</span>
+                                            <span class="badge bg-info">GRATUIT</span>
+                                        </div>
                                     </label>
                                 </div>
 
-                                <!-- Lygos -->
+                                <!-- Kkiapay -->
                                 <div class="col-md-4">
-                                    <input type="radio" class="btn-check" name="payment_method" id="lygos" value="lygos" required>
-                                    <label class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3" for="lygos">
-                                        <div class="mb-2">
-                                            <i class="fas fa-wallet fa-3x"></i>
+                                    <input type="radio" class="btn-check" name="payment_method" id="kkiapay" value="kkiapay" required>
+                                    <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4" for="kkiapay">
+                                        <div class="mb-3">
+                                            <img src="https://media.licdn.com/dms/image/v2/C5616AQGhqUtJMAG_Vg/profile-displaybackgroundimage-shrink_200_800/profile-displaybackgroundimage-shrink_200_800/0/1589537591763?e=2147483647&v=beta&t=eeZe2YGnp8gEnVySBHgSJ0WmFlQdidG-x2iKRM8i0a8" alt="Kkiapay" style="max-width: 120px; height: auto; border-radius: 8px;">
                                         </div>
-                                        <strong>Lygos</strong>
-                                        <small class="text-center text-muted">Paiement sécurisé</small>
+                                        <h5 class="mb-2">Kkiapay</h5>
+                                        <small class="text-muted text-center">Mobile Money, Cartes</small>
+                                        <div class="mt-2">
+                                            <span class="badge bg-warning text-dark">MTN</span>
+                                            <span class="badge bg-info">Moov</span>
+                                        </div>
                                     </label>
                                 </div>
 
                                 <!-- PayPal -->
                                 <div class="col-md-4">
                                     <input type="radio" class="btn-check" name="payment_method" id="paypal" value="paypal" required>
-                                    <label class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3" for="paypal">
-                                        <div class="mb-2">
-                                            <i class="fab fa-paypal fa-3x"></i>
+                                    <label class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4" for="paypal">
+                                        <div class="mb-3">
+                                            <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" alt="PayPal" style="max-width: 120px; height: auto;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'background: linear-gradient(135deg, #0070ba 0%, #1546a0 100%); padding: 15px 30px; border-radius: 10px;\'><h2 style=\'color: white; margin: 0; font-weight: 700; font-size: 1.5rem;\'>PayPal</h2></div>';">
                                         </div>
-                                        <strong>PayPal</strong>
-                                        <small class="text-center text-muted">Paiement international</small>
+                                        <h5 class="mb-2">PayPal</h5>
+                                        <small class="text-muted text-center">Paiement international</small>
+                                        <div class="mt-2">
+                                            <span class="badge bg-info">Mondial</span>
+                                        </div>
                                     </label>
                                 </div>
                             </div>
@@ -133,12 +144,12 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Sous-total</span>
-                            <span>{{ number_format($total, 0, ',', ' ') }} FCFA</span>
+                            <span>{{ fcfa($total) }}</span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between fw-bold fs-5">
                             <span>Total</span>
-                            <span class="text-success">{{ number_format($total, 0, ',', ' ') }} FCFA</span>
+                            <span class="text-success">{{ fcfa($total) }}</span>
                         </div>
                     </div>
                 </div>
@@ -205,15 +216,20 @@
         }
 
         label[for="kkiapay"],
-        label[for="lygos"],
         label[for="paypal"] {
             transition: all 0.3s ease;
             cursor: pointer;
+            min-height: 280px;
         }
 
         label[for="kkiapay"]:hover,
-        label[for="lygos"]:hover,
         label[for="paypal"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-info:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }

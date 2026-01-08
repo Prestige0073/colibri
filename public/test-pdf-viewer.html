@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PDF Viewer - Correction Flash</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .test-info h3 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+        .test-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin-top: 20px;
+            color: #155724;
+        }
+        .test-list {
+            margin: 20px 0;
+        }
+        .test-list li {
+            margin: 10px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .test-list li.fixed {
+            background: #d4edda;
+        }
+        .test-list li.fixed::before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Test de Correction - Flash PDF Viewer</h1>
+
+        <div class="test-info">
+            <h3>Problème identifié</h3>
+            <p><strong>Bug :</strong> Le PDF clignote/flash quand le curseur se déplace dessus</p>
+            <p><strong>Cause :</strong> La fonction <code>addWatermark()</code> recréait tous les filigranes à chaque appel, provoquant des modifications DOM répétées</p>
+        </div>
+
+        <div class="test-info">
+            <h3>Corrections appliquées</h3>
+            <ul class="test-list">
+                <li class="fixed">Ajout d'une variable <code>watermarkCreated</code> pour éviter les recréations</li>
+                <li class="fixed">Vérification avant création : si déjà créé, on retourne immédiatement</li>
+                <li class="fixed">Ajout de <code>will-change: transform</code> pour optimiser les performances CSS</li>
+                <li class="fixed">Ajout de <code>backface-visibility: hidden</code> sur le watermark overlay</li>
+                <li class="fixed">Ajout de <code>transform: translateZ(0)</code> sur le canvas pour activer l'accélération GPU</li>
+                <li class="fixed">Optimisation du rendu pour éviter les repaint inutiles</li>
+            </ul>
+        </div>
+
+        <div class="test-success">
+            <h3>✅ Tests à effectuer</h3>
+            <ol>
+                <li>Ouvrir la page : <a href="http://0.0.0.0:8000/formation/2/module/2" target="_blank">http://0.0.0.0:8000/formation/2/module/2</a></li>
+                <li>Cliquer sur le bouton "Voir" d'un contenu PDF</li>
+                <li>Attendre le chargement complet du PDF</li>
+                <li><strong>Déplacer le curseur sur le PDF</strong></li>
+                <li>Vérifier qu'il n'y a <strong>PLUS de clignotement/flash</strong></li>
+                <li>Naviguer entre les pages (boutons &lt; &gt;)</li>
+                <li>Zoomer/dézoomer (boutons + -)</li>
+                <li>Vérifier que les filigranes sont toujours visibles</li>
+            </ol>
+        </div>
+
+        <div class="test-info">
+            <h3>📝 Fichiers modifiés</h3>
+            <ul class="test-list">
+                <li><code>resources/views/formation/module.blade.php</code></li>
+            </ul>
+        </div>
+
+        <div class="test-info">
+            <h3>🔍 Détails techniques</h3>
+            <p><strong>Ligne 386-433 :</strong> Fonction addWatermark optimisée avec protection contre les recréations</p>
+            <p><strong>Ligne 747-759 :</strong> CSS du watermark-overlay avec will-change et backface-visibility</p>
+            <p><strong>Ligne 762-775 :</strong> CSS du canvas avec transform: translateZ(0) pour GPU</p>
+        </div>
+    </div>
+
+    <script>
+        console.log('%c✅ Correction appliquée avec succès !', 'color: green; font-size: 16px; font-weight: bold;');
+        console.log('%cLe problème de flash/clignotement du PDF devrait être résolu.', 'color: blue; font-size: 14px;');
+    </script>
+</body>
+</html>

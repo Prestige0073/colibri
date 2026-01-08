@@ -9,12 +9,18 @@ class Commande extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'nom', 'telephone', 'adresse', 'total', 'statut', 'idempotency_key'
+        'user_id', 'nom', 'telephone', 'adresse', 'total', 'statut', 'idempotency_key',
+        'paiement_valide', 'reference_paiement', 'payment_method'
     ];
 
     public function items()
     {
         return $this->hasMany(CommandeItem::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

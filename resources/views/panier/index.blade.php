@@ -35,8 +35,8 @@
                             </button>
                         </form>
                     </td>
-                    <td>{{ $item->catalogue->prix }} FCFA</td>
-                    <td>{{ $item->catalogue->prix * $item->quantite }} FCFA</td>
+                    <td>{{ fcfa($item->catalogue->prix) }}</td>
+                    <td>{{ fcfa($item->catalogue->prix * $item->quantite) }}</td>
                     <td>
                         <form method="POST" action="{{ route('panier.supprimer', $item->id) }}" style="display:inline;">
                             @csrf
@@ -53,7 +53,7 @@
                 <tr>
                     <th colspan="3" class="text-end">Total général</th>
                     <th>
-                        {{ $items->sum(fn($i) => $i->catalogue->prix * $i->quantite) }} FCFA
+                        {{ fcfa($items->sum(fn($i) => $i->catalogue->prix * $i->quantite)) }}
                     </th>
                 </tr>
             </tfoot>

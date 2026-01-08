@@ -81,7 +81,7 @@
                 @foreach($commande->items as $it)
                     <li class="mb-2">
                         <i class="fa fa-book me-2"></i>
-                        {{ $it->titre }} — x{{ $it->quantite }} — {{ number_format($it->prix,0,',',' ') }} FCFA
+                        {{ $it->titre }} — x{{ $it->quantite }} — {{ fcfa($it->prix) }}
                     </li>
                 @endforeach
             </ul>
@@ -90,7 +90,7 @@
                 <div>
                     <span class="badge bg-info text-dark">Statut: {{ $commande->statut_label }}</span>
                 </div>
-                <div class="fw-bold"><i class="fa fa-coins me-1"></i><span class="d-none d-sm-inline">Total: </span>{{ number_format($commande->total,0,',',' ') }} FCFA</div>
+                <div class="fw-bold"><i class="fa fa-coins me-1"></i><span class="d-none d-sm-inline">Total: </span>{{ fcfa($commande->total) }}</div>
             </div>
         </div>
     </div>

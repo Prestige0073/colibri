@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test KKiaPay - Méthode WebComponent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e88e5;
+            margin-bottom: 20px;
+        }
+        .method {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 4px solid #1e88e5;
+        }
+        button {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1e88e5;
+        }
+        #log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test KKiaPay - Documentation Officielle</h1>
+
+        <div class="info">
+            <strong>📝 Test selon la documentation officielle KKiaPay</strong><br>
+            Trois méthodes différentes pour identifier laquelle fonctionne.
+        </div>
+
+        <!-- MÉTHODE 1: WebComponent (Recommandée par KKiaPay) -->
+        <div class="method">
+            <h3>Méthode 1: WebComponent (Recommandé)</h3>
+            <kkiapay-widget
+                amount="100"
+                key="40200980e80411f0996935de2ca9cc0f"
+                position="center"
+                sandbox="true">
+            </kkiapay-widget>
+        </div>
+
+        <!-- MÉTHODE 2: Bouton avec classe CSS -->
+        <div class="method">
+            <h3>Méthode 2: Bouton avec Classe CSS</h3>
+            <button class="kkiapay-button">
+                💳 Payer avec KKiaPay (Méthode CSS)
+            </button>
+        </div>
+
+        <!-- MÉTHODE 3: JavaScript Function -->
+        <div class="method">
+            <h3>Méthode 3: Fonction JavaScript</h3>
+            <button onclick="testJavaScriptMethod()">
+                🔒 Payer avec KKiaPay (Méthode JS)
+            </button>
+        </div>
+
+        <div id="log">
+            <strong>📊 Logs :</strong>
+            <div id="logEntries"></div>
+        </div>
+    </div>
+
+    <!-- SDK KKiaPay avec configuration pour méthode CSS -->
+    <script
+        src="https://cdn.kkiapay.me/k.js"
+        amount="100"
+        position="center"
+        theme="#1e88e5"
+        key="40200980e80411f0996935de2ca9cc0f"
+        sandbox="true">
+    </script>
+
+    <script>
+        function addLog(message) {
+            const logEntries = document.getElementById('logEntries');
+            const entry = document.createElement('div');
+            entry.style.padding = '5px';
+            entry.style.borderLeft = '3px solid #1e88e5';
+            entry.style.paddingLeft = '10px';
+            entry.style.margin = '5px 0';
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            logEntries.appendChild(entry);
+            console.log(message);
+        }
+
+        // Méthode 3: Fonction JavaScript
+        function testJavaScriptMethod() {
+            addLog('🚀 Tentative avec méthode JavaScript...');
+            try {
+                openKkiapayWidget({
+                    amount: 100,
+                    position: "center",
+                    data: "test-js-" + Date.now(),
+                    theme: "#1e88e5",
+                    key: "40200980e80411f0996935de2ca9cc0f",
+                    sandbox: true
+                });
+                addLog('✅ openKkiapayWidget appelé sans erreur');
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message);
+            }
+        }
+
+        // Event Listeners selon la documentation officielle
+        window.addEventListener('load', function() {
+            addLog('📄 Page chargée');
+
+            if (typeof openKkiapayWidget === 'function') {
+                addLog('✅ SDK KKiaPay chargé');
+            } else {
+                addLog('❌ SDK KKiaPay non chargé');
+            }
+
+            if (typeof addSuccessListener === 'function') {
+                addLog('✅ addSuccessListener disponible');
+            } else {
+                addLog('⚠️ addSuccessListener non disponible');
+            }
+        });
+
+        // Listener officiel selon la doc
+        if (typeof addSuccessListener === 'function') {
+            addSuccessListener(function(response) {
+                addLog('✅✅✅ SUCCÈS - Transaction ID: ' + response.transactionId);
+                console.log('Réponse complète:', response);
+                alert('Paiement réussi! Transaction: ' + response.transactionId);
+            });
+        }
+
+        if (typeof addFailedListener === 'function') {
+            addFailedListener(function(error) {
+                addLog('❌ ÉCHEC - ' + JSON.stringify(error));
+                console.error('Erreur:', error);
+                alert('Paiement échoué');
+            });
+        }
+
+        // Essayer aussi avec l'ancien format au cas où
+        if (typeof addKkiapayListener === 'function') {
+            addLog('✅ addKkiapayListener disponible (ancien format)');
+
+            addKkiapayListener('success', function(response) {
+                addLog('✅ SUCCÈS (ancien format) - Transaction ID: ' + response.transactionId);
+            });
+
+            addKkiapayListener('failed', function(response) {
+                addLog('❌ ÉCHEC (ancien format)');
+            });
+        }
+
+        // Capturer les erreurs
+        window.addEventListener('error', function(event) {
+            addLog('❌ Erreur globale: ' + event.message);
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            addLog('❌ Promesse rejetée: ' + event.reason);
+        });
+    </script>
+</body>
+</html>

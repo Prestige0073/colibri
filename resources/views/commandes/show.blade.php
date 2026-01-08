@@ -38,7 +38,7 @@
                 <div class="mb-3">
                     <div class="text-muted small"><i class="fa {{ $addressIcon }} me-1"></i>Adresse : {{ $commande->adresse ?? '—' }}</div>
                     <div class="mt-2">
-                        <strong><i class="fa fa-coins text-warning me-1"></i>{{ number_format($commande->total, 0, ',', ' ') }} FCFA</strong>
+                        <strong><i class="fa fa-coins text-warning me-1"></i>{{ fcfa($commande->total) }}</strong>
                         <span class="badge bg-{{ $badgeClass }} ms-2"><i class="fa {{ $statusIcon }} me-1"></i>{{ $statusLabel }}</span>
                     </div>
                 </div>

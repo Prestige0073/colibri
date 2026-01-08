@@ -16,7 +16,7 @@
                         <p class="card-text">{{ $formation->description }}</p>
                         <p><strong>Durée :</strong> {{ $formation->duree ?? 'N/A' }}</p>
                         <p><strong>Niveau :</strong> {{ $formation->niveau ?? 'Tous niveaux' }}</p>
-                        <p><strong>Prix :</strong> {{ number_format($formation->prix ?? 0, 2, ',', ' ') }}€</p>
+                        <p><strong>Prix :</strong> {{ fcfa($formation->prix ?? 0) }}</p>
 
                         <form method="POST" action="{{ route('formation.acheter', $formation) }}">
                             @csrf
@@ -226,7 +226,7 @@
                                 <i class="fas fa-tag text-danger me-2"></i>
                                 <strong>Prix</strong>
                             </div>
-                            <span class="text-success fw-bold">{{ number_format($formation->prix ?? 0, 2, ',', ' ') }}€</span>
+                            <span class="text-success fw-bold">{{ fcfa($formation->prix ?? 0) }}</span>
                         </div>
                     </div>
                 </div>
@@ -300,7 +300,7 @@
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
                             <small><strong>Formation:</strong> {{ $formation->titre }}</small><br>
-                            <small><strong>Prix:</strong> {{ number_format($formation->prix ?? 0, 2, ',', ' ') }}€</small>
+                            <small><strong>Prix:</strong> {{ fcfa($formation->prix ?? 0) }}</small>
                         </div>
                     </div>
                 </div>

@@ -29,7 +29,7 @@
                             </div>
                             <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
                                 <span><i class="fa fa-video text-success me-2"></i>{{ $formation->modules_count * 4 ?? 0 }} vidéos</span>
-                                <span><i class="fa fa-euro-sign text-success me-2"></i>{{ number_format($formation->prix, 2, ',', ' ') }}€</span>
+                                <span><i class="fa fa-money-bill text-success me-2"></i>{{ fcfa($formation->prix) }}</span>
                                 <span><i class="fa fa-share-alt text-success me-2"></i></span>
                             </div>
                             <a href="{{ route('formation.show', $formation) }}" class="btn btn-success btn-block w-100 mt-3">

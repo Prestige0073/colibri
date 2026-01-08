@@ -47,7 +47,7 @@
                                     <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                         <span class="badge"
                                             style="background: #ffe7e7ff; color: #b30000ff; font-size: 0.95rem; padding: 0.25em 0.5em; border-radius: 8px; word-wrap: break-word;">
-                                            <i class="fa fa-tag me-1" aria-hidden="true"></i>Prix&nbsp;: {{ $catalogue->prix }}&nbsp;FCFA
+                                            <i class="fa fa-tag me-1" aria-hidden="true"></i>Prix&nbsp;: {{ fcfa($catalogue->prix) }}
                                         </span>
                                         @if ($catalogue->quantite > 0)
                                             <span class="badge"

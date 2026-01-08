@@ -114,10 +114,25 @@ class EmpruntUserController extends Controller
     }
 
     /**
-     * Afficher les détails d'un livre empruntable
+     * Afficher les détails d'un livre empruntable ou d'un emprunt
      */
     public function show($id)
     {
+        // Vérifier si c'est un ID d'emprunt
+        $emprunt = Emprunt::with('livre')->find($id);
+
+        if ($emprunt) {
+            // C'est un emprunt - afficher les détails de l'emprunt
+            // Vérifier que l'utilisateur a le droit de voir cet emprunt
+            if (Auth::check() && ($emprunt->user_id === Auth::id() || Auth::user()->role === 'admin')) {
+                return view('emprunts.detail', compact('emprunt'));
+            }
+
+            // Si l'utilisateur n'a pas le droit, rediriger avec erreur
+            return redirect()->route('emprunts.index')->with('error', 'Vous n\'avez pas accès à cet emprunt.');
+        }
+
+        // Sinon, c'est un ID de livre - afficher les détails du livre
         $livre = Catalogue::where('type_categorie', 'emprunt')->findOrFail($id);
 
         // Vérifier si l'utilisateur a déjà emprunté ce livre

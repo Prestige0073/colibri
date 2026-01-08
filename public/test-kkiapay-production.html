@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test KKiaPay - Mode Production</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e88e5;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        button {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        #log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test KKiaPay - Mode Production</h1>
+
+        <div class="warning">
+            <strong>⚠️ ATTENTION - MODE PRODUCTION</strong><br>
+            Ce test utilise vos clés de production.<br>
+            sandbox=false<br>
+            Les paiements seront RÉELS (même si petit montant).
+        </div>
+
+        <button onclick="testPayment()">
+            💳 Tester Paiement (100 FCFA) - PRODUCTION
+        </button>
+
+        <div id="log">
+            <strong>📊 Logs :</strong>
+            <div id="logEntries"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.kkiapay.me/k.js"></script>
+    <script>
+        function addLog(message) {
+            const logEntries = document.getElementById('logEntries');
+            const entry = document.createElement('div');
+            entry.style.padding = '5px';
+            entry.style.borderLeft = '3px solid #1e88e5';
+            entry.style.paddingLeft = '10px';
+            entry.style.margin = '5px 0';
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            logEntries.appendChild(entry);
+            console.log(message);
+        }
+
+        function testPayment() {
+            addLog('🚀 Ouverture du widget en mode PRODUCTION...');
+            try {
+                openKkiapayWidget({
+                    amount: 100,
+                    position: "center",
+                    data: "test-prod-" + Date.now(),
+                    theme: "#1e88e5",
+                    key: "40200980e80411f0996935de2ca9cc0f",
+                    sandbox: false  // MODE PRODUCTION
+                });
+                addLog('✅ Widget appelé sans erreur');
+            } catch (error) {
+                addLog('❌ Erreur: ' + error.message);
+            }
+        }
+
+        window.addEventListener('load', function() {
+            addLog('📄 Page chargée');
+            addLog('⚠️ MODE: PRODUCTION (sandbox=false)');
+
+            if (typeof openKkiapayWidget === 'function') {
+                addLog('✅ SDK KKiaPay chargé');
+            } else {
+                addLog('❌ SDK non chargé');
+            }
+        });
+
+        // Listeners
+        if (typeof addSuccessListener === 'function') {
+            addSuccessListener(function(response) {
+                addLog('✅✅✅ PAIEMENT RÉUSSI - ID: ' + response.transactionId);
+                alert('Paiement réussi (PRODUCTION)! Transaction: ' + response.transactionId);
+            });
+        }
+
+        if (typeof addFailedListener === 'function') {
+            addFailedListener(function(error) {
+                addLog('❌ PAIEMENT ÉCHOUÉ');
+                alert('Paiement échoué');
+            });
+        }
+
+        // Ancien format aussi
+        if (typeof addKkiapayListener === 'function') {
+            addKkiapayListener('success', function(response) {
+                addLog('✅ SUCCÈS (ancien format) - ID: ' + response.transactionId);
+            });
+
+            addKkiapayListener('failed', function(response) {
+                addLog('❌ ÉCHEC (ancien format)');
+            });
+        }
+
+        window.addEventListener('unhandledrejection', function(event) {
+            addLog('❌ Erreur Promise: ' + event.reason);
+        });
+    </script>
+</body>
+</html>

@@ -108,7 +108,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🕊️ Colibri Littéraire</h1>
+            <img src="https://colibri-litteraire.com/img/LOGO-COLIBRI-LITTERAIRE.png" alt="Colibri Littéraire" style="max-width: 200px; height: auto; margin-bottom: 15px;">
+            <h1>Colibri Littéraire</h1>
             <p>Promouvoir la lecture et la littérature africaine</p>
         </div>
 
@@ -124,6 +125,7 @@
                 <a href="#">LinkedIn</a>
             </div>
             <p><strong>Colibri Littéraire</strong></p>
+            <p>Site web: <a href="https://colibri-litteraire.com">https://colibri-litteraire.com</a></p>
             <p>Email: <a href="mailto:colibrilitteraire@gmail.com">colibrilitteraire@gmail.com</a></p>
             <p>© {{ date('Y') }} Colibri Littéraire. Tous droits réservés.</p>
             <p style="font-size: 11px; color: #999; margin-top: 20px;">

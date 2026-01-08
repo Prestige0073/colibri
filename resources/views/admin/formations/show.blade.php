@@ -57,7 +57,7 @@
                         <div class="col-md-3">
                             <div class="mb-3">
                                 <h6 class="text-muted mb-1">Prix</h6>
-                                <span class="badge bg-success fs-6">{{ number_format($formation->prix, 2) }} €</span>
+                                <span class="badge bg-success fs-6">{{ fcfa($formation->prix) }}</span>
                             </div>
                         </div>
                         <div class="col-md-3">

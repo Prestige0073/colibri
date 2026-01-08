@@ -13,12 +13,12 @@ class AccountController extends Controller
     public function profil() {
         $user = Auth::user();
         if ($user) {
-            $emprunts = Emprunt::where('user_id', $user->id)->get();
-            // Récupérer commandes en cours de livraison (statut pending ou en_livraison)
+            $emprunts = Emprunt::where('user_id', $user->id)->with('livre')->orderByDesc('created_at')->get();
+            // Récupérer commandes en cours de livraison
             // Vérifier si la table commandes existe
             if (\Schema::hasTable('commandes') && class_exists(\App\Models\Commande::class)) {
                 $commandesEnLivraison = \App\Models\Commande::where('user_id', $user->id)
-                    ->whereIn('statut', ['pending', 'en_livraison'])
+                    ->whereIn('statut', ['en_preparation', 'expedie', 'en_cours', 'pending', 'en_livraison'])
                     ->with('items')
                     ->orderByDesc('created_at')
                     ->get();
@@ -83,6 +83,56 @@ class AccountController extends Controller
         $user->save();
 
         return redirect()->route('account.profil')->with('success', 'Avatar mis à jour avec succès.');
+    }
+
+    /**
+     * Update user's profile information
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('account.profil')->with('error', 'Utilisateur non authentifié.');
+        }
+
+        // Validation des champs de base
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+        ];
+
+        // Si l'utilisateur veut changer son mot de passe
+        if ($request->filled('current_password')) {
+            $rules['current_password'] = 'required';
+            $rules['new_password'] = 'required|min:8|confirmed';
+        }
+
+        $request->validate($rules);
+
+        // Vérifier le mot de passe actuel si fourni
+        if ($request->filled('current_password')) {
+            if (!\Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors(['current_password' => 'Le mot de passe actuel est incorrect.'])->withInput();
+            }
+
+            // Mettre à jour le mot de passe
+            $user->password = \Hash::make($request->new_password);
+        }
+
+        // Mettre à jour les autres informations
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->phone = $request->phone;
+        $user->address = $request->address;
+        $user->save();
+
+        $message = $request->filled('current_password')
+            ? 'Profil et mot de passe mis à jour avec succès.'
+            : 'Profil mis à jour avec succès.';
+
+        return redirect()->route('account.profil')->with('success', $message);
     }
 
     public function historique() {

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test KKiaPay Widget</title>
+    <script src="https://cdn.kkiapay.me/k.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e88e5;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1e88e5;
+        }
+        .error {
+            background: #ffebee;
+            border-left-color: #f44336;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+            color: #2e7d32;
+        }
+        .config {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+        #log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 5px;
+            margin: 5px 0;
+            border-left: 3px solid #1e88e5;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test KKiaPay Widget</h1>
+
+        <div class="info">
+            <strong>📝 Instructions :</strong><br>
+            Cliquez sur le bouton ci-dessous pour tester le widget KKiaPay.<br>
+            Vérifiez la console du navigateur (F12) pour voir les erreurs.
+        </div>
+
+        <div class="config">
+            <strong>Configuration utilisée :</strong><br>
+            Public Key: 40200980e80411f0996935de2ca9cc0f<br>
+            Amount: 100 FCFA<br>
+            Sandbox: true<br>
+            Position: center
+        </div>
+
+        <button onclick="testPayment()">
+            🔒 Tester le Paiement KKiaPay (100 FCFA)
+        </button>
+
+        <div id="status"></div>
+
+        <div id="log">
+            <strong>📊 Logs :</strong>
+            <div id="logEntries"></div>
+        </div>
+    </div>
+
+    <script>
+        function addLog(message, type = 'info') {
+            const logEntries = document.getElementById('logEntries');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            logEntries.appendChild(entry);
+            console.log(message);
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = type + ' info';
+            statusDiv.innerHTML = '<strong>' + message + '</strong>';
+            statusDiv.style.marginTop = '20px';
+        }
+
+        // Vérifier que le SDK est chargé
+        window.addEventListener('load', function() {
+            if (typeof openKkiapayWidget === 'function') {
+                addLog('✅ SDK KKiaPay chargé avec succès');
+                showStatus('✅ SDK KKiaPay prêt', 'success');
+            } else {
+                addLog('❌ SDK KKiaPay non chargé', 'error');
+                showStatus('❌ Erreur : SDK KKiaPay non chargé', 'error');
+            }
+        });
+
+        function testPayment() {
+            addLog('🚀 Tentative d\'ouverture du widget...');
+            showStatus('⏳ Ouverture du widget...', 'info');
+
+            try {
+                openKkiapayWidget({
+                    amount: 100,
+                    position: "center",
+                    data: "test-" + Date.now(),
+                    theme: "#1e88e5",
+                    key: "40200980e80411f0996935de2ca9cc0f",
+                    sandbox: true
+                });
+                addLog('✅ Widget ouvert sans erreur JavaScript');
+            } catch (error) {
+                addLog('❌ Erreur lors de l\'ouverture : ' + error.message);
+                showStatus('❌ Erreur : ' + error.message, 'error');
+            }
+        }
+
+        // Écouter les événements KKiaPay
+        addKkiapayListener('success', function(response) {
+            addLog('✅ SUCCÈS - Transaction ID: ' + response.transactionId);
+            showStatus('✅ Paiement réussi ! ID: ' + response.transactionId, 'success');
+            console.log('Réponse complète:', response);
+        });
+
+        addKkiapayListener('failed', function(response) {
+            addLog('❌ ÉCHEC - Paiement échoué');
+            showStatus('❌ Paiement échoué', 'error');
+            console.log('Réponse d\'échec:', response);
+        });
+
+        addKkiapayListener('pending', function(response) {
+            addLog('⏳ EN ATTENTE - Paiement en attente');
+            showStatus('⏳ Paiement en attente...', 'info');
+            console.log('Réponse pending:', response);
+        });
+
+        // Capturer les erreurs globales
+        window.addEventListener('error', function(event) {
+            addLog('❌ Erreur globale: ' + event.message);
+        });
+
+        // Capturer les erreurs de promesses
+        window.addEventListener('unhandledrejection', function(event) {
+            addLog('❌ Promesse rejetée: ' + event.reason);
+            showStatus('❌ Erreur : ' + event.reason, 'error');
+        });
+    </script>
+</body>
+</html>

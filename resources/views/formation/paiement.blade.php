@@ -29,7 +29,7 @@
                                         <p class="mb-1"><strong>Modules:</strong> {{ $formation->modules->count() }}</p>
                                     </div>
                                     <div class="text-end">
-                                        <h3 class="text-success mb-0">{{ number_format($formation->prix ?? 0, 0, ',', ' ') }} FCFA</h3>
+                                        <h3 class="text-success mb-0">{{ fcfa($formation->prix ?? 0) }}</h3>
                                     </div>
                                 </div>
                             </div>
@@ -47,36 +47,35 @@
                             @csrf
                             <input type="hidden" name="inscription_id" value="{{ $inscription->id }}">
 
-                            <div class="row g-3">
+                            <div class="row g-3 justify-content-center">
+                                <!-- Mode Test -->
+                                <div class="col-md-4">
+                                    <input type="radio" class="btn-check" name="payment_method" id="test" value="test" required>
+                                    <label class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4" for="test">
+                                        <div class="mb-3">
+                                            <i class="fa fa-flask fa-4x text-warning"></i>
+                                        </div>
+                                        <h5 class="mb-2">Mode Test</h5>
+                                        <small class="text-muted text-center">Paiement fictif pour tester</small>
+                                        <div class="mt-2">
+                                            <span class="badge bg-warning text-dark">SIMULATION</span>
+                                            <span class="badge bg-info">GRATUIT</span>
+                                        </div>
+                                    </label>
+                                </div>
+
                                 <!-- Kkiapay -->
                                 <div class="col-md-4">
                                     <input type="radio" class="btn-check" name="payment_method" id="kkiapay" value="kkiapay" required>
                                     <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4" for="kkiapay">
                                         <div class="mb-3">
-                                            <img src="https://kkiapay.me/img/logo-light.png" alt="Kkiapay" style="max-width: 150px; height: auto;">
+                                            <img src="https://media.licdn.com/dms/image/v2/C5616AQGhqUtJMAG_Vg/profile-displaybackgroundimage-shrink_200_800/profile-displaybackgroundimage-shrink_200_800/0/1589537591763?e=2147483647&v=beta&t=eeZe2YGnp8gEnVySBHgSJ0WmFlQdidG-x2iKRM8i0a8" alt="Kkiapay" style="max-width: 120px; height: auto; border-radius: 8px;">
                                         </div>
                                         <h5 class="mb-2">Kkiapay</h5>
-                                        <small class="text-muted text-center">Mobile Money, Cartes bancaires</small>
+                                        <small class="text-muted text-center">Mobile Money, Cartes</small>
                                         <div class="mt-2">
                                             <span class="badge bg-warning text-dark">MTN</span>
                                             <span class="badge bg-info">Moov</span>
-                                            <span class="badge bg-primary">Visa</span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <!-- Lygos -->
-                                <div class="col-md-4">
-                                    <input type="radio" class="btn-check" name="payment_method" id="lygos" value="lygos" required>
-                                    <label class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4" for="lygos">
-                                        <div class="mb-3">
-                                            <img src="https://lygos.money/assets/images/logo.png" alt="Lygos" style="max-width: 150px; height: auto;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjYwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iNjAiIGZpbGw9IiMyOGE3NDUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIyNCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0iQXJpYWwiPkx5Z29zPC90ZXh0Pjwvc3ZnPg==';">
-                                        </div>
-                                        <h5 class="mb-2">Lygos</h5>
-                                        <small class="text-muted text-center">Paiement sécurisé en ligne</small>
-                                        <div class="mt-2">
-                                            <span class="badge bg-success">Sécurisé</span>
-                                            <span class="badge bg-success">Rapide</span>
                                         </div>
                                     </label>
                                 </div>
@@ -86,13 +85,12 @@
                                     <input type="radio" class="btn-check" name="payment_method" id="paypal" value="paypal" required>
                                     <label class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4" for="paypal">
                                         <div class="mb-3">
-                                            <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" alt="PayPal" style="max-width: 150px; height: auto;">
+                                            <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" alt="PayPal" style="max-width: 120px; height: auto;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'background: linear-gradient(135deg, #0070ba 0%, #1546a0 100%); padding: 15px 30px; border-radius: 10px;\'><h2 style=\'color: white; margin: 0; font-weight: 700; font-size: 1.5rem;\'>PayPal</h2></div>';">
                                         </div>
                                         <h5 class="mb-2">PayPal</h5>
                                         <small class="text-muted text-center">Paiement international</small>
                                         <div class="mt-2">
                                             <span class="badge bg-info">Mondial</span>
-                                            <span class="badge bg-info">Sûr</span>
                                         </div>
                                     </label>
                                 </div>
@@ -134,11 +132,16 @@
         }
 
         label[for="kkiapay"],
-        label[for="lygos"],
         label[for="paypal"] {
             transition: all 0.3s ease;
             cursor: pointer;
-            min-height: 250px;
+            min-height: 280px;
+        }
+
+        label[for="kkiapay"]:hover,
+        label[for="paypal"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
     </style>
 

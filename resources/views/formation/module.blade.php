@@ -293,498 +293,14 @@
                                             <i class="fas fa-file-pdf fa-3x text-danger me-3"></i>
                                             <div>
                                                 <h6 class="mb-0">Document PDF Protégé</h6>
-                                                <small class="text-muted">Cliquez pour visualiser le document de manière sécurisée</small>
+                                                <small class="text-muted">Ouvre dans un visualiseur sécurisé en plein écran</small>
                                             </div>
                                         </div>
-                                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#pdfModal{{ $contenu->id }}">
-                                            <i class="fas fa-eye me-2"></i>Voir
-                                        </button>
+                                        <a href="{{ route('pdf.viewer.show', [$formation, $module, $contenu]) }}"
+                                           class="btn btn-danger">
+                                            <i class="fas fa-eye me-2"></i>Voir le PDF
+                                        </a>
                                     </div>
-
-                                    <!-- Modal Plein écran pour le PDF -->
-                                    <div class="modal fade" id="pdfModal{{ $contenu->id }}" tabindex="-1" aria-labelledby="pdfModalLabel{{ $contenu->id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-fullscreen">
-                                            <div class="modal-content">
-                                                <div class="modal-header bg-danger text-white">
-                                                    <h5 class="modal-title" id="pdfModalLabel{{ $contenu->id }}">
-                                                        <i class="fas fa-file-pdf me-2"></i>{{ $contenu->titre }} - Document Protégé
-                                                    </h5>
-                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body p-0">
-                                                    <div class="pdf-viewer-container" id="pdf-viewer-{{ $contenu->id }}">
-                                        <div class="pdf-viewer-header bg-danger text-white p-3 rounded-top d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <i class="fas fa-file-pdf me-2"></i>
-                                                <strong>Document PDF Protégé</strong>
-                                            </div>
-                                            <div class="pdf-controls">
-                                                <button class="btn btn-sm btn-light" onclick="zoomOut{{ $contenu->id }}()">
-                                                    <i class="fas fa-search-minus"></i>
-                                                </button>
-                                                <span class="mx-2 text-white" id="zoom-level-{{ $contenu->id }}">100%</span>
-                                                <button class="btn btn-sm btn-light" onclick="zoomIn{{ $contenu->id }}()">
-                                                    <i class="fas fa-search-plus"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-light ms-2" onclick="prevPage{{ $contenu->id }}()">
-                                                    <i class="fas fa-chevron-left"></i>
-                                                </button>
-                                                <span class="mx-2 text-white">
-                                                    <span id="page-num-{{ $contenu->id }}">1</span> / <span id="page-count-{{ $contenu->id }}">-</span>
-                                                </span>
-                                                <button class="btn btn-sm btn-light" onclick="nextPage{{ $contenu->id }}()">
-                                                    <i class="fas fa-chevron-right"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="pdf-canvas-wrapper position-relative" style="background: #525659; min-height: 600px;">
-                                            <!-- Loader to avoid flash while PDF renders -->
-                                            <div class="pdf-loader d-flex align-items-center justify-content-center" id="pdf-loader-{{ $contenu->id }}" style="position:absolute;inset:0;z-index:20;background:rgba(0,0,0,0.35);">
-                                                <div class="text-center text-white">
-                                                    <div class="spinner-border text-light" role="status"></div>
-                                                    <div class="mt-2">Chargement du document…</div>
-                                                </div>
-                                            </div>
-                                            <canvas id="pdf-canvas-{{ $contenu->id }}" style="display: none; margin: 0 auto;"></canvas>
-                                            <div class="watermark-overlay" id="watermark-{{ $contenu->id }}"></div>
-                                            <!-- Protection overlay invisible -->
-                                            <div class="pdf-protection-layer"></div>
-                                        </div>
-                                        <div class="alert alert-warning m-3">
-                                            <i class="fas fa-shield-alt me-2"></i>
-                                            <small>Ce document est protégé. Toute tentative de copie ou téléchargement illégal est interdite et tracée.</small>
-                                        </div>
-                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-                                    <script>
-                                        (function() {
-                                            // Configuration PDF.js
-                                            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-                                            const pdfUrl{{ $contenu->id }} = '{{ asset($contenu->fichier) }}';
-                                            let pdfDoc{{ $contenu->id }} = null;
-                                            let pageNum{{ $contenu->id }} = 1;
-                                            let pageIsRendering{{ $contenu->id }} = false;
-                                            let pageNumIsPending{{ $contenu->id }} = null;
-                                            let scale{{ $contenu->id }} = 1.5;
-                                            let pdfLoaded{{ $contenu->id }} = false;
-
-                                            const canvas{{ $contenu->id }} = document.getElementById('pdf-canvas-{{ $contenu->id }}');
-                                            const ctx{{ $contenu->id }} = canvas{{ $contenu->id }}.getContext('2d');
-
-                                            // Désactiver le menu contextuel sur le canvas
-                                            canvas{{ $contenu->id }}.addEventListener('contextmenu', e => e.preventDefault());
-
-                                            // Désactiver la sélection
-                                            canvas{{ $contenu->id }}.style.userSelect = 'none';
-                                            canvas{{ $contenu->id }}.style.webkitUserSelect = 'none';
-
-                                            // Fonction pour ajouter le filigrane
-                                            function addWatermark{{ $contenu->id }}() {
-                                                const watermarkDiv = document.getElementById('watermark-{{ $contenu->id }}');
-                                                watermarkDiv.innerHTML = '';
-
-                                                @if($inscription)
-                                                    const userName = '{{ Auth::user()->name ?? "Utilisateur" }}';
-                                                    const userEmail = '{{ Auth::user()->email ?? "" }}';
-                                                    const currentDate = new Date().toLocaleString('fr-FR');
-
-                                                    // Créer plusieurs filigranes en diagonale
-                                                    for(let i = 0; i < 8; i++) {
-                                                        const watermark = document.createElement('div');
-                                                        watermark.style.cssText = `
-                                                            position: absolute;
-                                                            top: ${i * 150}px;
-                                                            left: 50%;
-                                                            transform: translateX(-50%) rotate(-45deg);
-                                                            font-size: 24px;
-                                                            color: rgba(255, 0, 0, 0.15);
-                                                            font-weight: bold;
-                                                            pointer-events: none;
-                                                            white-space: nowrap;
-                                                            z-index: 10;
-                                                            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-                                                        `;
-                                                        watermark.textContent = `${userName} - ${userEmail} - ${currentDate}`;
-                                                        watermarkDiv.appendChild(watermark);
-                                                    }
-                                                @endif
-                                            }
-
-                                            // Rendu de la page
-                                            function renderPage{{ $contenu->id }}(num) {
-                                                pageIsRendering{{ $contenu->id }} = true;
-
-                                                pdfDoc{{ $contenu->id }}.getPage(num).then(page => {
-                                                    const viewport = page.getViewport({ scale: scale{{ $contenu->id }} });
-                                                    canvas{{ $contenu->id }}.height = viewport.height;
-                                                    canvas{{ $contenu->id }}.width = viewport.width;
-
-                                                    const renderContext = {
-                                                        canvasContext: ctx{{ $contenu->id }},
-                                                        viewport: viewport
-                                                    };
-
-                                                            page.render(renderContext).promise.then(() => {
-                                                                pageIsRendering{{ $contenu->id }} = false;
-
-                                                                // Afficher le canvas et masquer le loader une fois le rendu terminé
-                                                                try {
-                                                                    const loaderEl = document.getElementById('pdf-loader-{{ $contenu->id }}');
-                                                                    const canvasEl = document.getElementById('pdf-canvas-{{ $contenu->id }}');
-                                                                    if (canvasEl) {
-                                                                        canvasEl.style.display = 'block';
-                                                                    }
-                                                                    if (loaderEl) {
-                                                                        loaderEl.style.display = 'none';
-                                                                    }
-                                                                } catch (e) {}
-
-                                                                if (pageNumIsPending{{ $contenu->id }} !== null) {
-                                                                    renderPage{{ $contenu->id }}(pageNumIsPending{{ $contenu->id }});
-                                                                    pageNumIsPending{{ $contenu->id }} = null;
-                                                                }
-
-                                                                // Ajouter le filigrane après le rendu
-                                                                addWatermark{{ $contenu->id }}();
-                                                            });
-
-                                                    // Afficher le numéro de page
-                                                    document.getElementById('page-num-{{ $contenu->id }}').textContent = num;
-                                                });
-                                            }
-
-                                            // Mettre en file d'attente le rendu de la page
-                                            function queueRenderPage{{ $contenu->id }}(num) {
-                                                if (pageIsRendering{{ $contenu->id }}) {
-                                                    pageNumIsPending{{ $contenu->id }} = num;
-                                                } else {
-                                                    renderPage{{ $contenu->id }}(num);
-                                                }
-                                            }
-
-                                            // Page précédente
-                                            window.prevPage{{ $contenu->id }} = function() {
-                                                if (pageNum{{ $contenu->id }} <= 1) {
-                                                    return;
-                                                }
-                                                pageNum{{ $contenu->id }}--;
-                                                queueRenderPage{{ $contenu->id }}(pageNum{{ $contenu->id }});
-                                            }
-
-                                            // Page suivante
-                                            window.nextPage{{ $contenu->id }} = function() {
-                                                if (pageNum{{ $contenu->id }} >= pdfDoc{{ $contenu->id }}.numPages) {
-                                                    return;
-                                                }
-                                                pageNum{{ $contenu->id }}++;
-                                                queueRenderPage{{ $contenu->id }}(pageNum{{ $contenu->id }});
-                                            }
-
-                                            // Zoom in
-                                            window.zoomIn{{ $contenu->id }} = function() {
-                                                scale{{ $contenu->id }} += 0.25;
-                                                document.getElementById('zoom-level-{{ $contenu->id }}').textContent = Math.round(scale{{ $contenu->id }} * 100) + '%';
-                                                queueRenderPage{{ $contenu->id }}(pageNum{{ $contenu->id }});
-                                            }
-
-                                            // Zoom out
-                                            window.zoomOut{{ $contenu->id }} = function() {
-                                                if (scale{{ $contenu->id }} > 0.5) {
-                                                    scale{{ $contenu->id }} -= 0.25;
-                                                    document.getElementById('zoom-level-{{ $contenu->id }}').textContent = Math.round(scale{{ $contenu->id }} * 100) + '%';
-                                                    queueRenderPage{{ $contenu->id }}(pageNum{{ $contenu->id }});
-                                                }
-                                            }
-
-                                            // Fonction pour charger le PDF
-                                            function loadPDF{{ $contenu->id }}() {
-                                                if (!pdfLoaded{{ $contenu->id }}) {
-                                                    pdfLoaded{{ $contenu->id }} = true;
-                                                    pdfjsLib.getDocument(pdfUrl{{ $contenu->id }}).promise.then(pdfDoc_ => {
-                                                        pdfDoc{{ $contenu->id }} = pdfDoc_;
-                                                        document.getElementById('page-count-{{ $contenu->id }}').textContent = pdfDoc{{ $contenu->id }}.numPages;
-                                                        renderPage{{ $contenu->id }}(pageNum{{ $contenu->id }});
-                                                    }).catch(err => {
-                                                        console.error('Erreur lors du chargement du PDF:', err);
-                                                        alert('Erreur lors du chargement du document PDF');
-                                                        pdfLoaded{{ $contenu->id }} = false;
-                                                    });
-                                                }
-                                            }
-
-                                            // Écouter l'ouverture du modal pour charger le PDF
-                                            const pdfModal{{ $contenu->id }} = document.getElementById('pdfModal{{ $contenu->id }}');
-                                            pdfModal{{ $contenu->id }}.addEventListener('shown.bs.modal', function () {
-                                                loadPDF{{ $contenu->id }}();
-                                            });
-
-                                            // Protection avancée contre les captures d'écran et raccourcis
-                                            document.addEventListener('keydown', function(e) {
-                                                // Bloquer Ctrl+S (Enregistrer)
-                                                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                                                    e.preventDefault();
-                                                    alert('⛔ Le téléchargement de ce document est désactivé.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+P (Imprimer)
-                                                if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-                                                    e.preventDefault();
-                                                    alert('⛔ L\'impression de ce document est désactivée.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Print Screen / Impr écran (toutes les variantes)
-                                                if (e.key === 'PrintScreen' || e.keyCode === 44 || e.key === 'Print') {
-                                                    e.preventDefault();
-                                                    alert('⛔ Les captures d\'écran sont désactivées pour protéger ce contenu.');
-                                                    // Effacer le presse-papier
-                                                    navigator.clipboard.writeText('');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Alt+PrintScreen (capture fenêtre active)
-                                                if (e.altKey && (e.key === 'PrintScreen' || e.keyCode === 44)) {
-                                                    e.preventDefault();
-                                                    alert('⛔ Les captures d\'écran sont désactivées pour protéger ce contenu.');
-                                                    navigator.clipboard.writeText('');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Windows+PrintScreen (Windows)
-                                                if (e.metaKey && (e.key === 'PrintScreen' || e.keyCode === 44)) {
-                                                    e.preventDefault();
-                                                    alert('⛔ Les captures d\'écran sont désactivées.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+Shift+S (Capture Firefox)
-                                                if (e.ctrlKey && e.shiftKey && e.key === 's') {
-                                                    e.preventDefault();
-                                                    alert('⛔ Les captures d\'écran sont désactivées.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer F12, F11 (Outils développeur et plein écran)
-                                                if (e.key === 'F12' || e.keyCode === 123) {
-                                                    e.preventDefault();
-                                                    alert('⛔ Les outils de développement sont désactivés.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+Shift+I (Outils développeur)
-                                                if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I')) {
-                                                    e.preventDefault();
-                                                    alert('⛔ Les outils de développement sont désactivés.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+Shift+J (Console)
-                                                if (e.ctrlKey && e.shiftKey && (e.key === 'j' || e.key === 'J')) {
-                                                    e.preventDefault();
-                                                    alert('⛔ La console est désactivée.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+Shift+C (Inspecteur)
-                                                if (e.ctrlKey && e.shiftKey && (e.key === 'c' || e.key === 'C')) {
-                                                    e.preventDefault();
-                                                    alert('⛔ L\'inspecteur est désactivé.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+U (Voir le code source)
-                                                if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-                                                    e.preventDefault();
-                                                    alert('⛔ L\'affichage du code source est désactivé.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+A (Tout sélectionner)
-                                                if (e.ctrlKey && (e.key === 'a' || e.key === 'A')) {
-                                                    e.preventDefault();
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+C (Copier)
-                                                if (e.ctrlKey && (e.key === 'c' || e.key === 'C') && !e.shiftKey) {
-                                                    e.preventDefault();
-                                                    alert('⛔ La copie est désactivée.');
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+V (Coller) - pour éviter certains contournements
-                                                if (e.ctrlKey && (e.key === 'v' || e.key === 'V')) {
-                                                    e.preventDefault();
-                                                    return false;
-                                                }
-
-                                                // Bloquer Ctrl+X (Couper)
-                                                if (e.ctrlKey && (e.key === 'x' || e.key === 'X')) {
-                                                    e.preventDefault();
-                                                    return false;
-                                                }
-
-                                                // Bloquer Insert (souvent utilisé pour capture)
-                                                if (e.key === 'Insert' || e.keyCode === 45) {
-                                                    e.preventDefault();
-                                                    return false;
-                                                }
-
-                                                // Bloquer Windows+Shift+S (Outil capture Windows 10/11)
-                                                if (e.metaKey && e.shiftKey && (e.key === 's' || e.key === 'S')) {
-                                                    e.preventDefault();
-                                                    alert('⛔ L\'outil de capture est désactivé.');
-                                                    return false;
-                                                }
-                                            });
-
-                                            // Bloquer le copier-coller via les événements
-                                            document.addEventListener('copy', function(e) {
-                                                e.preventDefault();
-                                                alert('⛔ La copie est désactivée pour protéger ce contenu.');
-                                                return false;
-                                            });
-
-                                            document.addEventListener('cut', function(e) {
-                                                e.preventDefault();
-                                                return false;
-                                            });
-
-                                            // Surveillance du presse-papier (effacer en continu)
-                                            setInterval(function() {
-                                                if (document.hasFocus() && pdfModal{{ $contenu->id }}.classList.contains('show')) {
-                                                    try {
-                                                        navigator.clipboard.writeText('').catch(() => {});
-                                                    } catch(e) {}
-                                                }
-                                            }, 1000);
-
-                                            // Bloquer la sélection de texte via événements
-                                            document.addEventListener('selectstart', function(e) {
-                                                if (e.target.closest('#pdfModal{{ $contenu->id }}')) {
-                                                    e.preventDefault();
-                                                    return false;
-                                                }
-                                            });
-
-                                            // Détecter le changement de visibilité de la page (possible screenshot externe)
-                                            document.addEventListener('visibilitychange', function() {
-                                                if (document.hidden && pdfModal{{ $contenu->id }}.classList.contains('show')) {
-                                                    console.warn('⚠️ Changement de visibilité détecté - Action suspecte tracée');
-                                                }
-                                            });
-
-                                            // Bloquer le glisser-déposer
-                                            document.addEventListener('dragstart', function(e) {
-                                                if (e.target.closest('#pdfModal{{ $contenu->id }}')) {
-                                                    e.preventDefault();
-                                                    return false;
-                                                }
-                                            });
-
-                                            // Détecter les outils de développement (tentative de screenshot)
-                                            let devtoolsOpen = false;
-                                            const detectDevTools = () => {
-                                                const threshold = 160;
-                                                if (window.outerWidth - window.innerWidth > threshold ||
-                                                    window.outerHeight - window.innerHeight > threshold) {
-                                                    if (!devtoolsOpen) {
-                                                        devtoolsOpen = true;
-                                                        console.warn('⚠️ Les outils de développement sont ouverts. Toute tentative de copie est tracée.');
-                                                    }
-                                                } else {
-                                                    devtoolsOpen = false;
-                                                }
-                                            };
-
-                                            setInterval(detectDevTools, 1000);
-                                        })();
-                                    </script>
-
-                                    <style>
-                                        .pdf-viewer-container {
-                                            height: 100%;
-                                            display: flex;
-                                            flex-direction: column;
-                                        }
-
-                                        .pdf-canvas-wrapper {
-                                            position: relative;
-                                            overflow: auto;
-                                            flex: 1;
-                                            background: #525659;
-                                        }
-
-                                        .watermark-overlay {
-                                            position: absolute;
-                                            top: 0;
-                                            left: 0;
-                                            width: 100%;
-                                            height: 100%;
-                                            pointer-events: none;
-                                            z-index: 5;
-                                        }
-
-                                        .pdf-protection-layer {
-                                            position: absolute;
-                                            top: 0;
-                                            left: 0;
-                                            width: 100%;
-                                            height: 100%;
-                                            z-index: 15;
-                                            cursor: not-allowed;
-                                        }
-
-                                        #pdf-canvas-{{ $contenu->id }} {
-                                            -webkit-user-select: none;
-                                            -moz-user-select: none;
-                                            -ms-user-select: none;
-                                            user-select: none;
-                                            -webkit-touch-callout: none;
-                                        }
-
-                                        /* Désactiver le menu contextuel */
-                                        .pdf-canvas-wrapper,
-                                        .pdf-canvas-wrapper * {
-                                            -webkit-user-select: none;
-                                            -moz-user-select: none;
-                                            -ms-user-select: none;
-                                            user-select: none;
-                                        }
-
-                                        /* Protection contre les captures d'écran via CSS */
-                                        #pdfModal{{ $contenu->id }} {
-                                            -webkit-user-select: none;
-                                            -moz-user-select: none;
-                                            -ms-user-select: none;
-                                            user-select: none;
-                                            -webkit-touch-callout: none;
-                                            -khtml-user-select: none;
-                                        }
-
-                                        /* Empêcher le copier-coller */
-                                        #pdfModal{{ $contenu->id }} * {
-                                            -webkit-user-drag: none;
-                                            -khtml-user-drag: none;
-                                            -moz-user-drag: none;
-                                            -o-user-drag: none;
-                                            user-drag: none;
-                                        }
-
-                                        /* Message d'avertissement visible en permanence */
-                                        @media print {
-                                            #pdfModal{{ $contenu->id }} {
-                                                display: none !important;
-                                            }
-                                        }
-                                    </style>
                                 @endif
 
                             @elseif($contenu->type === 'quiz')
@@ -825,6 +341,9 @@
                                 <div class="mt-3">
                                     <button class="btn {{ $buttonClass }} mark-completed-btn"
                                             data-contenu-id="{{ $contenu->id }}"
+                                            data-contenu-titre="{{ $contenu->titre }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmCompleteModal"
                                             {{ !$canComplete ? 'disabled' : '' }}>
                                         <i class="fas fa-check-circle me-2"></i>{{ $buttonText }}
                                     </button>
@@ -982,6 +501,40 @@
     </div>
 </div>
 
+<!-- Modal de confirmation pour marquer comme complété -->
+<div class="modal fade" id="confirmCompleteModal" tabindex="-1" aria-labelledby="confirmCompleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="confirmCompleteModalLabel">
+                    <i class="fas fa-check-circle me-2"></i>Confirmer la complétion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-3">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h5 class="mb-3">Marquer comme complété</h5>
+                    <p class="text-muted mb-2">
+                        Êtes-vous sûr d'avoir terminé ce contenu ?
+                    </p>
+                    <p class="mb-0">
+                        <strong id="modal-contenu-titre"></strong>
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-success rounded-pill" id="confirmCompleteBtn">
+                    <i class="fas fa-check-circle me-2"></i>Oui, j'ai terminé
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal pour informer que le paiement est requis -->
 <div class="modal fade" id="paiementRequiredModal" tabindex="-1" aria-labelledby="paiementRequiredModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -1041,24 +594,36 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Gestion du bouton "Marquer comme complété"
-        const markCompletedButtons = document.querySelectorAll('.mark-completed-btn');
+        // Gestion du modal de confirmation "Marquer comme complété"
+        const confirmCompleteModal = document.getElementById('confirmCompleteModal');
+        const confirmCompleteBtn = document.getElementById('confirmCompleteBtn');
+        const modalTitre = document.getElementById('modal-contenu-titre');
+        let currentContenuId = null;
+        let currentButton = null;
 
-        markCompletedButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const contenuId = this.getAttribute('data-contenu-id');
+        // Quand le modal s'ouvre, récupérer l'ID du contenu et le titre
+        if (confirmCompleteModal) {
+            confirmCompleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                currentButton = button;
+                currentContenuId = button.getAttribute('data-contenu-id');
+                const contenuTitre = button.getAttribute('data-contenu-titre');
 
-                // Confirmation
-                if (!confirm('Êtes-vous sûr d\'avoir terminé ce contenu ?')) {
-                    return;
-                }
+                modalTitre.textContent = contenuTitre;
+            });
+        }
 
-                // Désactiver le bouton pendant la requête
-                this.disabled = true;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>En cours...';
+        // Quand l'utilisateur confirme
+        if (confirmCompleteBtn) {
+            confirmCompleteBtn.addEventListener('click', function() {
+                if (!currentContenuId || !currentButton) return;
+
+                // Désactiver le bouton de confirmation
+                confirmCompleteBtn.disabled = true;
+                confirmCompleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>En cours...';
 
                 // Envoyer la requête AJAX
-                fetch(`/formation/{{ $formation->id }}/module/{{ $module->id }}/contenu/${contenuId}/complete`, {
+                fetch(`/formation/{{ $formation->id }}/module/{{ $module->id }}/contenu/${currentContenuId}/complete`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1069,22 +634,37 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // Fermer le modal
+                        const modal = bootstrap.Modal.getInstance(confirmCompleteModal);
+                        modal.hide();
+
                         // Recharger la page pour afficher les changements
                         location.reload();
                     } else {
+                        // Réactiver le bouton et afficher l'erreur
+                        confirmCompleteBtn.disabled = false;
+                        confirmCompleteBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Oui, j\'ai terminé';
                         alert(data.error || 'Une erreur est survenue');
-                        this.disabled = false;
-                        this.innerHTML = '<i class="fas fa-check-circle me-2"></i>Marquer comme complété';
                     }
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
+                    confirmCompleteBtn.disabled = false;
+                    confirmCompleteBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Oui, j\'ai terminé';
                     alert('Une erreur est survenue lors de la sauvegarde');
-                    this.disabled = false;
-                    this.innerHTML = '<i class="fas fa-check-circle me-2"></i>Marquer comme complété';
                 });
             });
-        });
+        }
+
+        // Réinitialiser le bouton quand le modal se ferme
+        if (confirmCompleteModal) {
+            confirmCompleteModal.addEventListener('hidden.bs.modal', function() {
+                confirmCompleteBtn.disabled = false;
+                confirmCompleteBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Oui, j\'ai terminé';
+                currentContenuId = null;
+                currentButton = null;
+            });
+        }
     });
 </script>
 @endpush

@@ -127,10 +127,10 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-muted mb-1 small">Chiffre d'affaires</p>
-                            <h2 class="mb-0 fw-bold">{{ number_format($totalRevenue, 0, ',', ' ') }} FCFA</h2>
+                            <h2 class="mb-0 fw-bold">{{ fcfa($totalRevenue) }}</h2>
                             <p class="mb-0 small text-success mt-2">
                                 <i class="fas fa-arrow-up me-1"></i>
-                                {{ number_format($revenueThisMonth, 0, ',', ' ') }} FCFA ce mois
+                                {{ fcfa($revenueThisMonth) }} ce mois
                             </p>
                         </div>
                         <div class="stat-icon bg-success bg-opacity-10 text-success">
@@ -534,8 +534,8 @@
                                     </td>
                                     <td>{{ $sale->user->name ?? 'N/A' }}</td>
                                     <td>{{ $sale->quantite }}</td>
-                                    <td>{{ number_format($sale->catalogue->prix ?? 0, 0, ',', ' ') }} FCFA</td>
-                                    <td class="fw-bold">{{ number_format(($sale->catalogue->prix ?? 0) * $sale->quantite, 0, ',', ' ') }} FCFA</td>
+                                    <td>{{ fcfa($sale->catalogue->prix ?? 0) }}</td>
+                                    <td class="fw-bold">{{ fcfa(($sale->catalogue->prix ?? 0) * $sale->quantite) }}</td>
                                     <td>{{ $sale->created_at->format('d/m/Y H:i') }}</td>
                                 </tr>
                             @endforeach

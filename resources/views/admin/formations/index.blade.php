@@ -53,7 +53,7 @@
                                 <small class="text-muted">{{ Str::limit($formation->description, 50) }}</small>
                             </td>
                             <td class="align-middle">
-                                <span class="badge bg-success">{{ number_format($formation->prix, 2) }} €</span>
+                                <span class="badge bg-success">{{ fcfa($formation->prix) }}</span>
                             </td>
                             <td class="align-middle">
                                 <span class="badge bg-{{ $formation->niveau === 'debutant' ? 'info' : ($formation->niveau === 'intermediaire' ? 'warning' : 'danger') }}">

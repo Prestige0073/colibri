@@ -117,7 +117,14 @@
 
     @php
         // Nombre d'articles dans le panier (utilisé pour le badge du menu burger)
-$cartCount = Auth::check() ? Auth::user()->cartItems->sum('quantite') : 0;
+        $cartCount = 0;
+        if (Auth::check()) {
+            try {
+                $cartCount = Auth::user()->cartItems()->sum('quantite') ?? 0;
+            } catch (\Exception $e) {
+                $cartCount = 0;
+            }
+        }
     @endphp
 
     <!-- Topbar Start -->
@@ -231,8 +238,15 @@ $cartCount = Auth::check() ? Auth::user()->cartItems->sum('quantite') : 0;
                     <!-- Panier responsive : affiché une seule fois, badge toujours visible -->
                     <div class="ms-auto align-items-center d-flex">
                         @php
-                            $cartItems = Auth::check() ? Auth::user()->cartItems : collect();
-                            $cartCount = $cartItems->sum('quantite');
+                            $cartItems = collect();
+                            if (Auth::check()) {
+                                try {
+                                    $cartItems = Auth::user()->cartItems()->get() ?? collect();
+                                } catch (\Exception $e) {
+                                    $cartItems = collect();
+                                }
+                            }
+                            $cartCount = $cartItems->sum('quantite') ?? 0;
                         @endphp
                         <button type="button" class="btn btn-square btn-dark ms-2 position-relative"
                             data-bs-toggle="modal" data-bs-target="#cartModal" aria-label="Voir le panier"

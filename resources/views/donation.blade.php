@@ -283,23 +283,23 @@
                                     <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                                         <input type="radio" class="btn-check" name="btnradio" id="btnradio1"
                                             autocomplete="off" checked>
-                                        <label class="btn btn-light" for="btnradio1">10 €</label>
+                                        <label class="btn btn-light" for="btnradio1">5 000 FCFA</label>
 
                                         <input type="radio" class="btn-check" name="btnradio" id="btnradio2"
                                             autocomplete="off">
-                                        <label class="btn btn-light" for="btnradio2">20 €</label>
+                                        <label class="btn btn-light" for="btnradio2">10 000 FCFA</label>
 
                                         <input type="radio" class="btn-check" name="btnradio" id="btnradio3"
                                             autocomplete="off">
-                                        <label class="btn btn-light" for="btnradio3">30 €</label>
+                                        <label class="btn btn-light" for="btnradio3">15 000 FCFA</label>
 
                                         <input type="radio" class="btn-check" name="btnradio" id="btnradio4"
                                             autocomplete="off">
-                                        <label class="btn btn-light" for="btnradio4">40 €</label>
+                                        <label class="btn btn-light" for="btnradio4">25 000 FCFA</label>
 
                                         <input type="radio" class="btn-check" name="btnradio" id="btnradio5"
                                             autocomplete="off">
-                                        <label class="btn btn-light" for="btnradio5">50 €</label>
+                                        <label class="btn btn-light" for="btnradio5">50 000 FCFA</label>
                                     </div>
                                 </div>
                                 <div class="col-12">

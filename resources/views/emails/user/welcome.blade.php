@@ -21,7 +21,7 @@
 </ul>
 
 <div style="text-align: center; margin: 30px 0;">
-    <a href="{{ url('/') }}" class="button">Commencer l'exploration</a>
+    <a href="https://colibri-litteraire.com" class="button">Commencer l'exploration</a>
 </div>
 
 <p>Si vous avez des questions, n'hésitez pas à nous contacter à tout moment.</p>

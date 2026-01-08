@@ -69,6 +69,9 @@ Route::get('formation/{formation}/module/{module}', [FormationController::class,
 Route::post('formation/{formation}/module/{module}/contenu/{contenu}/complete', [FormationController::class, 'markContenuCompleted'])->middleware('auth')->name('formation.module.contenu.complete');
 Route::post('formation/{formation}/module/{module}/contenu/{contenu}/update-video-progress', [FormationController::class, 'updateVideoProgress'])->middleware('auth')->name('formation.module.contenu.update-video-progress');
 
+// Route pour le visualiseur PDF sécurisé (page dédiée)
+Route::get('formation/{formation}/module/{module}/pdf/{contenu}', [\App\Http\Controllers\PdfViewerController::class, 'show'])->middleware('auth')->name('pdf.viewer.show');
+
 // Routes pour Catalogue
 Route::get('catalogue/decouvrir', [CatalogueController::class, 'decouvrir'])->name('catalogue.decouvrir');
 Route::get('catalogue/emprunts', [CatalogueController::class, 'acheter'])->name('catalogue.acheter');
@@ -95,22 +98,21 @@ Route::middleware('auth')->group(function () {
     Route::get('paiement/kkiapay/{inscription}', [PaiementController::class, 'kkiapay'])->name('paiement.kkiapay');
     Route::match(['get', 'post'], 'paiement/kkiapay/callback', [PaiementController::class, 'kkiapayCallback'])->name('paiement.kkiapay.callback');
 
-    Route::get('paiement/lygos/{inscription}', [PaiementController::class, 'lygos'])->name('paiement.lygos');
-    Route::post('paiement/lygos/process', [PaiementController::class, 'lygosCallback'])->name('paiement.lygos.process');
-    Route::get('paiement/lygos/callback', [PaiementController::class, 'lygosCallback'])->name('paiement.lygos.callback');
-
     Route::get('paiement/paypal/{inscription}', [PaiementController::class, 'paypal'])->name('paiement.paypal');
     Route::get('paiement/paypal/callback', [PaiementController::class, 'paypalCallback'])->name('paiement.paypal.callback');
 
     Route::get('paiement/annuler/{inscription}', [PaiementController::class, 'annuler'])->name('paiement.annuler');
 
+    // Routes pour les paiements TEST/SIMULATION
+    Route::get('paiement/test/formation/{inscription}', [PaiementController::class, 'testFormation'])->name('paiement.test.formation');
+    Route::post('paiement/test/formation/{inscription}/validate', [PaiementController::class, 'testFormationValidate'])->name('paiement.test.formation.validate');
+
+    Route::get('paiement/test/catalogue/{commande}', [PaiementController::class, 'testCatalogue'])->name('paiement.test.catalogue');
+    Route::post('paiement/test/catalogue/{commande}/validate', [PaiementController::class, 'testCatalogueValidate'])->name('paiement.test.catalogue.validate');
+
     // Paiements pour commandes (catalogue)
     Route::get('paiement/catalogue/kkiapay/{commande}', [PaiementController::class, 'catalogueKkiapay'])->name('paiement.catalogue.kkiapay');
-    Route::get('paiement/catalogue/kkiapay/callback', [PaiementController::class, 'catalogueKkiapayCallback'])->name('paiement.catalogue.kkiapay.callback');
-
-    Route::get('paiement/catalogue/lygos/{commande}', [PaiementController::class, 'catalogueLygos'])->name('paiement.catalogue.lygos');
-    Route::post('paiement/catalogue/lygos/process', [PaiementController::class, 'catalogueLygosCallback'])->name('paiement.catalogue.lygos.process');
-    Route::get('paiement/catalogue/lygos/callback', [PaiementController::class, 'catalogueLygosCallback'])->name('paiement.catalogue.lygos.callback');
+    Route::match(['get', 'post'], 'paiement/catalogue/kkiapay/callback', [PaiementController::class, 'catalogueKkiapayCallback'])->name('paiement.catalogue.kkiapay.callback');
 
     Route::get('paiement/catalogue/paypal/{commande}', [PaiementController::class, 'cataloguePaypal'])->name('paiement.catalogue.paypal');
     Route::get('paiement/catalogue/paypal/callback', [PaiementController::class, 'cataloguePaypalCallback'])->name('paiement.catalogue.paypal.callback');
@@ -223,11 +225,17 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
 });
 
 
+// Route de test (sans auth)
+Route::get('test-layout', function() {
+    return view('test-layout');
+});
+
 // Routes pour le tableau de bord utilisateur
-Route::middleware('auth')->group(function () {    
+Route::middleware('auth')->group(function () {
     // Routes pour Mon compte
     Route::get('account/profil', [App\Http\Controllers\AccountController::class, 'profil'])->name('account.profil');
     Route::post('account/avatar', [App\Http\Controllers\AccountController::class, 'updateAvatar'])->name('account.avatar.update');
+    Route::post('account/profil/update', [App\Http\Controllers\AccountController::class, 'updateProfile'])->name('account.profil.update');
     Route::get('account/commandes', [App\Http\Controllers\CommandeController::class, 'mesCommandes'])->name('account.commandes');
 
     // Routes pour les quiz (front-end)

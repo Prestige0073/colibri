@@ -186,7 +186,7 @@
                                     @endphp
                                     @if($totalAmount > 0)
                                         <span class="badge bg-success">
-                                            <i class="fas fa-coins me-1"></i>{{ number_format($totalAmount, 0, ',', ' ') }} FCFA
+                                            <i class="fas fa-coins me-1"></i>{{ fcfa($totalAmount) }}
                                         </span>
                                     @endif
                                 </div>
@@ -322,7 +322,7 @@
                                                     <strong class="text-success">
                                                         <i class="fas fa-money-bill-wave me-1"></i>Total:
                                                     </strong>
-                                                    <strong class="fs-5 text-success">{{ number_format($c->total,0,',',' ') }} FCFA</strong>
+                                                    <strong class="fs-5 text-success">{{ fcfa($c->total) }}</strong>
                                                 </div>
                                             </div>
                                         </div>
@@ -403,7 +403,7 @@
                                                     </span>
                                                 </div>
                                                 <div class="small text-muted">
-                                                    {{ $ac->items->count() }} article(s) — {{ number_format($ac->total,0,',',' ') }} FCFA
+                                                    {{ $ac->items->count() }} article(s) — {{ fcfa($ac->total) }}
                                                 </div>
                                                 <a href="{{ route('admin.commandes.show', $ac->id) }}" class="btn btn-sm btn-outline-secondary mt-2 w-100">
                                                     <i class="fas fa-eye me-1"></i>Voir

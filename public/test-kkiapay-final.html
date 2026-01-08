@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test KKiaPay - Syntaxe Officielle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e88e5;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            background: #f9f9f9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 4px solid #1e88e5;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+        button {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        #log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #263238;
+            color: #aed581;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-success {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .log-error {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .log-info {
+            color: #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Test KKiaPay - Syntaxe Officielle</h1>
+
+        <div class="info">
+            <strong>✨ Implémentation selon la documentation officielle KKiaPay</strong><br>
+            - Sans paramètre "callback"<br>
+            - Utilisation des event listeners<br>
+            - WebComponent natif
+        </div>
+
+        <!-- TEST 1: WebComponent (Recommandé par KKiaPay) -->
+        <div class="test-section">
+            <h3>📌 Test 1: WebComponent (Syntaxe Officielle)</h3>
+            <p>Cette méthode utilise l'élément HTML personnalisé de KKiaPay</p>
+            <kkiapay-widget
+                amount="100"
+                key="40200980e80411f0996935de2ca9cc0f"
+                position="center"
+                sandbox="true">
+            </kkiapay-widget>
+        </div>
+
+        <!-- TEST 2: Fonction JavaScript sans callback -->
+        <div class="test-section">
+            <h3>📌 Test 2: JavaScript (sans callback)</h3>
+            <p>Utilisation de openKkiapayWidget sans le paramètre callback</p>
+            <button onclick="testJavaScript()">
+                💳 Payer 100 FCFA (JavaScript)
+            </button>
+        </div>
+
+        <!-- TEST 3: Fonction JavaScript avec sandbox=false -->
+        <div class="test-section">
+            <h3>📌 Test 3: Mode Production (sandbox=false)</h3>
+            <p><strong>⚠️ ATTENTION:</strong> Ce test utilisera le mode production</p>
+            <button onclick="testProduction()">
+                🔴 Payer 100 FCFA (PRODUCTION - RÉEL)
+            </button>
+        </div>
+
+        <div id="status" class="info" style="display:none;"></div>
+
+        <div id="log">
+            <strong>📊 Console de Logs</strong>
+            <div id="logEntries"></div>
+        </div>
+    </div>
+
+    <!-- SDK KKiaPay -->
+    <script src="https://cdn.kkiapay.me/k.js"></script>
+
+    <script>
+        // Fonction de logging
+        function log(message, type = 'info') {
+            const logEntries = document.getElementById('logEntries');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-' + type;
+            entry.textContent = `[${time}] ${message}`;
+            logEntries.appendChild(entry);
+            logEntries.parentElement.scrollTop = logEntries.parentElement.scrollHeight;
+            console.log(message);
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'info ' + (type === 'success' ? 'success' : '');
+            statusDiv.innerHTML = '<strong>' + message + '</strong>';
+        }
+
+        // Test 2: JavaScript sans callback
+        function testJavaScript() {
+            log('🚀 Ouverture du widget (JavaScript, sandbox=true)...', 'info');
+            try {
+                openKkiapayWidget({
+                    amount: 100,
+                    position: "center",
+                    data: "test-js-" + Date.now(),
+                    theme: "#1e88e5",
+                    key: "40200980e80411f0996935de2ca9cc0f",
+                    sandbox: true
+                    // PAS de paramètre "callback"
+                });
+                log('✅ Widget appelé sans erreur', 'success');
+            } catch (error) {
+                log('❌ ERREUR: ' + error.message, 'error');
+                showStatus('❌ Erreur: ' + error.message, 'error');
+            }
+        }
+
+        // Test 3: Mode Production
+        function testProduction() {
+            if (!confirm('⚠️ ATTENTION!\n\nCe test utilisera le mode PRODUCTION.\nLes paiements seront RÉELS!\n\nContinuer?')) {
+                log('❌ Test production annulé par l\'utilisateur', 'info');
+                return;
+            }
+
+            log('🔴 Ouverture du widget (PRODUCTION, sandbox=false)...', 'info');
+            try {
+                openKkiapayWidget({
+                    amount: 100,
+                    position: "center",
+                    data: "test-prod-" + Date.now(),
+                    theme: "#f44336",
+                    key: "40200980e80411f0996935de2ca9cc0f",
+                    sandbox: false  // MODE PRODUCTION
+                });
+                log('✅ Widget production appelé sans erreur', 'success');
+            } catch (error) {
+                log('❌ ERREUR: ' + error.message, 'error');
+                showStatus('❌ Erreur: ' + error.message, 'error');
+            }
+        }
+
+        // Event Listeners
+        window.addEventListener('load', function() {
+            log('📄 Page chargée et prête', 'success');
+
+            if (typeof openKkiapayWidget === 'function') {
+                log('✅ SDK KKiaPay chargé avec succès', 'success');
+            } else {
+                log('❌ SDK KKiaPay NON CHARGÉ!', 'error');
+            }
+
+            log('👂 Initialisation des event listeners...', 'info');
+        });
+
+        // Listener de succès (format officiel)
+        if (typeof addSuccessListener === 'function') {
+            addSuccessListener(function(response) {
+                log('✅✅✅ PAIEMENT RÉUSSI!', 'success');
+                log('📝 Transaction ID: ' + response.transactionId, 'success');
+                console.log('Réponse complète:', response);
+                showStatus('✅ Paiement réussi! Transaction: ' + response.transactionId, 'success');
+                alert('🎉 Paiement réussi!\n\nTransaction ID: ' + response.transactionId);
+            });
+            log('✅ addSuccessListener configuré', 'info');
+        } else {
+            log('⚠️ addSuccessListener non disponible', 'error');
+        }
+
+        // Listener d'échec (format officiel)
+        if (typeof addFailedListener === 'function') {
+            addFailedListener(function(error) {
+                log('❌ PAIEMENT ÉCHOUÉ', 'error');
+                console.error('Erreur de paiement:', error);
+                showStatus('❌ Paiement échoué', 'error');
+                alert('❌ Le paiement a échoué. Veuillez réessayer.');
+            });
+            log('✅ addFailedListener configuré', 'info');
+        } else {
+            log('⚠️ addFailedListener non disponible', 'error');
+        }
+
+        // Ancien format (au cas où)
+        if (typeof addKkiapayListener === 'function') {
+            log('ℹ️ Format addKkiapayListener disponible (ancien)', 'info');
+
+            addKkiapayListener('success', function(response) {
+                log('✅ SUCCÈS (ancien format) - ID: ' + response.transactionId, 'success');
+            });
+
+            addKkiapayListener('failed', function(response) {
+                log('❌ ÉCHEC (ancien format)', 'error');
+            });
+
+            addKkiapayListener('pending', function(response) {
+                log('⏳ EN ATTENTE', 'info');
+            });
+        }
+
+        // Capturer les erreurs
+        window.addEventListener('error', function(event) {
+            log('❌ Erreur JavaScript: ' + event.message, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            log('❌ Promesse rejetée: ' + event.reason, 'error');
+        });
+    </script>
+</body>
+</html>

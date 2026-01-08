@@ -111,7 +111,7 @@ class FormationController extends Controller
     public function traiterPaiement(Request $request, Formation $formation)
     {
         $request->validate([
-            'payment_method' => 'required|in:kkiapay,lygos,paypal',
+            'payment_method' => 'required|in:kkiapay,paypal,test',
             'inscription_id' => 'required|exists:formation_inscriptions,id',
         ]);
 
@@ -127,10 +127,10 @@ class FormationController extends Controller
 
         // Rediriger vers le gestionnaire de paiement approprié
         switch ($paymentMethod) {
+            case 'test':
+                return redirect()->route('paiement.test.formation', ['inscription' => $inscription->id]);
             case 'kkiapay':
                 return redirect()->route('paiement.kkiapay', ['inscription' => $inscription->id]);
-            case 'lygos':
-                return redirect()->route('paiement.lygos', ['inscription' => $inscription->id]);
             case 'paypal':
                 return redirect()->route('paiement.paypal', ['inscription' => $inscription->id]);
             default:

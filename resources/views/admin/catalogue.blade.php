@@ -63,7 +63,7 @@
                                     data-auteur="{{ $cat->auteur }}"
                                     data-categorie="{{ $cat->categorie }}"
                                     data-prix="{{ $cat->prix }}"
-                                    data-prix-formatted="{{ number_format($cat->prix, 0, ',', ' ') }} FCFA"
+                                    data-prix-formatted="{{ fcfa($cat->prix) }}"
                                     data-quantite="{{ $cat->quantite }}"
                                     data-image="{{ $cat->image ? asset($cat->image) : '' }}"
                                     data-pdf="{{ $cat->pdf ? asset($cat->pdf) : '' }}"
@@ -72,7 +72,7 @@
                                     <td>{{ $cat->titre }}</td>
                                     <td>{{ $cat->auteur }}</td>
                                     <td>{{ $cat->categorie }}</td>
-                                    <td>{{ number_format($cat->prix, 0, ',', ' ') }} FCFA</td>
+                                    <td>{{ fcfa($cat->prix) }}</td>
                                     <td>{{ $cat->quantite }}</td>
                                     <td>
                                         @php
@@ -239,7 +239,7 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label for="prix" class="form-label fw-bold"><i
-                                            class="fa fa-money-bill-wave me-1 text-primary"></i> Prix</label>
+                                            class="fa fa-money-bill-wave me-1 text-primary"></i> Prix (FCFA)</label>
                                     <input type="number" class="form-control rounded-3" id="prix" name="prix"
                                         placeholder="Prix" min="0" required>
                                 </div>
