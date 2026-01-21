@@ -25,11 +25,14 @@ class AccountController extends Controller
             } else {
                 $commandesEnLivraison = collect();
             }
+            // Récupérer les livres achetés (bibliothèque)
+            $livresAchetes = $user->purchasedBooks()->take(6)->get();
         } else {
             $emprunts = collect();
             $commandesEnLivraison = collect();
+            $livresAchetes = collect();
         }
-        return view('account.profil', compact('emprunts', 'commandesEnLivraison'));
+        return view('account.profil', compact('emprunts', 'commandesEnLivraison', 'livresAchetes'));
     }
 
     /**
@@ -141,6 +144,21 @@ class AccountController extends Controller
 
     public function certifications() {
         return view('account.certifications');
+    }
+
+    /**
+     * Affiche la bibliothèque personnelle avec tous les livres achetés
+     */
+    public function bibliotheque()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Veuillez vous connecter pour accéder à votre bibliothèque.');
+        }
+
+        $livresAchetes = $user->purchasedBooks()->get();
+
+        return view('account.bibliotheque', compact('livresAchetes'));
     }
     /**
      * Display a listing of the resource.

@@ -20,46 +20,42 @@ class CatalogueAdminController extends Controller
     public function create() {}
     public function store(Request $request)
     {
-        $request->validate([
-            'titre' => 'required|string|max:255',
-            'auteur' => 'required|string|max:255',
-            'categorie' => 'required|string|max:255',
-            'prix' => 'required|integer|min:0',
-            'quantite' => 'required|integer|min:0',
-            'resumer' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'pdf' => 'required|mimes:pdf|max:10000',
+        $validated = $request->validate([
+            'titre' => 'nullable|string|max:255',
+            'auteur' => 'nullable|string|max:255',
+            'categorie' => 'nullable|string|max:255',
+            'prix' => 'nullable|integer|min:0',
+            'quantite' => 'nullable|integer|min:0',
+            'resumer' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'pdf' => 'nullable|mimes:pdf',
         ]);
 
         // Gestion image
-        $imagePath = 'img/livres';
-        if (!file_exists(public_path($imagePath))) {
-            mkdir(public_path($imagePath), 0775, true);
+        if ($request->hasFile('image')) {
+            $imagePath = 'img/livres';
+            if (!file_exists(public_path($imagePath))) {
+                mkdir(public_path($imagePath), 0775, true);
+            }
+            $imageName = uniqid('img_') . '.' . $request->image->extension();
+            $request->image->move(public_path($imagePath), $imageName);
+            $validated['image'] = $imagePath . '/' . $imageName;
         }
-        $imageName = uniqid('img_') . '.' . $request->image->extension();
-        $request->image->move(public_path($imagePath), $imageName);
-        $imageUrl = $imagePath . '/' . $imageName;
 
         // Gestion PDF
-        $pdfPath = 'pdf/catalogue';
-        if (!file_exists(public_path($pdfPath))) {
-            mkdir(public_path($pdfPath), 0775, true);
+        if ($request->hasFile('pdf')) {
+            $pdfPath = 'pdf/catalogue';
+            if (!file_exists(public_path($pdfPath))) {
+                mkdir(public_path($pdfPath), 0775, true);
+            }
+            $pdfName = uniqid('pdf_') . '.' . $request->pdf->extension();
+            $request->pdf->move(public_path($pdfPath), $pdfName);
+            $validated['pdf'] = $pdfPath . '/' . $pdfName;
         }
-        $pdfName = uniqid('pdf_') . '.' . $request->pdf->extension();
-        $request->pdf->move(public_path($pdfPath), $pdfName);
-        $pdfUrl = $pdfPath . '/' . $pdfName;
 
-        $catalogue = Catalogue::create([
-            'titre' => $request->titre,
-            'auteur' => $request->auteur,
-            'categorie' => $request->categorie,
-            'prix' => $request->prix,
-            'quantite' => $request->quantite,
-            'type_categorie' => 'catalogue',
-            'resumer' => $request->resumer,
-            'image' => $imageUrl,
-            'pdf' => $pdfUrl,
-        ]);
+        $validated['type_categorie'] = 'catalogue';
+
+        Catalogue::create($validated);
 
         return redirect()->route('admin.catalogue.index')->with('success', 'Livre ajouté avec succès !');
     }
@@ -68,15 +64,16 @@ class CatalogueAdminController extends Controller
     public function update(Request $request, $id)
     {
         $catalogue = Catalogue::findOrFail($id);
-        $request->validate([
-            'titre' => 'required|string|max:255',
-            'auteur' => 'required|string|max:255',
-            'categorie' => 'required|string|max:255',
-            'prix' => 'required|integer|min:0',
-            'quantite' => 'required|integer|min:0',
-            'resumer' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'pdf' => 'nullable|mimes:pdf|max:10000',
+
+        $validated = $request->validate([
+            'titre' => 'nullable|string|max:255',
+            'auteur' => 'nullable|string|max:255',
+            'categorie' => 'nullable|string|max:255',
+            'prix' => 'nullable|integer|min:0',
+            'quantite' => 'nullable|integer|min:0',
+            'resumer' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'pdf' => 'nullable|mimes:pdf',
         ]);
 
         // Gestion image
@@ -91,7 +88,7 @@ class CatalogueAdminController extends Controller
             }
             $imageName = uniqid('img_') . '.' . $request->image->extension();
             $request->image->move(public_path($imagePath), $imageName);
-            $catalogue->image = $imagePath . '/' . $imageName;
+            $validated['image'] = $imagePath . '/' . $imageName;
         }
 
         // Gestion PDF
@@ -106,17 +103,12 @@ class CatalogueAdminController extends Controller
             }
             $pdfName = uniqid('pdf_') . '.' . $request->pdf->extension();
             $request->pdf->move(public_path($pdfPath), $pdfName);
-            $catalogue->pdf = $pdfPath . '/' . $pdfName;
+            $validated['pdf'] = $pdfPath . '/' . $pdfName;
         }
 
-        $catalogue->titre = $request->titre;
-        $catalogue->auteur = $request->auteur;
-        $catalogue->categorie = $request->categorie;
-        $catalogue->prix = $request->prix;
-        $catalogue->quantite = $request->quantite;
-        $catalogue->type_categorie = 'catalogue';
-        $catalogue->resumer = $request->resumer;
-        $catalogue->save();
+        $validated['type_categorie'] = 'catalogue';
+
+        $catalogue->update($validated);
 
         return redirect()->route('admin.catalogue.index')->with('success', 'Livre modifié avec succès !');
     }

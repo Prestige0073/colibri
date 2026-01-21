@@ -46,9 +46,13 @@
                                 <small class="text-muted">{{ Str::limit($module->description, 50) }}</small>
                             </td>
                             <td class="align-middle">
-                                <a href="{{ route('admin.formations.show', $module->formation) }}" class="text-decoration-none">
-                                    {{ $module->formation->titre }}
-                                </a>
+                                @if($module->formation)
+                                    <a href="{{ route('admin.formations.show', $module->formation) }}" class="text-decoration-none">
+                                        {{ $module->formation->titre }}
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
                             </td>
                             <td class="align-middle">
                                 {{ $module->duree ?? '-' }}

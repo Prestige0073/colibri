@@ -13,7 +13,7 @@
                     <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Modifier l'utilisateur</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.users.update', $user) }}" method="POST">
+                    <form action="{{ route('admin.users.update', $user) }}" method="POST" class="needs-validation-confirm">
                         @csrf
                         @method('PUT')
 
@@ -25,7 +25,7 @@
                                    id="name"
                                    name="name"
                                    value="{{ old('name', $user->name) }}"
-                                   required>
+                                   data-important="true">
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -39,7 +39,7 @@
                                    id="email"
                                    name="email"
                                    value="{{ old('email', $user->email) }}"
-                                   required>
+                                   data-important="true">
                             @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -48,7 +48,7 @@
                         <!-- Rôle -->
                         <div class="mb-3">
                             <label for="role" class="form-label">Rôle <span class="text-danger">*</span></label>
-                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
+                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" data-important="true">
                                 <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>Utilisateur</option>
                                 <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Administrateur</option>
                             </select>
@@ -100,4 +100,11 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de confirmation -->
+@include('partials.confirmation-modal')
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/form-validation.js') }}"></script>
+@endpush

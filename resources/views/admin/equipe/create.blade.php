@@ -58,75 +58,21 @@
                             @enderror
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}">
-                                @error('email')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="telephone" class="form-label">Téléphone</label>
-                                <input type="text" class="form-control @error('telephone') is-invalid @enderror" id="telephone" name="telephone" value="{{ old('telephone') }}">
-                                @error('telephone')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}">
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Réseaux sociaux</label>
-                            <div class="row g-2">
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fab fa-linkedin"></i></span>
-                                        <input type="url" class="form-control @error('linkedin') is-invalid @enderror" name="linkedin" placeholder="URL LinkedIn" value="{{ old('linkedin') }}">
-                                    </div>
-                                    @error('linkedin')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fab fa-twitter"></i></span>
-                                        <input type="text" class="form-control @error('twitter') is-invalid @enderror" name="twitter" placeholder="@username" value="{{ old('twitter') }}">
-                                    </div>
-                                    @error('twitter')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fab fa-facebook"></i></span>
-                                        <input type="url" class="form-control @error('facebook') is-invalid @enderror" name="facebook" placeholder="URL Facebook" value="{{ old('facebook') }}">
-                                    </div>
-                                    @error('facebook')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="ordre" class="form-label">Ordre d'affichage</label>
-                                <input type="number" class="form-control @error('ordre') is-invalid @enderror" id="ordre" name="ordre" value="{{ old('ordre', 0) }}" min="0">
-                                <small class="text-muted">Plus le numéro est petit, plus il apparaît en premier</small>
-                                @error('ordre')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Statut</label>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="actif" name="actif" {{ old('actif', true) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="actif">
-                                        Membre actif (visible sur le site)
-                                    </label>
-                                </div>
+                            <label class="form-label">Statut</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="actif" name="actif" {{ old('actif', true) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="actif">
+                                    Membre actif (visible sur le site)
+                                </label>
                             </div>
                         </div>
 
@@ -155,11 +101,11 @@
                         <li><strong>Poste</strong> : Fonction dans l'organisation</li>
                     </ul>
 
-                    <h6 class="mt-3">Ordre d'affichage</h6>
-                    <p class="small">Définit l'ordre d'apparition sur la page équipe. Les membres avec un ordre plus petit apparaissent en premier.</p>
-
                     <h6 class="mt-3">Photo</h6>
-                    <p class="small">Taille recommandée : 400x400 pixels. Formats acceptés : JPG, PNG, GIF.</p>
+                    <p class="small">Taille recommandée : 400x400 pixels. Formats acceptés : JPG, PNG, GIF, WEBP.</p>
+
+                    <h6 class="mt-3">Statut</h6>
+                    <p class="small">Désactivez le statut pour masquer temporairement le membre du site public sans le supprimer.</p>
                 </div>
             </div>
         </div>

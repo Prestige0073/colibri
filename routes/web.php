@@ -237,6 +237,8 @@ Route::middleware('auth')->group(function () {
     Route::post('account/avatar', [App\Http\Controllers\AccountController::class, 'updateAvatar'])->name('account.avatar.update');
     Route::post('account/profil/update', [App\Http\Controllers\AccountController::class, 'updateProfile'])->name('account.profil.update');
     Route::get('account/commandes', [App\Http\Controllers\CommandeController::class, 'mesCommandes'])->name('account.commandes');
+    Route::get('account/bibliotheque', [App\Http\Controllers\AccountController::class, 'bibliotheque'])->name('account.bibliotheque');
+    Route::get('bibliotheque/lire/{catalogue}', [BibliothequeController::class, 'lire'])->name('bibliotheque.lire');
 
     // Routes pour les quiz (front-end)
     Route::get('quiz/{quiz}', [FrontQuizController::class, 'show'])->name('quiz.show');

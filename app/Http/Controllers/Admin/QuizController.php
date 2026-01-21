@@ -35,18 +35,24 @@ class QuizController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'titre' => 'required|string|max:255',
+            'titre' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'formation_id' => 'nullable|exists:formations,id',
             'module_id' => 'nullable|exists:modules,id',
             'duree_minutes' => 'nullable|integer|min:1',
-            'note_passage' => 'required|integer|min:0|max:100',
-            'nombre_tentatives' => 'required|integer|min:1|max:10',
+            'note_passage' => 'nullable|integer|min:0|max:100',
+            'nombre_tentatives' => 'nullable|integer|min:1|max:10',
             'afficher_reponses' => 'boolean',
             'melanger_questions' => 'boolean',
             'melanger_options' => 'boolean',
             'active' => 'boolean',
         ]);
+
+        // Gérer les checkboxes
+        $validated['active'] = $request->has('active') ? 1 : 0;
+        $validated['afficher_reponses'] = $request->has('afficher_reponses') ? 1 : 0;
+        $validated['melanger_questions'] = $request->has('melanger_questions') ? 1 : 0;
+        $validated['melanger_options'] = $request->has('melanger_options') ? 1 : 0;
 
         // S'assurer qu'au moins un lien existe (formation OU module)
         if (!$request->formation_id && !$request->module_id) {
@@ -84,18 +90,24 @@ class QuizController extends Controller
     public function update(Request $request, Quiz $quiz)
     {
         $validated = $request->validate([
-            'titre' => 'required|string|max:255',
+            'titre' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'formation_id' => 'nullable|exists:formations,id',
             'module_id' => 'nullable|exists:modules,id',
             'duree_minutes' => 'nullable|integer|min:1',
-            'note_passage' => 'required|integer|min:0|max:100',
-            'nombre_tentatives' => 'required|integer|min:1|max:10',
+            'note_passage' => 'nullable|integer|min:0|max:100',
+            'nombre_tentatives' => 'nullable|integer|min:1|max:10',
             'afficher_reponses' => 'boolean',
             'melanger_questions' => 'boolean',
             'melanger_options' => 'boolean',
             'active' => 'boolean',
         ]);
+
+        // Gérer les checkboxes
+        $validated['active'] = $request->has('active') ? 1 : 0;
+        $validated['afficher_reponses'] = $request->has('afficher_reponses') ? 1 : 0;
+        $validated['melanger_questions'] = $request->has('melanger_questions') ? 1 : 0;
+        $validated['melanger_options'] = $request->has('melanger_options') ? 1 : 0;
 
         // S'assurer qu'au moins un lien existe
         if (!$request->formation_id && !$request->module_id) {

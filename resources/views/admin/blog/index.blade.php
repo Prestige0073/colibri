@@ -165,12 +165,18 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="{{ route('blog.show', $article->slug) }}"
-                                               class="btn btn-sm btn-info"
-                                               title="Voir"
-                                               target="_blank">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
+                                            @if($article->slug)
+                                                <a href="{{ route('blog.show', $article->slug) }}"
+                                                   class="btn btn-sm btn-info"
+                                                   title="Voir"
+                                                   target="_blank">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @else
+                                                <button class="btn btn-sm btn-secondary" title="Slug manquant" disabled>
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            @endif
 
                                             <a href="{{ route('admin.blog.edit', $article->id) }}"
                                                class="btn btn-sm btn-primary"

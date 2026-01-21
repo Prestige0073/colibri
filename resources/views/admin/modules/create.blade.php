@@ -13,13 +13,13 @@
                     <h4 class="mb-0"><i class="fas fa-plus me-2"></i>Créer un Nouveau Module</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.modules.store') }}" method="POST">
+                    <form action="{{ route('admin.modules.store') }}" method="POST" class="needs-validation-confirm">
                         @csrf
 
                         <!-- Formation -->
                         <div class="mb-3">
                             <label for="formation_id" class="form-label">Formation <span class="text-danger">*</span></label>
-                            <select class="form-select @error('formation_id') is-invalid @enderror" id="formation_id" name="formation_id" required>
+                            <select class="form-select @error('formation_id') is-invalid @enderror" id="formation_id" name="formation_id" data-important="true">
                                 <option value="">-- Sélectionner une formation --</option>
                                 @foreach($formations as $formation)
                                     <option value="{{ $formation->id }}" {{ old('formation_id', request('formation_id')) == $formation->id ? 'selected' : '' }}>
@@ -36,7 +36,7 @@
                             <!-- Titre -->
                             <div class="col-md-9 mb-3">
                                 <label for="titre" class="form-label">Titre du module <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre') }}" required>
+                                <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre') }}" data-important="true">
                                 @error('titre')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -45,7 +45,7 @@
                             <!-- Ordre -->
                             <div class="col-md-3 mb-3">
                                 <label for="ordre" class="form-label">Ordre <span class="text-danger">*</span></label>
-                                <input type="number" min="0" class="form-control @error('ordre') is-invalid @enderror" id="ordre" name="ordre" value="{{ old('ordre', 1) }}" required>
+                                <input type="number" min="0" class="form-control @error('ordre') is-invalid @enderror" id="ordre" name="ordre" value="{{ old('ordre', 1) }}" data-important="true">
                                 @error('ordre')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -96,4 +96,11 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de confirmation -->
+@include('partials.confirmation-modal')
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/form-validation.js') }}"></script>
+@endpush

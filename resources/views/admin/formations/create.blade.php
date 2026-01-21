@@ -13,14 +13,14 @@
                     <h4 class="mb-0"><i class="fas fa-plus me-2"></i>Créer une Nouvelle Formation</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.formations.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.formations.store') }}" method="POST" enctype="multipart/form-data" class="needs-validation-confirm">
                         @csrf
 
                         <div class="row">
                             <!-- Titre -->
                             <div class="col-md-8 mb-3">
                                 <label for="titre" class="form-label">Titre de la formation <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre') }}" required>
+                                <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre') }}" data-important="true">
                                 @error('titre')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -29,7 +29,7 @@
                             <!-- Prix -->
                             <div class="col-md-4 mb-3">
                                 <label for="prix" class="form-label">Prix (FCFA) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" min="0" class="form-control @error('prix') is-invalid @enderror" id="prix" name="prix" value="{{ old('prix', 0) }}" required>
+                                <input type="number" step="0.01" min="0" class="form-control @error('prix') is-invalid @enderror" id="prix" name="prix" value="{{ old('prix', 0) }}" data-important="true">
                                 @error('prix')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -39,7 +39,7 @@
                         <!-- Description -->
                         <div class="mb-3">
                             <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="4" required>{{ old('description') }}</textarea>
+                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="4" data-important="true">{{ old('description') }}</textarea>
                             @error('description')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -59,7 +59,7 @@
                             <!-- Niveau -->
                             <div class="col-md-4 mb-3">
                                 <label for="niveau" class="form-label">Niveau <span class="text-danger">*</span></label>
-                                <select class="form-select @error('niveau') is-invalid @enderror" id="niveau" name="niveau" required>
+                                <select class="form-select @error('niveau') is-invalid @enderror" id="niveau" name="niveau" data-important="true">
                                     <option value="">-- Sélectionner --</option>
                                     <option value="debutant" {{ old('niveau') === 'debutant' ? 'selected' : '' }}>Débutant</option>
                                     <option value="intermediaire" {{ old('niveau') === 'intermediaire' ? 'selected' : '' }}>Intermédiaire</option>
@@ -145,4 +145,12 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de confirmation -->
+@include('partials.confirmation-modal')
+
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/form-validation.js') }}"></script>
+@endpush

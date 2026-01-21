@@ -21,16 +21,16 @@ class FormationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'titre' => 'required|string|max:255',
-            'description' => 'required|string',
+            'titre' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
             'objectifs' => 'nullable|string',
-            'prix' => 'required|numeric|min:0',
+            'prix' => 'nullable|numeric|min:0',
             'duree' => 'nullable|string',
-            'niveau' => 'required|in:debutant,intermediaire,avance',
+            'niveau' => 'nullable|in:debutant,intermediaire,avance',
             'categorie' => 'nullable|string',
             'prerequis' => 'nullable|string',
             'note_minimale_certification' => 'nullable|integer|min:0|max:100',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image',
             'active' => 'boolean',
         ]);
 
@@ -40,6 +40,9 @@ class FormationController extends Controller
             $file->move(public_path('img/formations'), $filename);
             $validated['image'] = 'img/formations/'.$filename;
         }
+
+        // Gérer le champ active (checkbox)
+        $validated['active'] = $request->has('active') ? 1 : 0;
 
         Formation::create($validated);
         return redirect()->route('admin.formations.index')->with('success', 'Formation créée avec succès.');
@@ -59,16 +62,16 @@ class FormationController extends Controller
     public function update(Request $request, Formation $formation)
     {
         $validated = $request->validate([
-            'titre' => 'required|string|max:255',
-            'description' => 'required|string',
+            'titre' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
             'objectifs' => 'nullable|string',
-            'prix' => 'required|numeric|min:0',
+            'prix' => 'nullable|numeric|min:0',
             'duree' => 'nullable|string',
-            'niveau' => 'required|in:debutant,intermediaire,avance',
+            'niveau' => 'nullable|in:debutant,intermediaire,avance',
             'categorie' => 'nullable|string',
             'prerequis' => 'nullable|string',
             'note_minimale_certification' => 'nullable|integer|min:0|max:100',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image',
             'active' => 'boolean',
         ]);
 
@@ -78,6 +81,9 @@ class FormationController extends Controller
             $file->move(public_path('img/formations'), $filename);
             $validated['image'] = 'img/formations/'.$filename;
         }
+
+        // Gérer le champ active (checkbox)
+        $validated['active'] = $request->has('active') ? 1 : 0;
 
         $formation->update($validated);
         return redirect()->route('admin.formations.index')->with('success', 'Formation modifiée avec succès.');

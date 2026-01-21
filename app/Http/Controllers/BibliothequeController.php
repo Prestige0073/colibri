@@ -49,4 +49,37 @@ class BibliothequeController extends Controller
         $emprunts = $user ? $user->emprunts()->with('livre')->orderByDesc('created_at')->get() : collect();
         return view('catalogue.acheter', compact('livres', 'emprunts'));
     }
+
+    /**
+     * Affiche le visualiseur PDF sécurisé pour un livre acheté
+     */
+    public function lire($catalogueId)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login')
+                ->with('error', 'Vous devez vous connecter pour accéder à ce livre.');
+        }
+
+        // Vérifier que le livre existe
+        $livre = \App\Models\Catalogue::findOrFail($catalogueId);
+
+        // Vérifier que l'utilisateur a bien acheté ce livre
+        if (!$user->hasPurchasedBook($catalogueId)) {
+            return redirect()->route('account.bibliotheque')
+                ->with('error', 'Vous n\'avez pas accès à ce livre. Veuillez l\'acheter pour y accéder.');
+        }
+
+        // Vérifier que le livre a un PDF
+        if (!$livre->pdf) {
+            return redirect()->route('account.bibliotheque')
+                ->with('error', 'Ce livre n\'a pas de version PDF disponible.');
+        }
+
+        // Afficher le visualiseur PDF sécurisé
+        return view('bibliotheque.lire', [
+            'livre' => $livre,
+            'user' => $user,
+        ]);
+    }
 }

@@ -23,13 +23,16 @@ class ModuleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'formation_id' => 'required|exists:formations,id',
-            'titre' => 'required|string|max:255',
+            'formation_id' => 'nullable|exists:formations,id',
+            'titre' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'duree' => 'nullable|string',
-            'ordre' => 'required|integer',
+            'ordre' => 'nullable|integer',
             'active' => 'boolean',
         ]);
+
+        $validated['active'] = $request->has('active') ? 1 : 0;
+
         Module::create($validated);
         return redirect()->route('admin.modules.index')->with('success', 'Module créé avec succès.');
     }
@@ -48,13 +51,16 @@ class ModuleController extends Controller
     public function update(Request $request, Module $module)
     {
         $validated = $request->validate([
-            'formation_id' => 'required|exists:formations,id',
-            'titre' => 'required|string|max:255',
+            'formation_id' => 'nullable|exists:formations,id',
+            'titre' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'duree' => 'nullable|string',
-            'ordre' => 'required|integer',
+            'ordre' => 'nullable|integer',
             'active' => 'boolean',
         ]);
+
+        $validated['active'] = $request->has('active') ? 1 : 0;
+
         $module->update($validated);
         return redirect()->route('admin.modules.index')->with('success', 'Module modifié avec succès.');
     }

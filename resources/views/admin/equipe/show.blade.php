@@ -41,7 +41,6 @@
                         @else
                             <span class="badge bg-secondary"><i class="fas fa-times me-1"></i>Inactif</span>
                         @endif
-                        <span class="badge bg-info"><i class="fas fa-sort me-1"></i>Ordre: {{ $membre->ordre }}</span>
                     </div>
 
                     <div class="d-grid gap-2">
@@ -65,68 +64,18 @@
                     <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations générales</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <strong><i class="fas fa-envelope me-2 text-primary"></i>Email :</strong>
-                            @if($membre->email)
-                                <a href="mailto:{{ $membre->email }}">{{ $membre->email }}</a>
-                            @else
-                                <span class="text-muted">Non renseigné</span>
-                            @endif
-                        </div>
-                        <div class="col-md-6">
-                            <strong><i class="fas fa-phone me-2 text-primary"></i>Téléphone :</strong>
-                            @if($membre->telephone)
-                                <a href="tel:{{ $membre->telephone }}">{{ $membre->telephone }}</a>
-                            @else
-                                <span class="text-muted">Non renseigné</span>
-                            @endif
-                        </div>
+                    <div class="mb-3">
+                        <strong><i class="fas fa-envelope me-2 text-primary"></i>Email :</strong>
+                        @if($membre->email)
+                            <a href="mailto:{{ $membre->email }}">{{ $membre->email }}</a>
+                        @else
+                            <span class="text-muted">Non renseigné</span>
+                        @endif
                     </div>
 
                     <div class="mb-3">
                         <strong><i class="fas fa-align-left me-2 text-primary"></i>Biographie :</strong>
                         <p class="mt-2">{{ $membre->bio ?? 'Aucune biographie' }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-share-alt me-2"></i>Réseaux sociaux</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <strong><i class="fab fa-linkedin me-2 text-primary"></i>LinkedIn :</strong><br>
-                            @if($membre->linkedin)
-                                <a href="{{ $membre->linkedin }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
-                                    <i class="fab fa-linkedin me-1"></i>Voir le profil
-                                </a>
-                            @else
-                                <span class="text-muted">Non renseigné</span>
-                            @endif
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <strong><i class="fab fa-twitter me-2 text-info"></i>Twitter :</strong><br>
-                            @if($membre->twitter)
-                                <a href="https://twitter.com/{{ ltrim($membre->twitter, '@') }}" target="_blank" class="btn btn-sm btn-outline-info mt-2">
-                                    <i class="fab fa-twitter me-1"></i>{{ $membre->twitter }}
-                                </a>
-                            @else
-                                <span class="text-muted">Non renseigné</span>
-                            @endif
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <strong><i class="fab fa-facebook me-2 text-primary"></i>Facebook :</strong><br>
-                            @if($membre->facebook)
-                                <a href="{{ $membre->facebook }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
-                                    <i class="fab fa-facebook me-1"></i>Voir le profil
-                                </a>
-                            @else
-                                <span class="text-muted">Non renseigné</span>
-                            @endif
-                        </div>
                     </div>
                 </div>
             </div>

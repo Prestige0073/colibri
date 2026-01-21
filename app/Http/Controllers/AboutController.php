@@ -12,7 +12,7 @@ class AboutController extends Controller
      */
     public function index()
     {
-        $membres = Equipe::where('actif', true)->orderBy('ordre')->get();
+        $membres = Equipe::where('actif', true)->orderBy('created_at', 'desc')->get();
         $totalMembres = $membres->count();
 
         return view('about', compact('membres', 'totalMembres'));

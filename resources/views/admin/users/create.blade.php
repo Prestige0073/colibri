@@ -13,7 +13,7 @@
                     <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Créer un nouvel utilisateur</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.users.store') }}" method="POST">
+                    <form action="{{ route('admin.users.store') }}" method="POST" class="needs-validation-confirm">
                         @csrf
 
                         <!-- Nom -->
@@ -24,7 +24,7 @@
                                    id="name"
                                    name="name"
                                    value="{{ old('name') }}"
-                                   required
+                                   data-important="true"
                                    autofocus>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -39,7 +39,7 @@
                                    id="email"
                                    name="email"
                                    value="{{ old('email') }}"
-                                   required>
+                                   data-important="true">
                             @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -48,7 +48,7 @@
                         <!-- Rôle -->
                         <div class="mb-3">
                             <label for="role" class="form-label">Rôle <span class="text-danger">*</span></label>
-                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
+                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" data-important="true">
                                 <option value="">-- Sélectionner un rôle --</option>
                                 <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>Utilisateur</option>
                                 <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Administrateur</option>
@@ -67,7 +67,7 @@
                                    class="form-control @error('password') is-invalid @enderror"
                                    id="password"
                                    name="password"
-                                   required>
+                                   data-important="true">
                             <small class="form-text text-muted">Minimum 8 caractères</small>
                             @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -79,8 +79,7 @@
                             <input type="password"
                                    class="form-control"
                                    id="password_confirmation"
-                                   name="password_confirmation"
-                                   required>
+                                   name="password_confirmation">
                         </div>
 
                         <!-- Boutons d'action -->
@@ -98,4 +97,11 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de confirmation -->
+@include('partials.confirmation-modal')
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/form-validation.js') }}"></script>
+@endpush

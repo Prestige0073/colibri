@@ -32,8 +32,8 @@
                         <!-- Image mise en avant -->
                         @if($article->featured_image)
                             <div class="position-relative overflow-hidden" style="max-height: 500px;">
-                                <img src="{{ asset('storage/' . $article->featured_image) }}"
-                                     alt="{{ $article->title }}"
+                                <img src="{{ asset($article->featured_image) }}"
+                                     alt="{{ $article->title ?? 'Article' }}"
                                      class="w-100"
                                      style="object-fit: cover;">
                             </div>

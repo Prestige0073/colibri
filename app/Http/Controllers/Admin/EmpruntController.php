@@ -64,8 +64,8 @@ class EmpruntController extends Controller
             'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
             'resumer' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'pdf' => 'nullable|mimes:pdf|max:10000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'pdf' => 'nullable|mimes:pdf',
         ]);
 
         // Gestion de l'image
@@ -161,8 +161,8 @@ class EmpruntController extends Controller
             'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
             'resumer' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'pdf' => 'nullable|mimes:pdf|max:10000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'pdf' => 'nullable|mimes:pdf',
         ]);
 
         // Gestion de l'image

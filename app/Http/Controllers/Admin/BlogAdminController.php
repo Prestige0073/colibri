@@ -39,33 +39,33 @@ class BlogAdminController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'nullable|string|max:255',
             'excerpt' => 'nullable|string',
-            'content' => 'required|string',
-            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'status' => 'required|in:draft,published',
-        ], [
-            'title.required' => 'Le titre est requis.',
-            'content.required' => 'Le contenu est requis.',
-            'featured_image.image' => 'Le fichier doit être une image.',
-            'featured_image.mimes' => 'L\'image doit être au format JPEG, PNG, JPG, GIF ou WEBP.',
-            'featured_image.max' => 'L\'image ne doit pas dépasser 2 Mo.',
+            'content' => 'nullable|string',
+            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'status' => 'nullable|in:draft,published',
         ]);
 
         // Gérer l'upload de l'image mise en avant
         if ($request->hasFile('featured_image')) {
-            $validated['featured_image'] = $request->file('featured_image')->store('blog', 'public');
+            $imagePath = 'img/blog';
+            if (!file_exists(public_path($imagePath))) {
+                mkdir(public_path($imagePath), 0775, true);
+            }
+            $imageName = uniqid('blog_') . '.' . $request->featured_image->extension();
+            $request->featured_image->move(public_path($imagePath), $imageName);
+            $validated['featured_image'] = $imagePath . '/' . $imageName;
         }
 
         // Définir l'auteur
         $validated['author_id'] = Auth::id();
 
         // Définir la date de publication si publié
-        if ($validated['status'] === 'published') {
+        if (isset($validated['status']) && $validated['status'] === 'published') {
             $validated['published_at'] = now();
         }
 
-        $article = Article::create($validated);
+        Article::create($validated);
 
         return redirect()->route('admin.blog.index')
                         ->with('success', 'Article créé avec succès.');
@@ -88,33 +88,35 @@ class BlogAdminController extends Controller
         $article = Article::findOrFail($id);
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'nullable|string|max:255',
             'excerpt' => 'nullable|string',
-            'content' => 'required|string',
-            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'status' => 'required|in:draft,published',
-        ], [
-            'title.required' => 'Le titre est requis.',
-            'content.required' => 'Le contenu est requis.',
-            'featured_image.image' => 'Le fichier doit être une image.',
-            'featured_image.mimes' => 'L\'image doit être au format JPEG, PNG, JPG, GIF ou WEBP.',
-            'featured_image.max' => 'L\'image ne doit pas dépasser 2 Mo.',
+            'content' => 'nullable|string',
+            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'status' => 'nullable|in:draft,published',
         ]);
 
         // Gérer l'upload de l'image
         if ($request->hasFile('featured_image')) {
-            // Supprimer l'ancienne image si elle existe
-            if ($article->featured_image && Storage::disk('public')->exists($article->featured_image)) {
-                Storage::disk('public')->delete($article->featured_image);
+            $imagePath = 'img/blog';
+            if (!file_exists(public_path($imagePath))) {
+                mkdir(public_path($imagePath), 0775, true);
             }
-            $validated['featured_image'] = $request->file('featured_image')->store('blog', 'public');
+            // Supprimer l'ancienne image si elle existe
+            if ($article->featured_image && file_exists(public_path($article->featured_image))) {
+                @unlink(public_path($article->featured_image));
+            }
+            $imageName = uniqid('blog_') . '.' . $request->featured_image->extension();
+            $request->featured_image->move(public_path($imagePath), $imageName);
+            $validated['featured_image'] = $imagePath . '/' . $imageName;
         }
 
         // Mettre à jour la date de publication
-        if ($validated['status'] === 'published' && $article->status === 'draft') {
-            $validated['published_at'] = now();
-        } elseif ($validated['status'] === 'draft') {
-            $validated['published_at'] = null;
+        if (isset($validated['status'])) {
+            if ($validated['status'] === 'published' && $article->status === 'draft') {
+                $validated['published_at'] = now();
+            } elseif ($validated['status'] === 'draft') {
+                $validated['published_at'] = null;
+            }
         }
 
         $article->update($validated);
@@ -131,8 +133,8 @@ class BlogAdminController extends Controller
         $article = Article::findOrFail($id);
 
         // Supprimer l'image associée
-        if ($article->featured_image && Storage::disk('public')->exists($article->featured_image)) {
-            Storage::disk('public')->delete($article->featured_image);
+        if ($article->featured_image && file_exists(public_path($article->featured_image))) {
+            @unlink(public_path($article->featured_image));
         }
 
         $article->delete();

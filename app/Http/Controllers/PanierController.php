@@ -49,6 +49,21 @@ class PanierController extends Controller
             return redirect()->back()->with('error', 'Vous devez être connecté pour ajouter au panier.');
         }
 
+        // Vérifier si l'utilisateur a déjà acheté ce livre
+        if ($user->hasPurchasedBook($request->catalogue_id)) {
+            $catalogue = \App\Models\Catalogue::find($request->catalogue_id);
+            $message = "Vous possédez déjà '{$catalogue->titre}' dans votre bibliothèque personnelle.";
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                    'already_owned' => true
+                ], 400);
+            }
+            return redirect()->back()->with('error', $message);
+        }
+
         $item = CartItem::where('user_id', $user->id)
             ->where('catalogue_id', $request->catalogue_id)
             ->first();

@@ -25,7 +25,7 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <form action="{{ route('admin.blog.update', $article->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.blog.update', $article->id) }}" method="POST" enctype="multipart/form-data" class="needs-validation-confirm">
                         @csrf
                         @method('PUT')
 
@@ -41,7 +41,7 @@
                                    name="title"
                                    placeholder="Entrez un titre accrocheur..."
                                    value="{{ old('title', $article->title) }}"
-                                   required>
+                                   data-important="true">
                             @error('title')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -72,7 +72,8 @@
                             <div id="editor" style="height: 400px; background: white;"></div>
                             <textarea class="form-control @error('content') is-invalid @enderror d-none"
                                       id="content"
-                                      name="content">{{ old('content', $article->content) }}</textarea>
+                                      name="content"
+                                      data-important="true">{{ old('content', $article->content) }}</textarea>
                             @error('content')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -178,6 +179,8 @@
         </div>
     </div>
 </div>
+<!-- Modal de confirmation -->
+@include('partials.confirmation-modal')
 @endsection
 
 @push('styles')
@@ -186,6 +189,7 @@
 @endpush
 
 @push('scripts')
+<script src="{{ asset('js/form-validation.js') }}"></script>
 <!-- Quill JS -->
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script>

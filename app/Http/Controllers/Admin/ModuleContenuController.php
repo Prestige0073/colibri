@@ -16,13 +16,13 @@ class ModuleContenuController extends Controller
     public function store(Request $request, Module $module)
     {
         $validated = $request->validate([
-            'type' => 'required|in:video,pdf,audio,image,texte',
-            'titre' => 'required|string|max:255',
+            'type' => 'nullable|in:video,pdf,audio,image,texte',
+            'titre' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'fichier' => 'nullable|file|max:51200',
+            'fichier' => 'nullable|file',
             'contenu' => 'nullable|string',
             'duree' => 'nullable|string',
-            'ordre' => 'required|integer',
+            'ordre' => 'nullable|integer',
         ]);
 
         if ($request->hasFile('fichier')) {
@@ -56,13 +56,13 @@ class ModuleContenuController extends Controller
     public function update(Request $request, ModuleContenu $contenu)
     {
         $validated = $request->validate([
-            'type' => 'required|in:video,pdf,audio,image,texte',
-            'titre' => 'required|string|max:255',
+            'type' => 'nullable|in:video,pdf,audio,image,texte',
+            'titre' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'fichier' => 'nullable|file|max:51200',
+            'fichier' => 'nullable|file',
             'contenu' => 'nullable|string',
             'duree' => 'nullable|string',
-            'ordre' => 'required|integer',
+            'ordre' => 'nullable|integer',
         ]);
 
         if ($request->hasFile('fichier')) {

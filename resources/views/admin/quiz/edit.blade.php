@@ -27,7 +27,7 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.quizzes.update', $quiz->id) }}" method="POST">
+    <form action="{{ route('admin.quizzes.update', $quiz->id) }}" method="POST" class="needs-validation-confirm">
         @csrf
         @method('PUT')
 
@@ -41,7 +41,7 @@
                         <div class="mb-3">
                             <label for="titre" class="form-label">Titre du quiz <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('titre') is-invalid @enderror"
-                                   id="titre" name="titre" value="{{ old('titre', $quiz->titre) }}" required>
+                                   id="titre" name="titre" value="{{ old('titre', $quiz->titre) }}" data-important="true">
                             @error('titre')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -119,7 +119,7 @@
                         <div class="mb-3">
                             <label for="note_passage" class="form-label">Note de passage (%) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control @error('note_passage') is-invalid @enderror"
-                                   id="note_passage" name="note_passage" value="{{ old('note_passage', $quiz->note_passage) }}" min="0" max="100" required>
+                                   id="note_passage" name="note_passage" value="{{ old('note_passage', $quiz->note_passage) }}" min="0" max="100" data-important="true">
                             @error('note_passage')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -130,7 +130,7 @@
                         <div class="mb-3">
                             <label for="nombre_tentatives" class="form-label">Nombre de tentatives <span class="text-danger">*</span></label>
                             <input type="number" class="form-control @error('nombre_tentatives') is-invalid @enderror"
-                                   id="nombre_tentatives" name="nombre_tentatives" value="{{ old('nombre_tentatives', $quiz->nombre_tentatives) }}" min="1" max="10" required>
+                                   id="nombre_tentatives" name="nombre_tentatives" value="{{ old('nombre_tentatives', $quiz->nombre_tentatives) }}" min="1" max="10" data-important="true">
                             @error('nombre_tentatives')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -189,4 +189,11 @@
         </div>
     </form>
 </div>
+
+<!-- Modal de confirmation -->
+@include('partials.confirmation-modal')
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/form-validation.js') }}"></script>
+@endpush

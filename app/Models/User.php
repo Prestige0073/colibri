@@ -66,4 +66,34 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\Commande::class);
     }
+
+    /**
+     * Retourne tous les livres achetés par l'utilisateur (commandes validées)
+     */
+    public function purchasedBooks()
+    {
+        return Catalogue::whereIn('id', function($query) {
+            $query->select('catalogue_id')
+                ->from('commande_items')
+                ->whereIn('commande_id', function($subQuery) {
+                    $subQuery->select('id')
+                        ->from('commandes')
+                        ->where('user_id', $this->id)
+                        ->where('paiement_valide', true);
+                });
+        })->distinct();
+    }
+
+    /**
+     * Vérifie si l'utilisateur a déjà acheté un livre spécifique
+     */
+    public function hasPurchasedBook($catalogueId)
+    {
+        return $this->commandes()
+            ->where('paiement_valide', true)
+            ->whereHas('items', function($query) use ($catalogueId) {
+                $query->where('catalogue_id', $catalogueId);
+            })
+            ->exists();
+    }
 }

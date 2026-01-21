@@ -14,7 +14,7 @@
                     <p class="mb-0 mt-1 small">Module: <strong>{{ $contenu->module->titre }}</strong></p>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.contenus.update', $contenu) }}" method="POST" enctype="multipart/form-data" id="contenuForm">
+                    <form action="{{ route('admin.contenus.update', $contenu) }}" method="POST" enctype="multipart/form-data" id="contenuForm" class="needs-validation-confirm">
                         @csrf
                         @method('PUT')
 
@@ -22,7 +22,7 @@
                             <!-- Type de contenu -->
                             <div class="col-md-4 mb-3">
                                 <label for="type" class="form-label">Type de contenu <span class="text-danger">*</span></label>
-                                <select class="form-select @error('type') is-invalid @enderror" id="type" name="type" required>
+                                <select class="form-select @error('type') is-invalid @enderror" id="type" name="type" data-important="true">
                                     <option value="">-- Sélectionner --</option>
                                     <option value="video" {{ old('type', $contenu->type) === 'video' ? 'selected' : '' }}>Vidéo</option>
                                     <option value="pdf" {{ old('type', $contenu->type) === 'pdf' ? 'selected' : '' }}>PDF</option>
@@ -38,7 +38,7 @@
                             <!-- Titre -->
                             <div class="col-md-6 mb-3">
                                 <label for="titre" class="form-label">Titre <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre', $contenu->titre) }}" required>
+                                <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre', $contenu->titre) }}" data-important="true">
                                 @error('titre')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -47,7 +47,7 @@
                             <!-- Ordre -->
                             <div class="col-md-2 mb-3">
                                 <label for="ordre" class="form-label">Ordre <span class="text-danger">*</span></label>
-                                <input type="number" min="0" class="form-control @error('ordre') is-invalid @enderror" id="ordre" name="ordre" value="{{ old('ordre', $contenu->ordre) }}" required>
+                                <input type="number" min="0" class="form-control @error('ordre') is-invalid @enderror" id="ordre" name="ordre" value="{{ old('ordre', $contenu->ordre) }}" data-important="true">
                                 @error('ordre')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -248,4 +248,11 @@ document.addEventListener('DOMContentLoaded', function() {
     updateFormFields();
 });
 </script>
+
+<!-- Modal de confirmation -->
+@include('partials.confirmation-modal')
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/form-validation.js') }}"></script>
+@endpush

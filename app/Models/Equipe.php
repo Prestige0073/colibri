@@ -15,16 +15,10 @@ class Equipe extends Model
         'bio',
         'photo',
         'email',
-        'telephone',
-        'linkedin',
-        'twitter',
-        'facebook',
-        'ordre',
         'actif',
     ];
 
     protected $casts = [
         'actif' => 'boolean',
-        'ordre' => 'integer',
     ];
 }

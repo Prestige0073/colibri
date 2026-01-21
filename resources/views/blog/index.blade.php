@@ -49,8 +49,8 @@
                             <div class="card h-100 border-0 shadow-sm overflow-hidden article-card">
                                 @if($article->featured_image)
                                     <div class="position-relative overflow-hidden" style="height: 250px;">
-                                        <img src="{{ asset('storage/' . $article->featured_image) }}"
-                                             alt="{{ $article->title }}"
+                                        <img src="{{ asset($article->featured_image) }}"
+                                             alt="{{ $article->title ?? 'Article' }}"
                                              class="w-100 h-100"
                                              style="object-fit: cover; transition: transform 0.3s ease;">
                                     </div>
@@ -73,7 +73,7 @@
                                     <h5 class="card-title mb-3">
                                         <a href="{{ route('blog.show', $article->slug) }}"
                                            class="text-dark text-decoration-none stretched-link">
-                                            {{ $article->title }}
+                                            {{ $article->title ?? 'Sans titre' }}
                                         </a>
                                     </h5>
                                     @if($article->excerpt)
@@ -82,7 +82,7 @@
                                         </p>
                                     @else
                                         <p class="card-text text-muted mb-3">
-                                            {{ Str::limit(strip_tags($article->content), 120) }}
+                                            {{ Str::limit(strip_tags($article->content ?? ''), 120) }}
                                         </p>
                                     @endif
                                     <div class="mt-auto">

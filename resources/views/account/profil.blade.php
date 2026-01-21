@@ -370,6 +370,125 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Section Ma Bibliothèque -->
+            <div class="col-12">
+                <hr class="my-2">
+            </div>
+
+            <div class="col-12">
+                <div class="row g-3 mb-4 shadow p-4 rounded-4 profile-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="mb-0 text-secondary">
+                            <i class="fa fa-book me-2"></i>Ma Bibliothèque
+                            ({{ $livresAchetes->count() }})
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('account.bibliotheque') }}" class="btn btn-sm btn-primary rounded-pill">
+                                <i class="fa fa-list me-1"></i>Voir tout
+                            </a>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#bibliotheque" aria-expanded="true" aria-controls="bibliotheque">
+                                <i class="fa fa-chevron-up biblio-chevron"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="bibliotheque">
+                        @if ($livresAchetes->isEmpty())
+                            <div class="text-center py-5">
+                                <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
+                                <h6 class="text-muted">Votre bibliothèque est vide</h6>
+                                <p class="text-muted small">Achetez des livres pour les ajouter à votre bibliothèque personnelle</p>
+                                <a href="{{ route('catalogue.decouvrir') }}" class="btn btn-primary btn-sm rounded-pill mt-2">
+                                    <i class="fa fa-shopping-cart me-1"></i>Découvrir le catalogue
+                                </a>
+                            </div>
+                        @else
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                                @foreach ($livresAchetes as $livre)
+                                    <div class="col">
+                                        <div class="card h-100 livre-card-profile border-0 shadow-sm position-relative">
+                                            <!-- Badge "Acheté" -->
+                                            <div class="position-absolute top-0 start-0 m-2" style="z-index: 10;">
+                                                <span class="badge bg-success shadow-sm">
+                                                    <i class="fa fa-check-circle me-1"></i>Acheté
+                                                </span>
+                                            </div>
+
+                                            <!-- Image du livre -->
+                                            <div class="livre-image-wrapper position-relative"
+                                                style="height: 250px; overflow: hidden; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                                @if ($livre->image)
+                                                    <img src="{{ asset($livre->image) }}"
+                                                        alt="{{ $livre->titre }}"
+                                                        class="card-img-top"
+                                                        style="width: 100%; height: 100%; object-fit: cover;"
+                                                        loading="lazy">
+                                                @else
+                                                    <div class="d-flex align-items-center justify-content-center h-100">
+                                                        <i class="fas fa-book fa-4x text-white opacity-50"></i>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <!-- Informations du livre -->
+                                            <div class="card-body d-flex flex-column">
+                                                <h6 class="card-title mb-1 fw-bold" title="{{ $livre->titre }}">
+                                                    {{ Str::limit($livre->titre, 40) }}
+                                                </h6>
+
+                                                @if($livre->auteur)
+                                                    <p class="text-muted small mb-2">
+                                                        <i class="fas fa-user-pen me-1 text-primary"></i>
+                                                        {{ Str::limit($livre->auteur, 30) }}
+                                                    </p>
+                                                @endif
+
+                                                @if($livre->categorie)
+                                                    <span class="badge bg-primary mb-2">{{ $livre->categorie }}</span>
+                                                @endif
+
+                                                @if($livre->resumer)
+                                                    <p class="card-text text-muted small mb-3" style="flex: 1;">
+                                                        {{ Str::limit(strip_tags($livre->resumer), 80) }}
+                                                    </p>
+                                                @endif
+
+                                                <!-- Actions -->
+                                                <div class="mt-auto d-grid gap-2">
+                                                    @if($livre->pdf)
+                                                        <a href="{{ route('bibliotheque.lire', $livre->id) }}"
+                                                           class="btn btn-primary btn-sm">
+                                                            <i class="fas fa-book-open me-1"></i>Lire maintenant
+                                                        </a>
+                                                    @else
+                                                        <button class="btn btn-secondary btn-sm" disabled>
+                                                            <i class="fas fa-exclamation-circle me-1"></i>PDF indisponible
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <!-- Footer -->
+                                            <div class="card-footer bg-light border-0 text-center small text-success">
+                                                <i class="fa fa-infinity me-1"></i>Accès à vie
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            @if ($livresAchetes->count() >= 6)
+                                <div class="text-center mt-4">
+                                    <a href="{{ route('account.bibliotheque') }}" class="btn btn-primary rounded-pill">
+                                        <i class="fa fa-eye me-2"></i>Voir toute ma bibliothèque
+                                    </a>
+                                </div>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Modal de modification du profil -->

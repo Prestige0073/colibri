@@ -59,24 +59,24 @@
                             @forelse($catalogues as $cat)
                                 <tr class="catalogue-row"
                                     data-id="{{ $cat->id }}"
-                                    data-titre="{{ $cat->titre }}"
-                                    data-auteur="{{ $cat->auteur }}"
-                                    data-categorie="{{ $cat->categorie }}"
-                                    data-prix="{{ $cat->prix }}"
-                                    data-prix-formatted="{{ fcfa($cat->prix) }}"
-                                    data-quantite="{{ $cat->quantite }}"
+                                    data-titre="{{ $cat->titre ?? '' }}"
+                                    data-auteur="{{ $cat->auteur ?? '' }}"
+                                    data-categorie="{{ $cat->categorie ?? '' }}"
+                                    data-prix="{{ $cat->prix ?? 0 }}"
+                                    data-prix-formatted="{{ $cat->prix ? fcfa($cat->prix) : '0 FCFA' }}"
+                                    data-quantite="{{ $cat->quantite ?? 0 }}"
                                     data-image="{{ $cat->image ? asset($cat->image) : '' }}"
                                     data-pdf="{{ $cat->pdf ? asset($cat->pdf) : '' }}"
                                     data-resumer="{{ strip_tags($cat->resumer ?? '') }}">
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $cat->titre }}</td>
-                                    <td>{{ $cat->auteur }}</td>
-                                    <td>{{ $cat->categorie }}</td>
-                                    <td>{{ fcfa($cat->prix) }}</td>
-                                    <td>{{ $cat->quantite }}</td>
+                                    <td>{{ $cat->titre ?? '-' }}</td>
+                                    <td>{{ $cat->auteur ?? '-' }}</td>
+                                    <td>{{ $cat->categorie ?? '-' }}</td>
+                                    <td>{{ $cat->prix ? fcfa($cat->prix) : '-' }}</td>
+                                    <td>{{ $cat->quantite ?? 0 }}</td>
                                     <td>
                                         @php
-                                            $q = $cat->quantite;
+                                            $q = $cat->quantite ?? 0;
                                             if ($q == 0) {
                                                 $statut = 'Épuisé';
                                                 $badgeClass = 'bg-danger text-white';
@@ -89,7 +89,7 @@
                                         @endphp
                                         <span class="badge {{ $badgeClass }} {{ $blink }}">{{ $statut }}</span>
                                     </td>
-                                    <td>{{ Str::limit(strip_tags($cat->resumer), 20) }}</td>
+                                    <td>{{ Str::limit(strip_tags($cat->resumer ?? ''), 20) }}</td>
                                     <td>
                                         @if ($cat->image)
                                             <img src="{{ asset($cat->image) }}" alt="image"
@@ -205,7 +205,7 @@
                             livre</h4>
                     </div>
                     <div class="card-body bg-light">
-                        <form id="catalogueForm" method="POST" enctype="multipart/form-data">
+                        <form id="catalogueForm" method="POST" enctype="multipart/form-data" class="needs-validation-confirm">
                             @csrf
                             <input type="hidden" id="catalogue_id" name="catalogue_id" value="">
                             <div class="row g-3 align-items-end">
@@ -213,18 +213,18 @@
                                     <label for="titre" class="form-label fw-bold"><i
                                             class="fa fa-book me-1 text-primary"></i> Titre</label>
                                     <input type="text" class="form-control rounded-3" id="titre" name="titre"
-                                        placeholder="Titre du livre" required>
+                                        placeholder="Titre du livre" data-important="true">
                                 </div>
                                 <div class="col-md-2">
                                     <label for="auteur" class="form-label fw-bold"><i
                                             class="fa fa-user-pen me-1 text-primary"></i> Auteur</label>
                                     <input type="text" class="form-control rounded-3" id="auteur" name="auteur"
-                                        placeholder="Auteur" required>
+                                        placeholder="Auteur" data-important="true">
                                 </div>
                                 <div class="col-md-2">
                                     <label for="categorie" class="form-label fw-bold"><i
                                             class="fa fa-tags me-1 text-primary"></i> Catégorie</label>
-                                    <select class="form-select rounded-3" id="categorie" name="categorie" required>
+                                    <select class="form-select rounded-3" id="categorie" name="categorie" data-important="true">
                                         <option value="">Choisir une catégorie</option>
                                         <option value="Roman">Roman</option>
                                         <option value="Essai">Essai</option>
@@ -241,11 +241,11 @@
                                     <label for="prix" class="form-label fw-bold"><i
                                             class="fa fa-money-bill-wave me-1 text-primary"></i> Prix (FCFA)</label>
                                     <input type="number" class="form-control rounded-3" id="prix" name="prix"
-                                        placeholder="Prix" min="0" required>
+                                        placeholder="Prix" min="0" data-important="true">
                                 </div>
                                 <div class="col-md-3">
                                     <label for="quantite" class="form-label fw-bold"><i class="fa fa-box me-1 text-primary"></i> Quantité</label>
-                                    <input type="number" class="form-control rounded-3" id="quantite" name="quantite" placeholder="Quantité" min="0" required>
+                                    <input type="number" class="form-control rounded-3" id="quantite" name="quantite" placeholder="Quantité" min="0" data-important="true">
                                 </div>
                             </div>
                             <div class="row g-3 mt-2">
@@ -260,14 +260,12 @@
                                 <div class="col-md-6">
                                     <label for="image" class="form-label fw-bold"><i
                                             class="fa fa-image me-1 text-primary"></i> Image de couverture</label>
-                                    <input type="file" class="form-control rounded-3" id="image" name="image"
-                                        accept="image/*">
+                                    <input type="file" class="form-control rounded-3" id="image" name="image">
                                 </div>
                                 <div class="col-md-6">
                                     <label for="pdf" class="form-label fw-bold"><i
                                             class="fa fa-file-pdf me-1 text-danger"></i> Fichier PDF</label>
-                                    <input type="file" class="form-control rounded-3" id="pdf" name="pdf"
-                                        accept="application/pdf">
+                                    <input type="file" class="form-control rounded-3" id="pdf" name="pdf">
                                 </div>
                             </div>
                             <div class="text-end mt-4">
@@ -280,6 +278,7 @@
                                     style="display:none;">Annuler</button>
                             </div>
                         </form>
+                        @include('partials.confirmation-modal')
                     </div>
                 </div>
             </div>
@@ -316,62 +315,50 @@
 
 @push('scripts')
     <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <script src="{{ asset('js/form-validation.js') }}"></script>
     <script>
-        let catalogueEditorInstance = null;
-        let editMode = false;
-        let editId = null;
-        document.addEventListener('DOMContentLoaded', function() {
-            var textarea = document.getElementById('resumer-catalogue-editor');
+        // Petite intégration pour CKEditor + gestion edit/add
+        (function(){
+            let catalogueEditorInstance = null;
+            let editMode = false;
+            let editId = null;
+            const form = document.getElementById('catalogueForm');
+            const submitBtn = document.getElementById('catalogueSubmitBtn');
+            const submitText = document.getElementById('catalogueSubmitText');
+            const cancelEditBtn = document.getElementById('catalogueCancelEdit');
+            const textarea = document.getElementById('resumer-catalogue-editor');
+
             if (textarea) {
                 ClassicEditor.create(textarea, {
-                    toolbar: [
-                        'undo', 'redo', '|', 'bold', 'italic', 'bulletedList',
-                        'numberedList', 'link'
-                    ],
-                    language: 'fr',
-                }).then(editor => {
-                    catalogueEditorInstance = editor;
-                }).catch(error => {
-                    console.error(error);
-                });
+                    toolbar: ['undo','redo','|','bold','italic','bulletedList','numberedList','link'],
+                    language: 'fr'
+                }).then(editor => catalogueEditorInstance = editor).catch(()=>{});
             }
 
-            // Gestion du formulaire (ajout/édition)
-            var form = document.getElementById('catalogueForm');
-            var submitBtn = document.getElementById('catalogueSubmitBtn');
-            var submitText = document.getElementById('catalogueSubmitText');
-            var cancelEditBtn = document.getElementById('catalogueCancelEdit');
+            // Prepare form default action
             form.action = "{{ route('admin.catalogue.store') }}";
-            form.method = "POST";
 
-            form.addEventListener('submit', function(e) {
-                if (catalogueEditorInstance) {
+            // Before any submission triggered by the shared validator, ensure editor is synced and method spoofing is set
+            form.addEventListener('submit', function(e){
+                if (catalogueEditorInstance && textarea) {
                     textarea.value = catalogueEditorInstance.getData();
                 }
-                if (editMode) {
+
+                // If edit mode, adapt action and method
+                if (editMode && editId) {
                     form.action = `/admin/catalogue/${editId}`;
-                    form.method = "POST";
-                    // Ajoute le spoofing PATCH
                     if (!form.querySelector('input[name="_method"]')) {
                         let methodInput = document.createElement('input');
-                        methodInput.type = 'hidden';
-                        methodInput.name = '_method';
-                        methodInput.value = 'PATCH';
+                        methodInput.type = 'hidden'; methodInput.name = '_method'; methodInput.value = 'PATCH';
                         form.appendChild(methodInput);
                     } else {
                         form.querySelector('input[name="_method"]').value = 'PATCH';
                     }
-                } else {
-                    form.action = "{{ route('admin.catalogue.store') }}";
-                    if (form.querySelector('input[name="_method"]')) {
-                        form.querySelector('input[name="_method"]').remove();
-                    }
                 }
             });
 
-            cancelEditBtn.addEventListener('click', function() {
-                editMode = false;
-                editId = null;
+            cancelEditBtn.addEventListener('click', function(){
+                editMode = false; editId = null;
                 form.reset();
                 if (catalogueEditorInstance) catalogueEditorInstance.setData('');
                 submitText.textContent = 'Ajouter';
@@ -380,15 +367,12 @@
                 cancelEditBtn.style.display = 'none';
             });
 
-            // Bouton Modifier : pré-remplit le formulaire
-            document.querySelectorAll('.btn-edit-catalogue').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
+            // Prefill edit
+            document.querySelectorAll('.btn-edit-catalogue').forEach(function(btn){
+                btn.addEventListener('click', function(e){
                     e.preventDefault();
-                    const row = this.closest('tr');
-                    if (!row) return;
-
-                    editMode = true;
-                    editId = row.dataset.id;
+                    const row = this.closest('tr'); if (!row) return;
+                    editMode = true; editId = row.dataset.id;
                     document.getElementById('catalogue_id').value = editId;
                     document.getElementById('titre').value = row.dataset.titre || '';
                     document.getElementById('auteur').value = row.dataset.auteur || '';
@@ -400,74 +384,40 @@
                     submitBtn.classList.remove('btn-gradient-blue');
                     submitBtn.classList.add('btn-warning');
                     cancelEditBtn.style.display = '';
-                    window.scrollTo({
-                        top: form.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
+                    window.scrollTo({top: form.offsetTop - 80, behavior: 'smooth'});
                 });
             });
 
-            // Modal catalogue info
-            document.querySelectorAll('.catalogue-row').forEach(function(row) {
-                row.addEventListener('click', function(e) {
-                    // Ignore click on action buttons
+            // Modal display for rows (existing behavior)
+            document.querySelectorAll('.catalogue-row').forEach(function(row){
+                row.addEventListener('click', function(e){
                     if (e.target.closest('button')) return;
-
                     document.getElementById('modalTitre').textContent = this.dataset.titre || '';
                     document.getElementById('modalAuteur').textContent = this.dataset.auteur || '';
                     document.getElementById('modalCategorie').textContent = this.dataset.categorie || '';
                     document.getElementById('modalPrix').textContent = this.dataset.prixFormatted || '';
                     document.getElementById('modalImage').src = this.dataset.image || '';
                     document.getElementById('modalQuantite').textContent = this.dataset.quantite || '';
-                    // Statut dynamique simplifié : 0 = Épuisé, sinon OK
-                    let statut = '';
-                    let badgeClass = '';
-                    let blink = '';
                     let q = parseInt(this.dataset.quantite);
-                    if (q === 0) {
-                        statut = 'Épuisé';
-                        badgeClass = 'bg-danger text-white';
-                        blink = 'badge-blink';
-                    } else {
-                        statut = 'OK';
-                        badgeClass = 'bg-success text-white';
-                        blink = '';
-                    }
+                    let statut = (q === 0) ? 'Épuisé' : 'OK';
+                    let badgeClass = (q === 0) ? 'bg-danger text-white' : 'bg-success text-white';
+                    let blink = (q === 0) ? 'badge-blink' : '';
                     document.getElementById('modalStatut').innerHTML = `<span class='badge ${badgeClass} ${blink}'>${statut}</span>`;
                     if (this.dataset.pdf) {
-                        document.getElementById('modalPdfLink').innerHTML =
-                            `<a href="${this.dataset.pdf}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-file-pdf"></i> PDF</a>`;
-                    } else {
-                        document.getElementById('modalPdfLink').innerHTML = '';
-                    }
-                    // Résumé tronqué et dépliable
+                        document.getElementById('modalPdfLink').innerHTML = `<a href="${this.dataset.pdf}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-file-pdf"></i> PDF</a>`;
+                    } else { document.getElementById('modalPdfLink').innerHTML = ''; }
                     const resumer = this.dataset.resumer || '';
-                    const short = resumer.substring(0, 50);
-                    const full = resumer.substring(50);
+                    const short = resumer.substring(0,50); const full = resumer.substring(50);
                     document.getElementById('modalResumerShort').textContent = short;
                     document.getElementById('modalResumerFull').textContent = full;
                     document.getElementById('modalResumerFull').style.display = 'none';
                     const toggleBtn = document.getElementById('modalResumerToggle');
-                    if (full.length > 0) {
-                        toggleBtn.style.display = '';
-                        toggleBtn.textContent = 'Lire la suite';
-                        toggleBtn.onclick = function() {
-                            const fullSpan = document.getElementById('modalResumerFull');
-                            if (fullSpan.style.display === 'none') {
-                                fullSpan.style.display = '';
-                                toggleBtn.textContent = 'Réduire';
-                            } else {
-                                fullSpan.style.display = 'none';
-                                toggleBtn.textContent = 'Lire la suite';
-                            }
-                        };
-                    } else {
-                        toggleBtn.style.display = 'none';
-                    }
+                    if (full.length > 0) { toggleBtn.style.display = ''; toggleBtn.textContent = 'Lire la suite'; toggleBtn.onclick = function(){ const fullSpan = document.getElementById('modalResumerFull'); if (fullSpan.style.display === 'none'){ fullSpan.style.display = ''; toggleBtn.textContent = 'Réduire'; } else { fullSpan.style.display = 'none'; toggleBtn.textContent = 'Lire la suite'; } } }
+                    else { toggleBtn.style.display = 'none'; }
                     const modal = new bootstrap.Modal(document.getElementById('catalogueModal'));
                     modal.show();
                 });
             });
-        });
+        })();
     </script>
 @endpush

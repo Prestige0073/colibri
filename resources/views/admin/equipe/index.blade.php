@@ -33,7 +33,6 @@
                             <th>Nom</th>
                             <th>Poste</th>
                             <th>Email</th>
-                            <th>Ordre</th>
                             <th>Statut</th>
                             <th>Actions</th>
                         </tr>
@@ -57,9 +56,6 @@
                                 <td><strong>{{ $membre->nom }}</strong></td>
                                 <td>{{ $membre->poste }}</td>
                                 <td>{{ $membre->email ?? 'N/A' }}</td>
-                                <td>
-                                    <span class="badge bg-info">{{ $membre->ordre }}</span>
-                                </td>
                                 <td>
                                     @if($membre->actif)
                                         <span class="badge bg-success"><i class="fas fa-check me-1"></i>Actif</span>

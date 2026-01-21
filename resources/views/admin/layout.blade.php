@@ -140,7 +140,6 @@
                             </a>
                         </li>
                         <li class="nav-item"><a href="{{ route('admin.blog.index') }}" class="nav-link text-white{{ request()->routeIs('admin.blog.*') ? ' active' : '' }}"><i class="fa fa-newspaper me-2"></i>Blog</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.donations.index') }}" class="nav-link text-white{{ request()->routeIs('admin.donations.index') ? ' active' : '' }}"><i class="fa fa-hand-holding-heart me-2"></i>Dons</a></li>
                     </ul>
                 </div>
             </div>
@@ -195,7 +194,6 @@
                             </a>
                         </li>
                         <li class="nav-item"><a href="{{ route('admin.blog.index') }}" class="nav-link text-white{{ request()->routeIs('admin.blog.*') ? ' active' : '' }}"><i class="fa fa-newspaper me-2"></i>Blog</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.donations.index') }}" class="nav-link text-white{{ request()->routeIs('admin.donations.index') ? ' active' : '' }}"><i class="fa fa-hand-holding-heart me-2"></i>Dons</a></li>
                     </ul>
                 </div>
             </nav>

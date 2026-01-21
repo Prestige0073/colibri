@@ -191,35 +191,35 @@
                         <div class="col-md-6 col-lg-4 col-xl-4 wow fadeIn" data-wow-delay="0.1s">
                             <div class="catalogue-item card h-100 border-0 shadow-lg"
                                 style="background: transparent; backdrop-filter: blur(6px); border-top-left-radius: 12px; border-top-right-radius: 12px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
-                                <img class="card-img-top" src="{{ asset($catalogue->image) }}"
-                                    alt="{{ $catalogue->titre }}"
+                                <img class="card-img-top" src="{{ $catalogue->image ? asset($catalogue->image) : asset('img/default-book.jpg') }}"
+                                    alt="{{ $catalogue->titre ?? 'Livre' }}"
                                     style="border-top-left-radius: 12px; border-top-right-radius: 12px; width:100%; height:240px; object-fit:cover;">
                                 <div class="card-body d-flex flex-column justify-content-between"
                                     style="padding: 1.2rem;">
                                     <h5 class="card-title mb-2 d-flex align-items-center"
                                         style="color: #212529; font-weight: 700; font-size: 1.15rem;">
                                         <i class="fa fa-feather-alt"
-                                            style="color: #000000ff; margin-right: 0.5em;"></i>{{ $catalogue->titre }}
+                                            style="color: #000000ff; margin-right: 0.5em;"></i>{{ $catalogue->titre ?? 'Sans titre' }}
                                     </h5>
                                     <p class="mb-1 d-flex align-items-center" style="color: #607d8b; font-size: 1rem;">
                                         <i class="fa fa-user" style="color: #000000ff; margin-right: 0.4em;"></i>
-                                        {{ $catalogue->auteur }} &bull; {{ $catalogue->categorie }}
+                                        {{ $catalogue->auteur ?? 'Auteur inconnu' }} &bull; {{ $catalogue->categorie ?? 'Non catégorisé' }}
                                     </p>
                                     <hr style="margin: 0.5rem 0; padding: 0;">
                                     <p class="mb-2 d-flex align-items-start"
                                         style="color: #6d838fff; font-size: 1.05rem;">
                                         <i class="fa fa-star catalogue-resumer-icon" style="color: #FFAC00; margin-right: 0.5em;"></i>
                                         <span class="catalogue-resumer">
-                                            {{ Str::limit(strip_tags($catalogue->resumer), 300) }}
+                                            {{ Str::limit(strip_tags($catalogue->resumer ?? 'Aucune description disponible'), 300) }}
                                         </span>
                                     </p>
                                     <div class="mb-3 d-flex justify-content-between align-items-center">
                                         <span class="badge"
                                             style="background: #ffe7e7ff; color: #b30000ff; font-size: 1.1rem; padding: 0.25em 0.5em; border-radius: 8px;">
                                             <i class="fa fa-tag me-2" aria-hidden="true"></i>Prix&nbsp;:
-                                            {{ $catalogue->prix }}&nbsp;FCFA
+                                            {{ $catalogue->prix ?? 0 }}&nbsp;FCFA
                                         </span>
-                                        @if ($catalogue->quantite > 0)
+                                        @if (($catalogue->quantite ?? 0) > 0)
                                             <span class="badge"
                                                 style="background: #198754; color: #fff; font-size: 0.8rem; padding: 0.25em 0.5em; border-radius: 8px;">En
                                                 stock</span>
@@ -242,7 +242,7 @@
                                                     onclick="decrementQuantite{{ $catalogue->id }}()">
                                                     <i class="fa fa-minus"></i>
                                                 </button>
-                                                <input type="number" min="1" max="{{ $catalogue->quantite }}"
+                                                <input type="number" min="1" max="{{ $catalogue->quantite ?? 0 }}"
                                                     name="quantite" id="quantite-{{ $catalogue->id }}"
                                                     class="form-control text-center" value="1"
                                                     style="width: 34px; height:28px; padding:0; font-size:1rem;">
@@ -270,13 +270,13 @@
                                         </script>
                                         <button type="submit" class="btn w-100 catalogue-buy-btn"
                                             style="background: #198754; color: #ffffffff; border-radius: 0; font-weight: 600; font-size: 1.05rem; border: none; transition: background 0.2s;"
-                                            @if ($catalogue->quantite == 0) disabled @endif>
+                                            @if (($catalogue->quantite ?? 0) == 0) disabled @endif>
                                             <i class="fa fa-shopping-cart me-2"></i>Acheter
                                         </button>
                                     </form>
                                     <script>
                                         function checkStock{{ $catalogue->id }}(e) {
-                                            if ({{ $catalogue->quantite }} == 0) {
+                                            if ({{ $catalogue->quantite ?? 0 }} == 0) {
                                                 e.preventDefault();
                                                 alert('Ce livre n\'est pas en stock. Veuillez choisir un autre article.');
                                                 return false;
@@ -482,23 +482,6 @@
     </div>
     <!-- Bibliothèque End -->
 
-    <!-- Partner (OIF) Start -->
-    <div class="container-fluid py-4 bg-light">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-12 col-md-3 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0">
-                    <img src="{{ asset('img/Logo_OIF.png') }}" alt="OIF" class="img-fluid"
-                        style="max-height:80px;">
-                </div>
-                <div class="col-12 col-md-9 text-center text-md-start">
-                    <p class="section-title bg-white text-start text-success pe-3">Partenaire</p>
-                    <h4 class="mb-1">Organisation Internationale de la Francophonie (OIF)</h4>
-                    <p class="mb-0">Soutient ce projet dans le cadre du dispositif <strong>FORCE</strong>.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Partner (OIF) End -->
     <!-- Testimonials Start -->
     <div class="container-fluid py-5">
         <div class="container">
@@ -579,6 +562,24 @@
         </div>
     </div>
     <!-- Testimonials End -->
+
+    <!-- Partner (OIF) Start -->
+    <div class="container-fluid py-4 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-3 d-flex justify-content-center justify-content-md-start mb-3 mb-md-0">
+                    <img src="{{ asset('img/Logo_OIF.png') }}" alt="OIF" class="img-fluid"
+                        style="max-height:80px;">
+                </div>
+                <div class="col-12 col-md-9 text-center text-md-start">
+                    <p class="section-title bg-white text-start text-success pe-3">Partenaire</p>
+                    <h4 class="mb-1">Organisation Internationale de la Francophonie (OIF)</h4>
+                    <p class="mb-0">Soutient ce projet dans le cadre du dispositif <strong>FORCE</strong>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Partner (OIF) End -->
 
     <!-- Modal Témoignage -->
     <div class="modal fade" id="testimonialModal" tabindex="-1" aria-labelledby="testimonialModalLabel" aria-hidden="true">
@@ -731,29 +732,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Newsletter Start -->
-    <div class="container-fluid bg-success py-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-7 text-center wow fadeIn" data-wow-delay="0.5s">
-                    <h1 class="display-6 text-white mb-4">Subscribe the Newsletter</h1>
-                    <h1 class="display-6 text-white mb-4">Abonnez-vous à la newsletter</h1>
-                    <div class="position-relative w-100 mb-2">
-                        <input class="form-control border-0 w-100 ps-4 pe-5" type="text" placeholder="Votre email"
-                            style="height: 60px;">
-                        <button type="button"
-                            class="btn btn-lg-square shadow-none position-absolute top-0 end-0 mt-2 me-2"><i
-                                class="fa fa-paper-plane text-success fs-4"></i></button>
-                    </div>
-                    <p class="mb-0 text-white">Recevez nos actualités, nouvelles formations et offres spéciales sur le
-                        livre
-                        africain.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Newsletter End -->
 
 @endsection
 

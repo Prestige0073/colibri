@@ -11,7 +11,12 @@
             <div>
                 <h1 class="h3 mb-0"><i class="fas fa-list me-2"></i>{{ $module->titre }}</h1>
                 <p class="text-muted mb-0">
-                    Formation: <a href="{{ route('admin.formations.show', $module->formation) }}">{{ $module->formation->titre }}</a>
+                    Formation:
+                    @if($module->formation)
+                        <a href="{{ route('admin.formations.show', $module->formation) }}">{{ $module->formation->titre }}</a>
+                    @else
+                        <span class="text-muted">Non définie</span>
+                    @endif
                 </p>
             </div>
             <div class="d-flex gap-2">
@@ -217,14 +222,20 @@
                     <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Formation</h5>
                 </div>
                 <div class="card-body">
-                    @if($module->formation->image)
-                        <img src="{{ asset($module->formation->image) }}" alt="{{ $module->formation->titre }}" class="img-fluid rounded mb-3">
+                    @if($module->formation)
+                        @if($module->formation->image)
+                            <img src="{{ asset($module->formation->image) }}" alt="{{ $module->formation->titre }}" class="img-fluid rounded mb-3">
+                        @endif
+                        <h6>{{ $module->formation->titre }}</h6>
+                        <p class="small text-muted mb-3">{{ Str::limit($module->formation->description, 100) }}</p>
+                        <a href="{{ route('admin.formations.show', $module->formation) }}" class="btn btn-sm btn-primary w-100">
+                            <i class="fas fa-eye me-1"></i>Voir la formation
+                        </a>
+                    @else
+                        <p class="text-muted text-center mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Aucune formation associée
+                        </p>
                     @endif
-                    <h6>{{ $module->formation->titre }}</h6>
-                    <p class="small text-muted mb-3">{{ Str::limit($module->formation->description, 100) }}</p>
-                    <a href="{{ route('admin.formations.show', $module->formation) }}" class="btn btn-sm btn-primary w-100">
-                        <i class="fas fa-eye me-1"></i>Voir la formation
-                    </a>
                 </div>
             </div>
         </div>

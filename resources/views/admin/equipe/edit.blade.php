@@ -16,18 +16,30 @@
         </div>
     </div>
 
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Erreurs de validation</h5>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <form id="editForm" action="{{ route('admin.equipe.update', $membre->id) }}" method="POST" enctype="multipart/form-data">
+                    <form id="editForm" action="{{ route('admin.equipe.update', $membre->id) }}" method="POST" enctype="multipart/form-data" class="needs-validation-confirm">
                         @csrf
                         @method('PUT')
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="nom" class="form-label">Nom complet <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('nom') is-invalid @enderror" id="nom" name="nom" value="{{ old('nom', $membre->nom) }}" required>
+                                <input type="text" class="form-control @error('nom') is-invalid @enderror" id="nom" name="nom" value="{{ old('nom', $membre->nom) }}" data-important="true">
                                 @error('nom')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -35,7 +47,7 @@
 
                             <div class="col-md-6">
                                 <label for="poste" class="form-label">Poste <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('poste') is-invalid @enderror" id="poste" name="poste" value="{{ old('poste', $membre->poste) }}" required>
+                                <input type="text" class="form-control @error('poste') is-invalid @enderror" id="poste" name="poste" value="{{ old('poste', $membre->poste) }}" data-important="true">
                                 @error('poste')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -69,75 +81,21 @@
                             @enderror
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $membre->email) }}">
-                                @error('email')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="telephone" class="form-label">Téléphone</label>
-                                <input type="text" class="form-control @error('telephone') is-invalid @enderror" id="telephone" name="telephone" value="{{ old('telephone', $membre->telephone) }}">
-                                @error('telephone')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $membre->email) }}">
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Réseaux sociaux</label>
-                            <div class="row g-2">
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fab fa-linkedin"></i></span>
-                                        <input type="url" class="form-control @error('linkedin') is-invalid @enderror" name="linkedin" placeholder="URL LinkedIn" value="{{ old('linkedin', $membre->linkedin) }}">
-                                    </div>
-                                    @error('linkedin')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fab fa-twitter"></i></span>
-                                        <input type="text" class="form-control @error('twitter') is-invalid @enderror" name="twitter" placeholder="@username" value="{{ old('twitter', $membre->twitter) }}">
-                                    </div>
-                                    @error('twitter')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fab fa-facebook"></i></span>
-                                        <input type="url" class="form-control @error('facebook') is-invalid @enderror" name="facebook" placeholder="URL Facebook" value="{{ old('facebook', $membre->facebook) }}">
-                                    </div>
-                                    @error('facebook')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="ordre" class="form-label">Ordre d'affichage</label>
-                                <input type="number" class="form-control @error('ordre') is-invalid @enderror" id="ordre" name="ordre" value="{{ old('ordre', $membre->ordre) }}" min="0">
-                                <small class="text-muted">Plus le numéro est petit, plus il apparaît en premier</small>
-                                @error('ordre')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Statut</label>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="actif" name="actif" {{ old('actif', $membre->actif) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="actif">
-                                        Membre actif (visible sur le site)
-                                    </label>
-                                </div>
+                            <label class="form-label">Statut</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="actif" name="actif" {{ old('actif', $membre->actif) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="actif">
+                                    Membre actif (visible sur le site)
+                                </label>
                             </div>
                         </div>
 
@@ -165,8 +123,8 @@
 
                     <hr>
 
-                    <h6>Ordre d'affichage</h6>
-                    <p class="small">Définit l'ordre d'apparition sur la page équipe. Les membres avec un ordre plus petit apparaissent en premier.</p>
+                    <h6>Statut du membre</h6>
+                    <p class="small">Activez ou désactivez la visibilité du membre sur le site public.</p>
                 </div>
             </div>
         </div>
@@ -196,4 +154,8 @@
         });
     });
 </script>
+<script src="{{ asset('js/form-validation.js') }}"></script>
 @endpush
+
+<!-- Modal de confirmation -->
+@include('partials.confirmation-modal')

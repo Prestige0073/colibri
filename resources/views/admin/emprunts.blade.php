@@ -1,5 +1,5 @@
 @extends('admin.layout')
-@section('title', 'Admin - Gestion des Emprunts')
+@section('title', 'Gestion des Emprunts')
 
 @section('content')
 <div class="container-fluid py-4">
@@ -729,7 +729,8 @@
     /* Table responsive améliorée */
     .table-responsive {
         border-radius: 8px;
-        overflow: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .table thead th {
@@ -738,6 +739,7 @@
         text-transform: uppercase;
         font-size: 0.875rem;
         letter-spacing: 0.5px;
+        white-space: nowrap;
     }
 
     .table tbody tr {
@@ -746,6 +748,134 @@
 
     .table tbody tr:hover {
         background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .table td {
+        white-space: nowrap;
+    }
+
+    /* Responsive mobile */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        h2, h4 {
+            font-size: 1.25rem;
+        }
+
+        .card-header h4 {
+            font-size: 1.1rem;
+        }
+
+        /* Faire défiler les tableaux horizontalement sur mobile */
+        .table-responsive {
+            margin-bottom: 1rem;
+        }
+
+        .table {
+            font-size: 0.85rem;
+            min-width: 800px;
+        }
+
+        .table td, .table th {
+            padding: 0.5rem 0.4rem;
+        }
+
+        /* Rendre les images plus petites */
+        .table img.img-thumbnail {
+            width: 30px !important;
+            height: 42px !important;
+        }
+
+        /* Selects d'action */
+        .action-select, .action-select-demande {
+            min-width: 100px !important;
+            font-size: 0.8rem;
+            padding: 0.375rem 0.5rem;
+        }
+
+        /* Formulaires */
+        .form-label {
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            font-size: 0.9rem;
+        }
+
+        /* Boutons */
+        .btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        /* Badges */
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.5em;
+        }
+
+        /* Alerts */
+        .alert {
+            font-size: 0.9rem;
+            padding: 0.75rem;
+        }
+
+        /* Modales */
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        /* Cards */
+        .card-body {
+            padding: 1rem;
+        }
+
+        /* Colonnes de formulaire */
+        .col-md-3, .col-md-2, .col-md-6, .col-md-4 {
+            margin-bottom: 0.75rem;
+        }
+
+        /* Espacement */
+        .mb-5 {
+            margin-bottom: 2rem !important;
+        }
+
+        .py-4 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        h2 {
+            font-size: 1.1rem;
+        }
+
+        .card-header h4 {
+            font-size: 1rem;
+        }
+
+        .table {
+            font-size: 0.75rem;
+            min-width: 700px;
+        }
+
+        .btn-sm {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.75rem;
+        }
     }
 </style>
 @endpush
