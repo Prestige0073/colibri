@@ -145,7 +145,7 @@
                                         <div class="card h-100 border-0 shadow-sm article-card">
                                             @if($related->featured_image)
                                                 <div class="position-relative overflow-hidden" style="height: 150px;">
-                                                    <img src="{{ asset('storage/' . $related->featured_image) }}"
+                                                    <img src="{{ asset($related->featured_image) }}"
                                                          alt="{{ $related->title }}"
                                                          class="w-100 h-100"
                                                          style="object-fit: cover;">

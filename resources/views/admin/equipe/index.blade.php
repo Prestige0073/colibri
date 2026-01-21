@@ -90,6 +90,13 @@
                         @endforelse
                     </tbody>
                 </table>
+                
+                <!-- Pagination -->
+                @if($membres->hasPages())
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $membres->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>

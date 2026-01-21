@@ -10,7 +10,7 @@ class ModuleController extends Controller
 {
     public function index()
     {
-        $modules = Module::with('formation')->get();
+        $modules = Module::with('formation')->orderBy('created_at', 'desc')->paginate(15);
         return view('admin.modules.index', compact('modules'));
     }
 

@@ -155,89 +155,21 @@
                                                     title="Modifier">
                                                 <i class="fa fa-edit"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLivreModal{{ $livre->id }}" title="Supprimer">
+                                            <button type="button" class="btn btn-sm btn-danger btn-delete-livre"
+                                                    data-livre-id="{{ $livre->id }}"
+                                                    data-livre-titre="{{ $livre->titre }}"
+                                                    data-livre-auteur="{{ $livre->auteur }}"
+                                                    data-livre-categorie="{{ $livre->categorie }}"
+                                                    data-livre-prix="{{ $livre->prix }}"
+                                                    data-livre-quantite="{{ $livre->quantite }}"
+                                                    data-livre-image="{{ $livre->image ? asset($livre->image) : '' }}"
+                                                    data-delete-url="{{ route('admin.emprunts.destroyLivre', $livre->id) }}"
+                                                    title="Supprimer">
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
-
-                                <!-- Modal de suppression -->
-                                <div class="modal fade" id="deleteLivreModal{{ $livre->id }}" tabindex="-1" aria-labelledby="deleteLivreModalLabel{{ $livre->id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-danger text-white">
-                                                <h5 class="modal-title text-white" id="deleteLivreModalLabel{{ $livre->id }}">
-                                                    <i class="fa fa-exclamation-triangle me-2"></i>Confirmer la suppression
-                                                </h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="alert alert-warning d-flex align-items-center" role="alert">
-                                                    <i class="fa fa-exclamation-circle me-2 fs-4"></i>
-                                                    <div>
-                                                        <strong>Attention !</strong> Cette action est irréversible.
-                                                    </div>
-                                                </div>
-
-                                                <p class="mb-3">Êtes-vous sûr de vouloir supprimer ce livre empruntable ?</p>
-
-                                                <div class="card border-0 bg-light p-3 mb-3">
-                                                    <div class="row g-2">
-                                                        <div class="col-3">
-                                                            @if($livre->image)
-                                                                <img src="{{ asset($livre->image) }}" alt="{{ $livre->titre }}" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
-                                                            @else
-                                                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 100px;">
-                                                                    <i class="fa fa-book fs-3"></i>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                        <div class="col-9">
-                                                            <h6 class="fw-bold mb-2"><i class="fa fa-book text-primary me-1"></i> {{ $livre->titre }}</h6>
-                                                            <p class="mb-1 small"><strong>Auteur :</strong> {{ $livre->auteur }}</p>
-                                                            <p class="mb-1 small"><strong>Catégorie :</strong> <span class="badge bg-info">{{ $livre->categorie }}</span></p>
-                                                            <p class="mb-1 small"><strong>Prix :</strong> {{ number_format($livre->prix, 0, ',', ' ') }} FCFA</p>
-                                                            <p class="mb-0 small"><strong>Stock disponible :</strong> <span class="badge {{ $livre->quantite > 0 ? 'bg-success' : 'bg-danger' }}">{{ $livre->quantite }}</span></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                @php
-                                                    $empruntsEnCours = \App\Models\Emprunt::where('livre_id', $livre->id)
-                                                        ->whereIn('statut', ['en_cours', 'en_retard'])
-                                                        ->count();
-                                                @endphp
-
-                                                @if($empruntsEnCours > 0)
-                                                    <div class="alert alert-danger" role="alert">
-                                                        <i class="fa fa-times-circle me-2"></i>
-                                                        <strong>Impossible de supprimer :</strong> Ce livre a actuellement <strong>{{ $empruntsEnCours }}</strong> emprunt(s) en cours ou en retard.
-                                                    </div>
-                                                @else
-                                                    <div class="alert alert-success" role="alert">
-                                                        <i class="fa fa-check-circle me-2"></i>
-                                                        Aucun emprunt en cours. La suppression est possible.
-                                                    </div>
-                                                @endif
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                    <i class="fa fa-times me-1"></i>Annuler
-                                                </button>
-                                                @if($empruntsEnCours == 0)
-                                                    <form method="POST" action="{{ route('admin.emprunts.destroyLivre', $livre->id) }}" style="display: inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger">
-                                                            <i class="fa fa-trash me-1"></i>Supprimer définitivement
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             @endforeach
                         </tbody>
                     </table>
@@ -246,32 +178,110 @@
         </div>
     </div>
 
+    <!-- Modals de suppression des livres empruntables (en dehors de la carte) -->
+    @foreach($livresEmpruntables as $livre)
+        @php
+            $empruntsEnCours = \App\Models\Emprunt::where('livre_id', $livre->id)
+                ->whereIn('statut', ['en_cours', 'en_retard'])
+                ->count();
+        @endphp
+        <div class="modal fade" id="deleteLivreModal{{ $livre->id }}" tabindex="-1" aria-labelledby="deleteLivreModalLabel{{ $livre->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title text-white" id="deleteLivreModalLabel{{ $livre->id }}">
+                            <i class="fa fa-exclamation-triangle me-2"></i>Confirmer la suppression
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <i class="fa fa-exclamation-circle me-2 fs-4"></i>
+                            <div>
+                                <strong>Attention !</strong> Cette action est irréversible.
+                            </div>
+                        </div>
+
+                        <p class="mb-3">Êtes-vous sûr de vouloir supprimer ce livre empruntable ?</p>
+
+                        <div class="card border-0 bg-light p-3 mb-3">
+                            <div class="row g-2">
+                                <div class="col-3">
+                                    @if($livre->image)
+                                        <img src="{{ asset($livre->image) }}" alt="{{ $livre->titre }}" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
+                                    @else
+                                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 100px;">
+                                            <i class="fa fa-book fs-3"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="col-9">
+                                    <h6 class="fw-bold mb-2"><i class="fa fa-book text-primary me-1"></i> {{ $livre->titre }}</h6>
+                                    <p class="mb-1 small"><strong>Auteur :</strong> {{ $livre->auteur }}</p>
+                                    <p class="mb-1 small"><strong>Catégorie :</strong> <span class="badge bg-info">{{ $livre->categorie }}</span></p>
+                                    <p class="mb-1 small"><strong>Prix :</strong> {{ number_format($livre->prix ?? 0, 0, ',', ' ') }} FCFA</p>
+                                    <p class="mb-0 small"><strong>Stock disponible :</strong> <span class="badge {{ $livre->quantite > 0 ? 'bg-success' : 'bg-danger' }}">{{ $livre->quantite }}</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if($empruntsEnCours > 0)
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fa fa-times-circle me-2"></i>
+                                <strong>Impossible de supprimer :</strong> Ce livre a actuellement <strong>{{ $empruntsEnCours }}</strong> emprunt(s) en cours ou en retard.
+                            </div>
+                        @else
+                            <div class="alert alert-success" role="alert">
+                                <i class="fa fa-check-circle me-2"></i>
+                                Aucun emprunt en cours. La suppression est possible.
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fa fa-times me-1"></i>Annuler
+                        </button>
+                        @if($empruntsEnCours == 0)
+                            <form method="POST" action="{{ route('admin.emprunts.destroyLivre', $livre->id) }}" style="display: inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fa fa-trash me-1"></i>Supprimer définitivement
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
     <!-- Section 2: Formulaire d'ajout de livre empruntable -->
     <div class="card shadow border-0 mb-5">
         <div class="card-header bg-success text-white rounded-top-4">
             <h4 class="mb-0 fw-bold text-white"><i class="fa fa-plus-circle me-2"></i>Ajouter un Livre Empruntable</h4>
         </div>
         <div class="card-body bg-light">
-            <form method="POST" action="{{ route('admin.emprunts.store') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('admin.emprunts.store') }}" enctype="multipart/form-data" class="needs-validation-confirm">
                 @csrf
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label for="titre" class="form-label fw-bold"><i class="fa fa-book me-1 text-primary"></i> Titre</label>
-                        <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre') }}" required>
+                        <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre') }}" data-important="true">
                         @error('titre')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-md-3">
                         <label for="auteur" class="form-label fw-bold"><i class="fa fa-user-pen me-1 text-primary"></i> Auteur</label>
-                        <input type="text" class="form-control @error('auteur') is-invalid @enderror" id="auteur" name="auteur" value="{{ old('auteur') }}" required>
+                        <input type="text" class="form-control @error('auteur') is-invalid @enderror" id="auteur" name="auteur" value="{{ old('auteur') }}" data-important="true">
                         @error('auteur')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-md-2">
                         <label for="categorie" class="form-label fw-bold"><i class="fa fa-tags me-1 text-primary"></i> Catégorie</label>
-                        <select class="form-select @error('categorie') is-invalid @enderror" id="categorie" name="categorie" required>
+                        <select class="form-select @error('categorie') is-invalid @enderror" id="categorie" name="categorie" data-important="true">
                             <option value="">Choisir...</option>
                             <option value="Roman" {{ old('categorie') == 'Roman' ? 'selected' : '' }}>Roman</option>
                             <option value="Essai" {{ old('categorie') == 'Essai' ? 'selected' : '' }}>Essai</option>
@@ -289,14 +299,14 @@
                     </div>
                     <div class="col-md-2">
                         <label for="prix" class="form-label fw-bold"><i class="fa fa-money-bill-wave me-1 text-primary"></i> Prix (FCFA)</label>
-                        <input type="number" class="form-control @error('prix') is-invalid @enderror" id="prix" name="prix" value="{{ old('prix', 0) }}" min="0" required>
+                        <input type="number" class="form-control @error('prix') is-invalid @enderror" id="prix" name="prix" value="{{ old('prix', 0) }}" min="0" data-important="true">
                         @error('prix')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-md-2">
                         <label for="quantite" class="form-label fw-bold"><i class="fa fa-box me-1 text-primary"></i> Quantité</label>
-                        <input type="number" class="form-control @error('quantite') is-invalid @enderror" id="quantite" name="quantite" value="{{ old('quantite', 1) }}" min="0" required>
+                        <input type="number" class="form-control @error('quantite') is-invalid @enderror" id="quantite" name="quantite" value="{{ old('quantite', 1) }}" min="0" data-important="true">
                         @error('quantite')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -317,7 +327,7 @@
                     <div class="col-md-6">
                         <label for="image" class="form-label fw-bold"><i class="fa fa-image me-1 text-primary"></i> Image de couverture</label>
                         <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" accept="image/*">
-                        <small class="text-muted">Formats: JPEG, PNG, JPG, GIF, WEBP (max 2MB)</small>
+                        <small class="text-muted">Formats: JPEG, PNG, JPG, GIF, WEBP (jusqu'à 512 Mo)</small>
                         @error('image')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -325,7 +335,7 @@
                     <div class="col-md-6">
                         <label for="pdf" class="form-label fw-bold"><i class="fa fa-file-pdf me-1 text-danger"></i> Fichier PDF</label>
                         <input type="file" class="form-control @error('pdf') is-invalid @enderror" id="pdf" name="pdf" accept="application/pdf">
-                        <small class="text-muted">Format: PDF (max 10MB)</small>
+                        <small class="text-muted">Format: PDF (jusqu'à 512 Mo)</small>
                         @error('pdf')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -442,11 +452,14 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center mt-4">
+                {{ $emprunts->links() }}
+            </div>
 
 
-                <div class="mt-3">
-                    {{ $emprunts->links() }}
-                </div>
             @endif
         </div>
     </div>
@@ -612,23 +625,23 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="edit_titre" class="form-label fw-bold">Titre</label>
-                                <input type="text" class="form-control" id="edit_titre" name="titre" required>
+                                <input type="text" class="form-control" id="edit_titre" name="titre">
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_auteur" class="form-label fw-bold">Auteur</label>
-                                <input type="text" class="form-control" id="edit_auteur" name="auteur" required>
+                                <input type="text" class="form-control" id="edit_auteur" name="auteur">
                             </div>
                             <div class="col-md-4">
                                 <label for="edit_categorie" class="form-label fw-bold">Catégorie</label>
-                                <input type="text" class="form-control" id="edit_categorie" name="categorie" required>
+                                <input type="text" class="form-control" id="edit_categorie" name="categorie">
                             </div>
                             <div class="col-md-4">
                                 <label for="edit_prix" class="form-label fw-bold">Prix (FCFA)</label>
-                                <input type="number" class="form-control" id="edit_prix" name="prix" min="0" required>
+                                <input type="number" class="form-control" id="edit_prix" name="prix" min="0">
                             </div>
                             <div class="col-md-4">
                                 <label for="edit_quantite" class="form-label fw-bold">Stock</label>
-                                <input type="number" class="form-control" id="edit_quantite" name="quantite" min="0" required>
+                                <input type="number" class="form-control" id="edit_quantite" name="quantite" min="0">
                             </div>
                             <div class="col-12">
                                 <label for="edit_resumer" class="form-label fw-bold">Résumé</label>
@@ -637,12 +650,12 @@
                             <div class="col-md-6">
                                 <label for="edit_image" class="form-label fw-bold">Image (optionnel)</label>
                                 <input type="file" class="form-control" id="edit_image" name="image" accept="image/*">
-                                <small class="text-muted" id="current_image_info"></small>
+                                <small class="text-muted" id="current_image_info">Formats: JPEG, PNG, JPG, GIF, WEBP (jusqu'à 512 Mo)</small>
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_pdf" class="form-label fw-bold">PDF (optionnel)</label>
                                 <input type="file" class="form-control" id="edit_pdf" name="pdf" accept="application/pdf">
-                                <small class="text-muted" id="current_pdf_info"></small>
+                                <small class="text-muted" id="current_pdf_info">Format: PDF (jusqu'à 512 Mo)</small>
                             </div>
                         </div>
                     </div>
@@ -684,6 +697,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Modale de confirmation pour champs vides -->
+    @include('partials.confirmation-modal')
 
 </div>
 @endsection
@@ -881,6 +897,7 @@
 @endpush
 
 @push('scripts')
+<script src="{{ asset('js/form-validation.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Références aux modals
@@ -909,6 +926,20 @@
         if (validerModal) validerModalInstance = new bootstrap.Modal(validerModal);
         if (rejeterModal) rejeterModalInstance = new bootstrap.Modal(rejeterModal);
         if (editLivreModal) editLivreModalInstance = new bootstrap.Modal(editLivreModal);
+
+        // Gestion des boutons de suppression de livre
+        document.querySelectorAll('.btn-delete-livre').forEach(button => {
+            button.addEventListener('click', function() {
+                const livreId = this.getAttribute('data-livre-id');
+                const modalId = 'deleteLivreModal' + livreId;
+                const modal = document.getElementById(modalId);
+
+                if (modal) {
+                    const modalInstance = new bootstrap.Modal(modal);
+                    modalInstance.show();
+                }
+            });
+        });
 
         // Gestion des boutons de modification de livre
         document.querySelectorAll('.btn-edit-livre').forEach(button => {

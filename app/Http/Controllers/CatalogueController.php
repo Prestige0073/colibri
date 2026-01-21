@@ -11,8 +11,11 @@ class CatalogueController extends Controller
 {
     public function decouvrir()
     {
+        // Pagination pour les catalogues (12 par page)
+        $catalogues = Catalogue::where('type_categorie', 'catalogue')
+            ->latest()
+            ->paginate(12);
 
-        $catalogues = Catalogue::all();
         return view('catalogue.decouvrir', compact('catalogues'));
     }
 
@@ -86,7 +89,16 @@ class CatalogueController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $catalogue = Catalogue::findOrFail($id);
+
+        // Récupérer des livres similaires (même catégorie)
+        $livresSimilaires = Catalogue::where('categorie', $catalogue->categorie)
+            ->where('id', '!=', $id)
+            ->where('type_categorie', $catalogue->type_categorie)
+            ->limit(4)
+            ->get();
+
+        return view('catalogue.show', compact('catalogue', 'livresSimilaires'));
     }
 
     /**

@@ -84,6 +84,19 @@
     </div>
     <!-- Video End -->
 
+    <!-- Section Recherche de Catalogue Start -->
+    <div class="container-fluid bg-light py-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h5 class="text-primary text-uppercase">Notre Catalogue</h5>
+                <h1 class="display-5 mb-0">Recherchez Vos Livres Préférés</h1>
+            </div>
+
+            @include('partials.catalogue-search')
+        </div>
+    </div>
+    <!-- Section Recherche de Catalogue End -->
+
     <!-- Video Modal Start -->
     <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -736,6 +749,7 @@
 @endsection
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('css/catalogue-search.css') }}">
 <style>
     /* Testimonial Cards */
     .testimonial-card {
@@ -779,6 +793,7 @@
 @endpush
 
 @push('scripts')
+<script src="{{ asset('js/catalogue-search.js') }}"></script>
 <script>
     // Compteur de caractères pour le message
     document.addEventListener('DOMContentLoaded', function() {

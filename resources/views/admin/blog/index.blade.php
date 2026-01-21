@@ -115,7 +115,7 @@
                                 <tr class="{{ $article->status === 'draft' ? 'table-warning' : '' }}">
                                     <td>
                                         @if($article->featured_image)
-                                            <img src="{{ asset('storage/' . $article->featured_image) }}"
+                                            <img src="{{ asset($article->featured_image) }}"
                                                  alt="{{ $article->title }}"
                                                  class="rounded"
                                                  style="width: 60px; height: 60px; object-fit: cover;">
@@ -195,18 +195,14 @@
                                                 </button>
                                             </form>
 
-                                            <form action="{{ route('admin.blog.destroy', $article->id) }}"
-                                                  method="POST"
-                                                  class="d-inline"
-                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-danger"
-                                                        title="Supprimer">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-danger btn-delete-article"
+                                                    data-article-id="{{ $article->id }}"
+                                                    data-article-title="{{ $article->title }}"
+                                                    data-delete-url="{{ route('admin.blog.destroy', $article->id) }}"
+                                                    title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -220,6 +216,45 @@
             </div>
         </div>
     @endif
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteArticleModal" tabindex="-1" aria-labelledby="deleteArticleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title text-white" id="deleteArticleModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmer la suppression
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="fas fa-exclamation-circle me-2 fs-4"></i>
+                        <div>
+                            <strong>Attention !</strong> Cette action est irréversible.
+                        </div>
+                    </div>
+                    <p class="mb-3">Êtes-vous sûr de vouloir supprimer cet article ?</p>
+                    <div class="card border-0 bg-light p-3">
+                        <h6 class="fw-bold mb-0" id="deleteArticleTitle"></h6>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Annuler
+                    </button>
+                    <form id="deleteArticleForm" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i>Supprimer définitivement
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -247,4 +282,31 @@
         border-bottom-right-radius: 0.25rem;
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal de suppression
+        const deleteModal = document.getElementById('deleteArticleModal');
+        const deleteModalInstance = deleteModal ? new bootstrap.Modal(deleteModal) : null;
+        const deleteForm = document.getElementById('deleteArticleForm');
+        const deleteTitle = document.getElementById('deleteArticleTitle');
+
+        // Gestion des boutons de suppression
+        document.querySelectorAll('.btn-delete-article').forEach(button => {
+            button.addEventListener('click', function() {
+                const articleId = this.getAttribute('data-article-id');
+                const articleTitle = this.getAttribute('data-article-title');
+                const deleteUrl = this.getAttribute('data-delete-url');
+
+                if (deleteForm && deleteTitle && deleteModalInstance) {
+                    deleteTitle.textContent = articleTitle;
+                    deleteForm.setAttribute('action', deleteUrl);
+                    deleteModalInstance.show();
+                }
+            });
+        });
+    });
+</script>
 @endpush

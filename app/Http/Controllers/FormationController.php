@@ -9,8 +9,11 @@ use App\Models\Module as ModuleModel;
 class FormationController extends Controller
 {
     public function modules() {
-        // Récupère les formations paginées avec le nombre de modules associés
-        $formations = Formation::withCount('modules')->orderBy('created_at', 'desc')->paginate(9);
+        // Récupère les formations paginées avec le nombre de modules associés et leurs contenus
+        $formations = Formation::withCount('modules')
+            ->with(['modules.contenus'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(9);
         return view('formation.modules', compact('formations'));
     }
 

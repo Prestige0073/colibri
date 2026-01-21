@@ -23,14 +23,35 @@
                             <a href="#" class="h3 d-inline-block">{{ $formation->titre }}</a>
                             <p>{{ \Illuminate\Support\Str::limit($formation->description, 150) }}</p>
                             <div class="bg-light p-4">
-                                <p class="mb-1"><i class="fa fa-clock text-success me-2"></i>{{ $formation->duree ?? 'N/A' }}</p>
                                 <p class="mb-1"><i class="fa fa-level-up-alt text-success me-2"></i>{{ $formation->niveau ?? 'Tous niveaux' }}</p>
                                 <p class="mb-0"><i class="fa fa-book text-success me-2"></i>{{ $formation->modules_count }} module(s)</p>
                             </div>
+                            @php
+                                $totalContenus = 0;
+                                $videosCount = 0;
+                                $pdfsCount = 0;
+                                foreach($formation->modules as $module) {
+                                    foreach($module->contenus as $contenu) {
+                                        $totalContenus++;
+                                        if($contenu->type === 'video') {
+                                            $videosCount++;
+                                        } elseif($contenu->type === 'pdf') {
+                                            $pdfsCount++;
+                                        }
+                                    }
+                                }
+                            @endphp
                             <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
-                                <span><i class="fa fa-video text-success me-2"></i>{{ $formation->modules_count * 4 ?? 0 }} vidéos</span>
-                                <span><i class="fa fa-money-bill text-success me-2"></i>{{ fcfa($formation->prix) }}</span>
-                                <span><i class="fa fa-share-alt text-success me-2"></i></span>
+                                @if($videosCount > 0)
+                                    <span><i class="fa fa-video text-success me-2"></i>{{ $videosCount }} vidéo{{ $videosCount > 1 ? 's' : '' }}</span>
+                                @endif
+                                @if($pdfsCount > 0)
+                                    <span><i class="fa fa-file-pdf text-success me-2"></i>{{ $pdfsCount }} PDF</span>
+                                @endif
+                                @if($videosCount == 0 && $pdfsCount == 0 && $totalContenus > 0)
+                                    <span><i class="fa fa-file text-success me-2"></i>{{ $totalContenus }} contenu{{ $totalContenus > 1 ? 's' : '' }}</span>
+                                @endif
+                                <span><i class="fa fa-money-bill text-success me-2"></i>{{ $formation->prix > 0 ? fcfa($formation->prix) : 'Gratuit' }}</span>
                             </div>
                             <a href="{{ route('formation.show', $formation) }}" class="btn btn-success btn-block w-100 mt-3">
                                 <i class="fa fa-graduation-cap me-2"></i>Suis la formation

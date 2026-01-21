@@ -12,8 +12,8 @@ class CatalogueAdminController extends Controller
 {
     public function index()
     {
-        $catalogues = Catalogue::where('type_categorie', 'catalogue')->latest()->get();
-        $cataloguesEmprunt = Catalogue::where('type_categorie', 'emprunt')->latest()->get();
+        $catalogues = Catalogue::where('type_categorie', 'catalogue')->latest()->paginate(15);
+        $cataloguesEmprunt = Catalogue::where('type_categorie', 'emprunt')->latest()->paginate(15);
 
         return view('admin.catalogue', compact('catalogues', 'cataloguesEmprunt'));
     }

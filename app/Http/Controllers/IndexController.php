@@ -13,11 +13,17 @@ class IndexController extends Controller
      */
     public function index()
     {
-        // Récupérer les Catalogues du catalogue depuis la base de données
-        $Catalogues = Catalogue::all();
+        // Récupérer les catalogues les plus récents pour la page d'accueil (limite à 9)
+        $Catalogues = Catalogue::where('type_categorie', 'catalogue')
+            ->latest()
+            ->take(9)
+            ->get();
 
-        // Récupérer les livres de la bibliothèque (ici, même source que catalogue)
-        $Bibliotheques = Catalogue::all();
+        // Récupérer les livres de la bibliothèque/emprunt les plus récents (limite à 9)
+        $Bibliotheques = Catalogue::where('type_categorie', 'emprunt')
+            ->latest()
+            ->take(9)
+            ->get();
 
         // Récupérer les derniers emprunts (les plus récents en premier)
         $recentEmprunts = Emprunt::with('livre', 'user')->orderByDesc('created_at')->take(6)->get();

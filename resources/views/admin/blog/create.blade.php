@@ -91,7 +91,7 @@
                             @error('featured_image')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <small class="text-muted">Formats acceptés: JPEG, PNG, JPG, GIF, WEBP (max 2 Mo)</small>
+                            <small class="text-muted">Formats acceptés: JPEG, PNG, JPG, GIF, WEBP (jusqu'à 512 Mo)</small>
                         </div>
 
                         <!-- Prévisualisation de l'image -->

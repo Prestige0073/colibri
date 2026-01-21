@@ -58,11 +58,11 @@ class EmpruntController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'titre' => 'required|string|max:255',
-            'auteur' => 'required|string|max:255',
-            'categorie' => 'required|string|max:255',
-            'prix' => 'required|numeric|min:0',
-            'quantite' => 'required|integer|min:0',
+            'titre' => 'nullable|string|max:255',
+            'auteur' => 'nullable|string|max:255',
+            'categorie' => 'nullable|string|max:255',
+            'prix' => 'nullable|numeric|min:0',
+            'quantite' => 'nullable|integer|min:0',
             'resumer' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
             'pdf' => 'nullable|mimes:pdf',
@@ -155,11 +155,11 @@ class EmpruntController extends Controller
         $livre = Catalogue::findOrFail($id);
 
         $validated = $request->validate([
-            'titre' => 'required|string|max:255',
-            'auteur' => 'required|string|max:255',
-            'categorie' => 'required|string|max:255',
-            'prix' => 'required|numeric|min:0',
-            'quantite' => 'required|integer|min:0',
+            'titre' => 'nullable|string|max:255',
+            'auteur' => 'nullable|string|max:255',
+            'categorie' => 'nullable|string|max:255',
+            'prix' => 'nullable|numeric|min:0',
+            'quantite' => 'nullable|integer|min:0',
             'resumer' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
             'pdf' => 'nullable|mimes:pdf',

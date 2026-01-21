@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\CertificationAdminController;
 use App\Http\Controllers\Admin\CatalogueAdminController;
 use App\Http\Controllers\Admin\AchatController as AchatAdminController;
 use App\Http\Controllers\Admin\ModuleAdminController;
+use App\Http\Controllers\CatalogueSearchController;
 use App\Http\Controllers\Admin\TeamAdminController;
 use App\Http\Controllers\Admin\EquipeAdminController;
 use App\Http\Controllers\Admin\DashboardAdminController;
@@ -75,6 +76,7 @@ Route::get('formation/{formation}/module/{module}/pdf/{contenu}', [\App\Http\Con
 // Routes pour Catalogue
 Route::get('catalogue/decouvrir', [CatalogueController::class, 'decouvrir'])->name('catalogue.decouvrir');
 Route::get('catalogue/emprunts', [CatalogueController::class, 'acheter'])->name('catalogue.acheter');
+Route::get('catalogue/{id}', [CatalogueController::class, 'show'])->name('catalogue.show');
 // Route index compatible avec les appels existants
 Route::get('catalogue', [CatalogueController::class, 'decouvrir'])->name('catalogue.index');
 
@@ -248,6 +250,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// API Routes pour la recherche de catalogues (AJAX)
+Route::prefix('api/catalogue')->group(function () {
+    Route::get('/search', [CatalogueSearchController::class, 'search'])->name('api.catalogue.search');
+    Route::get('/categories', [CatalogueSearchController::class, 'getCategories'])->name('api.catalogue.categories');
+    Route::get('/price-stats', [CatalogueSearchController::class, 'getPriceStats'])->name('api.catalogue.price-stats');
 });
 
 require __DIR__.'/auth.php';

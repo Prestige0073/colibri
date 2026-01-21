@@ -15,6 +15,11 @@
                 <p class="section-title bg-white text-center text-success px-3">Catalogue</p>
                 <h1 class="display-6 mb-4">Découvrez notre sélection de livres africains</h1>
             </div>
+
+            <!-- Système de recherche avancée -->
+            <div class="mb-5">
+                @include('partials.catalogue-search')
+            </div>
             <div class="row g-4">
                 @foreach ($catalogues ?? [] as $catalogue)
                     @if ($catalogue->type_categorie === 'catalogue')
@@ -145,7 +150,24 @@
                     @endif
                 @endforeach
             </div>
+
+            <!-- Pagination -->
+            @if($catalogues->hasPages())
+                <div class="row mt-5">
+                    <div class="col-12 d-flex justify-content-center">
+                        {{ $catalogues->links() }}
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
     <!-- Catalogue End -->
 @endsection
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/catalogue-search.css') }}">
+@endpush
+
+@push('scripts')
+<script src="{{ asset('js/catalogue-search.js') }}"></script>
+@endpush

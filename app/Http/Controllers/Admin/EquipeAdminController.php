@@ -11,7 +11,7 @@ class EquipeAdminController extends Controller
 {
     public function index()
     {
-        $membres = Equipe::orderBy('created_at', 'desc')->get();
+        $membres = Equipe::orderBy('created_at', 'desc')->paginate(15);
         return view('admin.equipe.index', compact('membres'));
     }
 

@@ -59,7 +59,12 @@ class Article extends Model
 
         static::creating(function ($article) {
             if (empty($article->slug)) {
-                $article->slug = Str::slug($article->title);
+                // Générer slug depuis le titre ou utiliser un slug par défaut
+                if (!empty($article->title)) {
+                    $article->slug = Str::slug($article->title);
+                } else {
+                    $article->slug = 'article-' . uniqid();
+                }
 
                 // Vérifier l'unicité du slug
                 $count = 1;
@@ -68,6 +73,39 @@ class Article extends Model
                     $article->slug = $originalSlug . '-' . $count;
                     $count++;
                 }
+            }
+        });
+
+        static::updating(function ($article) {
+            // Générer slug s'il est vide
+            if (empty($article->slug)) {
+                if (!empty($article->title)) {
+                    $article->slug = Str::slug($article->title);
+                } else {
+                    $article->slug = 'article-' . uniqid();
+                }
+
+                // Vérifier l'unicité
+                $count = 1;
+                $originalSlug = $article->slug;
+                while (static::where('slug', $article->slug)->where('id', '!=', $article->id)->exists()) {
+                    $article->slug = $originalSlug . '-' . $count;
+                    $count++;
+                }
+            }
+            // Regénérer le slug si le titre a changé et qu'il n'est pas vide
+            elseif ($article->isDirty('title') && !empty($article->title)) {
+                $newSlug = Str::slug($article->title);
+
+                // Vérifier l'unicité du slug
+                $count = 1;
+                $originalSlug = $newSlug;
+                while (static::where('slug', $newSlug)->where('id', '!=', $article->id)->exists()) {
+                    $newSlug = $originalSlug . '-' . $count;
+                    $count++;
+                }
+
+                $article->slug = $newSlug;
             }
         });
     }

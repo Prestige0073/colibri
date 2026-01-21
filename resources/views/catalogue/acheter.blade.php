@@ -14,6 +14,18 @@
 
     @include('partials.notifications')
 
+    <!-- Système de recherche avancée -->
+    <div class="container-fluid bg-light py-5">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h1 class="display-6 mb-3">Rechercher dans notre catalogue</h1>
+                <p class="text-muted">Trouvez facilement les livres que vous recherchez</p>
+            </div>
+
+            @include('partials.catalogue-search')
+        </div>
+    </div>
+
     <!-- Livres empruntables -->
     @if($livresEmpruntables && $livresEmpruntables->count() > 0)
         <div class="container mt-4 mb-5">
@@ -455,4 +467,9 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/catalogue-search.css') }}">
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/catalogue-search.js') }}"></script>
+@endpush

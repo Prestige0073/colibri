@@ -73,49 +73,105 @@
                 <p class="section-title bg-white text-center text-primary px-3">Équipe</p>
                 <h1 class="display-6 mb-4">Découvrez les membres passionnés de Colibri Littéraire</h1>
             </div>
-            <div class="row g-4">
-                @forelse($membres as $index => $membre)
-                    <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="{{ 0.1 + ($index % 3) * 0.2 }}s">
-                        <div class="team-item d-flex h-100 p-4">
+            @php
+                // Séparer le président des autres membres
+                $president = $membres->firstWhere('poste', 'Président') ??
+                             $membres->firstWhere('poste', 'Présidente') ??
+                             $membres->firstWhere('poste', 'président') ??
+                             $membres->firstWhere('poste', 'présidente');
+                $autresMembres = $membres->reject(function($m) use ($president) {
+                    return $president && $m->id === $president->id;
+                });
+            @endphp
+
+            @if($membres->count() > 0)
+                <!-- Président en haut - centré -->
+                @if($president)
+                <div class="row g-4 mb-5 justify-content-center">
+                    <div class="col-md-8 col-lg-6 wow fadeIn" data-wow-delay="0.1s">
+                        <div class="team-item d-flex h-100 p-4 shadow-lg">
                             <div class="team-detail pe-4">
-                                @if($membre->photo)
-                                    @if(str_starts_with($membre->photo, 'http') || str_starts_with($membre->photo, 'img/'))
-                                        <img class="img-fluid mb-4" src="{{ asset($membre->photo) }}" alt="{{ $membre->nom }}">
+                                @if($president->photo)
+                                    @if(str_starts_with($president->photo, 'http') || str_starts_with($president->photo, 'img/'))
+                                        <img class="img-fluid mb-4" src="{{ asset($president->photo) }}" alt="{{ $president->nom }}">
                                     @else
-                                        <img class="img-fluid mb-4" src="{{ asset('storage/' . $membre->photo) }}" alt="{{ $membre->nom }}">
+                                        <img class="img-fluid mb-4" src="{{ asset('storage/' . $president->photo) }}" alt="{{ $president->nom }}">
                                     @endif
                                 @else
-                                    <img class="img-fluid mb-4" src="{{ asset('img/team-default.jpg') }}" alt="{{ $membre->nom }}">
+                                    <img class="img-fluid mb-4" src="{{ asset('img/team-default.jpg') }}" alt="{{ $president->nom }}">
                                 @endif
-                                <h3>{{ $membre->nom }}</h3>
-                                <span>{{ $membre->poste }}</span>
-                                @if($membre->bio)
-                                    <p class="mt-3 text-muted small">{{ Str::limit($membre->bio, 100) }}</p>
+                                <h3 class="text-primary">{{ $president->nom }}</h3>
+                                <span class="badge bg-primary fs-6">{{ $president->poste }}</span>
+                                @if($president->bio)
+                                    <p class="mt-3 text-muted small">{{ Str::limit($president->bio, 150) }}</p>
                                 @endif
                             </div>
                             <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
-                                @if($membre->facebook)
-                                    <a class="btn btn-square btn-primary my-2" href="{{ $membre->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                                @if($president->facebook)
+                                    <a class="btn btn-square btn-primary my-2" href="{{ $president->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
                                 @endif
-                                @if($membre->twitter)
-                                    <a class="btn btn-square btn-primary my-2" href="https://twitter.com/{{ ltrim($membre->twitter, '@') }}" target="_blank"><i class="fab fa-x-twitter"></i></a>
+                                @if($president->twitter)
+                                    <a class="btn btn-square btn-primary my-2" href="https://twitter.com/{{ ltrim($president->twitter, '@') }}" target="_blank"><i class="fab fa-x-twitter"></i></a>
                                 @endif
-                                @if($membre->linkedin)
-                                    <a class="btn btn-square btn-primary my-2" href="{{ $membre->linkedin }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                                @if($president->linkedin)
+                                    <a class="btn btn-square btn-primary my-2" href="{{ $president->linkedin }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
                                 @endif
-                                @if($membre->email)
-                                    <a class="btn btn-square btn-primary my-2" href="mailto:{{ $membre->email }}"><i class="fas fa-envelope"></i></a>
+                                @if($president->email)
+                                    <a class="btn btn-square btn-primary my-2" href="mailto:{{ $president->email }}"><i class="fas fa-envelope"></i></a>
                                 @endif
                             </div>
                         </div>
                     </div>
-                @empty
-                    <div class="col-12 text-center py-5">
-                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">Aucun membre de l'équipe pour le moment</p>
-                    </div>
-                @endforelse
-            </div>
+                </div>
+                @endif
+
+                <!-- Autres membres - disposition pyramidale -->
+                @if($autresMembres->count() > 0)
+                <div class="row g-4">
+                    @foreach($autresMembres as $index => $membre)
+                        <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="{{ 0.1 + ($index % 3) * 0.2 }}s">
+                            <div class="team-item d-flex h-100 p-4">
+                                <div class="team-detail pe-4">
+                                    @if($membre->photo)
+                                        @if(str_starts_with($membre->photo, 'http') || str_starts_with($membre->photo, 'img/'))
+                                            <img class="img-fluid mb-4" src="{{ asset($membre->photo) }}" alt="{{ $membre->nom }}">
+                                        @else
+                                            <img class="img-fluid mb-4" src="{{ asset('storage/' . $membre->photo) }}" alt="{{ $membre->nom }}">
+                                        @endif
+                                    @else
+                                        <img class="img-fluid mb-4" src="{{ asset('img/team-default.jpg') }}" alt="{{ $membre->nom }}">
+                                    @endif
+                                    <h3>{{ $membre->nom }}</h3>
+                                    <span>{{ $membre->poste }}</span>
+                                    @if($membre->bio)
+                                        <p class="mt-3 text-muted small">{{ Str::limit($membre->bio, 100) }}</p>
+                                    @endif
+                                </div>
+                                <div class="team-social bg-light d-flex flex-column justify-content-center flex-shrink-0 p-4">
+                                    @if($membre->facebook)
+                                        <a class="btn btn-square btn-primary my-2" href="{{ $membre->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                                    @endif
+                                    @if($membre->twitter)
+                                        <a class="btn btn-square btn-primary my-2" href="https://twitter.com/{{ ltrim($membre->twitter, '@') }}" target="_blank"><i class="fab fa-x-twitter"></i></a>
+                                    @endif
+                                    @if($membre->linkedin)
+                                        <a class="btn btn-square btn-primary my-2" href="{{ $membre->linkedin }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                                    @endif
+                                    @if($membre->email)
+                                        <a class="btn btn-square btn-primary my-2" href="mailto:{{ $membre->email }}"><i class="fas fa-envelope"></i></a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                @endif
+            @else
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Aucun membre de l'équipe pour le moment</p>
+                </div>
+            @endif
 
             <!-- Ancienne section - à retirer après vérification
             <div class="row g-4">

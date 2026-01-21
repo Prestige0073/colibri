@@ -123,6 +123,13 @@
                         @endforelse
                     </tbody>
                 </table>
+                
+                <!-- Pagination -->
+                @if($modules->hasPages())
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $modules->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>

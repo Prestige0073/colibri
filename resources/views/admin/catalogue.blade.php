@@ -193,6 +193,13 @@
                             </div>
                         </div>
                     </table>
+                    
+                    <!-- Pagination Catalogues -->
+                    @if($catalogues->hasPages())
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $catalogues->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

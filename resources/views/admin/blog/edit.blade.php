@@ -86,7 +86,7 @@
                                     <i class="fas fa-image me-2 text-primary"></i>Image actuelle
                                 </label>
                                 <div>
-                                    <img src="{{ asset('storage/' . $article->featured_image) }}"
+                                    <img src="{{ asset($article->featured_image) }}"
                                          alt="{{ $article->title }}"
                                          class="img-thumbnail"
                                          style="max-width: 300px;">
@@ -108,7 +108,7 @@
                             @error('featured_image')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <small class="text-muted">Formats acceptés: JPEG, PNG, JPG, GIF, WEBP (max 2 Mo)</small>
+                            <small class="text-muted">Formats acceptés: JPEG, PNG, JPG, GIF, WEBP (jusqu'à 512 Mo)</small>
                         </div>
 
                         <!-- Prévisualisation de la nouvelle image -->

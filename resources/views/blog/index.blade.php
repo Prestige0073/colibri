@@ -71,10 +71,14 @@
                                         </small>
                                     </div>
                                     <h5 class="card-title mb-3">
-                                        <a href="{{ route('blog.show', $article->slug) }}"
-                                           class="text-dark text-decoration-none stretched-link">
-                                            {{ $article->title ?? 'Sans titre' }}
-                                        </a>
+                                        @if($article->slug)
+                                            <a href="{{ route('blog.show', $article->slug) }}"
+                                               class="text-dark text-decoration-none stretched-link">
+                                                {{ $article->title ?? 'Sans titre' }}
+                                            </a>
+                                        @else
+                                            <span class="text-dark">{{ $article->title ?? 'Sans titre' }}</span>
+                                        @endif
                                     </h5>
                                     @if($article->excerpt)
                                         <p class="card-text text-muted mb-3">
