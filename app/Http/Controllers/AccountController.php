@@ -160,6 +160,51 @@ class AccountController extends Controller
 
         return view('account.bibliotheque', compact('livresAchetes'));
     }
+
+    /**
+     * Affiche les formations de l'utilisateur (inscrit)
+     */
+    public function formations()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Veuillez vous connecter pour accéder à vos formations.');
+        }
+
+        // Récupérer toutes les inscriptions de l'utilisateur avec les formations et leurs modules
+        $inscriptions = \App\Models\FormationInscription::where('user_id', $user->id)
+            ->with(['formation.modules.contenus', 'formation.quizzes'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Calculer la progression pour chaque inscription
+        foreach ($inscriptions as $inscription) {
+            $formation = $inscription->formation;
+            if ($formation) {
+                $totalContenus = 0;
+                $completedContenus = 0;
+
+                foreach ($formation->modules as $module) {
+                    $totalContenus += $module->contenus->count();
+
+                    // Compter les contenus complétés
+                    $completedContenus += \App\Models\UserModuleProgression::where('user_id', $user->id)
+                        ->where('module_id', $module->id)
+                        ->where('completed', true)
+                        ->count();
+                }
+
+                $inscription->calculated_progression = $totalContenus > 0
+                    ? round(($completedContenus / $totalContenus) * 100)
+                    : 0;
+                $inscription->total_contenus = $totalContenus;
+                $inscription->completed_contenus = $completedContenus;
+            }
+        }
+
+        return view('account.formations', compact('inscriptions'));
+    }
+
     /**
      * Display a listing of the resource.
      */

@@ -27,11 +27,13 @@ class CatalogueAdminController extends Controller
             'prix' => 'nullable|integer|min:0',
             'quantite' => 'nullable|integer|min:0',
             'resumer' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'image' => 'nullable|image',
             'pdf' => 'nullable|mimes:pdf',
+            'audio' => 'nullable|mimes:mp3,wav,ogg,m4a',
+            'type_contenu' => 'nullable|in:pdf,audio',
         ]);
 
-        // Gestion image
+        // Gestion image (tous formats acceptés)
         if ($request->hasFile('image')) {
             $imagePath = 'img/livres';
             if (!file_exists(public_path($imagePath))) {
@@ -53,6 +55,17 @@ class CatalogueAdminController extends Controller
             $validated['pdf'] = $pdfPath . '/' . $pdfName;
         }
 
+        // Gestion Audio
+        if ($request->hasFile('audio')) {
+            $audioPath = 'audio/catalogue';
+            if (!file_exists(public_path($audioPath))) {
+                mkdir(public_path($audioPath), 0775, true);
+            }
+            $audioName = uniqid('audio_') . '.' . $request->audio->extension();
+            $request->audio->move(public_path($audioPath), $audioName);
+            $validated['audio'] = $audioPath . '/' . $audioName;
+        }
+
         $validated['type_categorie'] = 'catalogue';
 
         Catalogue::create($validated);
@@ -72,11 +85,13 @@ class CatalogueAdminController extends Controller
             'prix' => 'nullable|integer|min:0',
             'quantite' => 'nullable|integer|min:0',
             'resumer' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'image' => 'nullable|image',
             'pdf' => 'nullable|mimes:pdf',
+            'audio' => 'nullable|mimes:mp3,wav,ogg,m4a',
+            'type_contenu' => 'nullable|in:pdf,audio',
         ]);
 
-        // Gestion image
+        // Gestion image (tous formats acceptés)
         if ($request->hasFile('image')) {
             $imagePath = 'img/livres';
             if (!file_exists(public_path($imagePath))) {
@@ -106,6 +121,21 @@ class CatalogueAdminController extends Controller
             $validated['pdf'] = $pdfPath . '/' . $pdfName;
         }
 
+        // Gestion Audio
+        if ($request->hasFile('audio')) {
+            $audioPath = 'audio/catalogue';
+            if (!file_exists(public_path($audioPath))) {
+                mkdir(public_path($audioPath), 0775, true);
+            }
+            // Supprime l'ancien audio
+            if ($catalogue->audio && file_exists(public_path($catalogue->audio))) {
+                @unlink(public_path($catalogue->audio));
+            }
+            $audioName = uniqid('audio_') . '.' . $request->audio->extension();
+            $request->audio->move(public_path($audioPath), $audioName);
+            $validated['audio'] = $audioPath . '/' . $audioName;
+        }
+
         $validated['type_categorie'] = 'catalogue';
 
         $catalogue->update($validated);
@@ -121,6 +151,9 @@ class CatalogueAdminController extends Controller
         }
         if ($catalogue->pdf && file_exists(public_path($catalogue->pdf))) {
             @unlink(public_path($catalogue->pdf));
+        }
+        if ($catalogue->audio && file_exists(public_path($catalogue->audio))) {
+            @unlink(public_path($catalogue->audio));
         }
         $catalogue->delete();
         return redirect()->route('admin.catalogue.index')->with('success', 'Livre supprimé avec succès !');

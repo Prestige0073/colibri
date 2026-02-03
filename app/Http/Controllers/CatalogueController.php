@@ -9,32 +9,100 @@ use Illuminate\Support\Facades\Auth;
 
 class CatalogueController extends Controller
 {
-    public function decouvrir()
+    public function decouvrir(Request $request)
     {
-        // Pagination pour les catalogues (12 par page)
-        $catalogues = Catalogue::where('type_categorie', 'catalogue')
-            ->latest()
-            ->paginate(12);
+        // Requête de base pour les catalogues
+        $query = Catalogue::where('type_categorie', 'catalogue');
+
+        // Recherche textuelle (titre, auteur, catégorie)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('titre', 'like', '%' . $search . '%')
+                  ->orWhere('auteur', 'like', '%' . $search . '%')
+                  ->orWhere('categorie', 'like', '%' . $search . '%')
+                  ->orWhere('resumer', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filtre par catégorie si spécifié
+        if ($request->filled('categorie')) {
+            $query->where('categorie', $request->categorie);
+        }
+
+        // Filtre par prix minimum
+        if ($request->filled('prix_min')) {
+            $query->where('prix', '>=', (int) $request->prix_min);
+        }
+
+        // Filtre par prix maximum
+        if ($request->filled('prix_max')) {
+            $query->where('prix', '<=', (int) $request->prix_max);
+        }
+
+        // Filtre par disponibilité
+        if ($request->filled('disponible') && $request->disponible === 'true') {
+            $query->where('quantite', '>', 0);
+        }
+
+        // Tri
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $allowedSorts = ['created_at', 'titre', 'auteur', 'prix'];
+
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder === 'asc' ? 'asc' : 'desc');
+        } else {
+            $query->latest();
+        }
+
+        // Pagination (12 par page) avec conservation des paramètres de requête
+        $catalogues = $query->paginate(12)->withQueryString();
 
         return view('catalogue.decouvrir', compact('catalogues'));
     }
 
-    public function acheter()
+    public function acheter(Request $request)
     {
-        // Récupérer les livres à vendre, triés du plus récent au plus ancien
-        $livres = Catalogue::where('type_categorie', 'vente')
-            ->orderByDesc('created_at')
-            ->orderBy('titre')
-            ->paginate(12);
+        // Requête de base pour les livres empruntables
+        $query = Catalogue::where('type_categorie', 'emprunt');
 
-        // Collection complète de catalogues (utile pour filtres, catégories, etc.)
-        $catalogues = Catalogue::where('type_categorie', 'vente')
-            ->orderBy('titre')
-            ->get();
+        // Recherche textuelle (titre, auteur, catégorie)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('titre', 'like', '%' . $search . '%')
+                  ->orWhere('auteur', 'like', '%' . $search . '%')
+                  ->orWhere('categorie', 'like', '%' . $search . '%')
+                  ->orWhere('resumer', 'like', '%' . $search . '%');
+            });
+        }
 
-        $user = Auth::user();
-        $emprunts = $user && method_exists($user, 'emprunts') ? $user->emprunts()->with('livre')->orderByDesc('created_at')->get() : collect();
-        return view('catalogue.acheter', compact('livres', 'catalogues', 'emprunts'));
+        // Filtre par catégorie si spécifié
+        if ($request->filled('categorie')) {
+            $query->where('categorie', $request->categorie);
+        }
+
+        // Filtre par disponibilité
+        if ($request->filled('disponible') && $request->disponible === 'true') {
+            $query->where('quantite', '>', 0);
+        }
+
+        // Tri
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $allowedSorts = ['created_at', 'titre', 'auteur'];
+
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder === 'asc' ? 'asc' : 'desc');
+        } else {
+            $query->latest();
+        }
+
+        // Pagination (12 par page) avec conservation des paramètres de requête
+        $emprunts = $query->paginate(12)->withQueryString();
+
+        return view('catalogue.acheter', compact('emprunts'));
     }
 
     /**

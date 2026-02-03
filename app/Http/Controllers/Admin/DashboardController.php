@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\CartItem;
 use App\Models\Emprunt;
 use App\Models\Catalogue;
+use App\Models\Formation;
+use App\Models\Contact;
+use App\Models\Commande;
 use App\Services\EmpruntService;
 use Illuminate\Support\Facades\DB;
 
@@ -159,5 +162,111 @@ class DashboardController extends Controller
             ->orderByDesc('created_at')
             ->get();
         return response()->json($emprunts);
+    }
+
+    /**
+     * Recherche globale dans l'admin
+     */
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+        $results = [];
+
+        if (strlen($query) < 2) {
+            return response()->json(['results' => []]);
+        }
+
+        // Recherche utilisateurs
+        $users = User::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('email', 'LIKE', "%{$query}%")
+            ->limit(5)
+            ->get();
+
+        foreach ($users as $user) {
+            $results[] = [
+                'title' => $user->name,
+                'type' => 'Utilisateur',
+                'url' => route('admin.users.show', $user->id),
+                'icon' => 'fas fa-user',
+                'color' => '#1e7a2f'
+            ];
+        }
+
+        // Recherche catalogues (livres)
+        $catalogues = Catalogue::where('titre', 'LIKE', "%{$query}%")
+            ->orWhere('auteur', 'LIKE', "%{$query}%")
+            ->limit(5)
+            ->get();
+
+        foreach ($catalogues as $catalogue) {
+            $results[] = [
+                'title' => $catalogue->titre,
+                'type' => 'Catalogue - ' . ($catalogue->auteur ?? 'Livre'),
+                'url' => route('admin.catalogue.edit', $catalogue->id),
+                'icon' => 'fas fa-book',
+                'color' => '#2196f3'
+            ];
+        }
+
+        // Recherche formations
+        if (class_exists(Formation::class)) {
+            $formations = Formation::where('titre', 'LIKE', "%{$query}%")
+                ->orWhere('description', 'LIKE', "%{$query}%")
+                ->limit(5)
+                ->get();
+
+            foreach ($formations as $formation) {
+                $results[] = [
+                    'title' => $formation->titre,
+                    'type' => 'Formation',
+                    'url' => route('admin.formations.edit', $formation->id),
+                    'icon' => 'fas fa-graduation-cap',
+                    'color' => '#ff9800'
+                ];
+            }
+        }
+
+        // Recherche commandes
+        if (class_exists(Commande::class)) {
+            $commandes = Commande::with('user')
+                ->where('nom', 'LIKE', "%{$query}%")
+                ->orWhere('telephone', 'LIKE', "%{$query}%")
+                ->orWhere('reference_paiement', 'LIKE', "%{$query}%")
+                ->orWhere('id', 'LIKE', "%{$query}%")
+                ->limit(5)
+                ->get();
+
+            foreach ($commandes as $commande) {
+                $clientName = $commande->nom ?? ($commande->user->name ?? 'Client');
+                $results[] = [
+                    'title' => 'Commande #' . $commande->id,
+                    'type' => 'Commande - ' . $clientName,
+                    'url' => route('admin.commandes.show', $commande->id),
+                    'icon' => 'fas fa-shopping-cart',
+                    'color' => '#9c27b0'
+                ];
+            }
+        }
+
+        // Recherche messages contacts
+        if (class_exists(Contact::class)) {
+            $contacts = Contact::where('name', 'LIKE', "%{$query}%")
+                ->orWhere('email', 'LIKE', "%{$query}%")
+                ->orWhere('subject', 'LIKE', "%{$query}%")
+                ->limit(5)
+                ->get();
+
+            foreach ($contacts as $contact) {
+                $results[] = [
+                    'title' => $contact->subject ?? $contact->name,
+                    'type' => 'Message - ' . $contact->name,
+                    'url' => route('admin.contacts.show', $contact->id),
+                    'icon' => 'fas fa-envelope',
+                    'color' => '#e91e63'
+                ];
+            }
+        }
+
+        return response()->json(['results' => array_slice($results, 0, 15)]);
     }
 }

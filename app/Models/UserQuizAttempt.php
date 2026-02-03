@@ -25,11 +25,12 @@ class UserQuizAttempt extends Model
     protected $casts = [
         'reponses' => 'array',
         'score' => 'decimal:2',
-        'points_obtenus' => 'decimal:2',
-        'points_total' => 'decimal:2',
+        'points_obtenus' => 'integer',
+        'points_total' => 'integer',
         'reussi' => 'boolean',
         'debut_at' => 'datetime',
         'fin_at' => 'datetime',
+        'duree_secondes' => 'integer',
     ];
 
     // Relations

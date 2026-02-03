@@ -18,7 +18,13 @@ class SecurePdfController extends Controller
 
         // Vérifier que le fichier PDF existe
         if (!$livre->pdf || !file_exists(public_path($livre->pdf))) {
-            abort(404, 'PDF non disponible');
+            \Illuminate\Support\Facades\Log::channel('security')->error('Fichier PDF emprunt manquant', [
+                'livre_id' => $livre->id,
+                'pdf_path' => $livre->pdf,
+                'user_id' => auth()->id(),
+            ]);
+            return redirect()->route('emprunts.index')
+                ->with('error', 'Le fichier PDF n\'est pas disponible. Veuillez contacter le support.');
         }
 
         // Vérifier que l'utilisateur est authentifié

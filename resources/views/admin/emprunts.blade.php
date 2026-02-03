@@ -1,86 +1,509 @@
 @extends('admin.layout')
 @section('title', 'Gestion des Emprunts')
+@section('subtitle', 'Gérez les livres empruntables et suivez les emprunts')
 
 @section('content')
-<div class="container-fluid py-4">
-    @include('partials.notifications')
+@php
+    $totalLivres = $livresEmpruntables->count();
+    $totalEmprunts = $emprunts->total();
+    $empruntsEnCours = $emprunts->where('statut', 'en_cours')->count();
+    $empruntsEnRetard = $emprunts->where('statut', 'en_retard')->count();
+@endphp
 
-    <h2 class="mb-4"><i class="fa fa-book-reader me-2 text-primary"></i>Gestion des Emprunts</h2>
-
-    <!-- Section 0: Demandes en attente de validation -->
-    @if($demandesEnAttente->isNotEmpty())
-    <div class="card shadow border-0 mb-5 border-start border-warning border-5">
-        <div class="card-header bg-warning text-dark rounded-top-4">
-            <h4 class="mb-0 fw-bold"><i class="fa fa-clock me-2"></i>Demandes en attente de validation ({{ $demandesEnAttente->count() }})</h4>
+<!-- Page Header -->
+<div class="admin-page-header">
+    <div class="admin-page-header-content">
+        <div class="admin-page-icon">
+            <i class="fas fa-book-reader"></i>
         </div>
-        <div class="card-body">
-            <div class="alert alert-info">
-                <i class="fa fa-info-circle me-2"></i>
-                Ces demandes d'emprunt nécessitent votre validation avant que les utilisateurs puissent accéder aux PDFs.
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-warning">
+        <div class="admin-page-info">
+            <h1>Gestion des Emprunts</h1>
+            <p>Gérez les livres empruntables et suivez les emprunts</p>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="admin-stats-row">
+    <div class="admin-stat-card admin-stat-primary">
+        <div class="admin-stat-icon">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="admin-stat-content">
+            <span class="admin-stat-value">{{ $totalLivres }}</span>
+            <span class="admin-stat-label">Livres disponibles</span>
+        </div>
+    </div>
+
+    <div class="admin-stat-card admin-stat-warning">
+        <div class="admin-stat-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="admin-stat-content">
+            <span class="admin-stat-value">{{ $demandesEnAttente->count() }}</span>
+            <span class="admin-stat-label">En attente</span>
+        </div>
+    </div>
+
+    <div class="admin-stat-card admin-stat-info">
+        <div class="admin-stat-icon">
+            <i class="fas fa-sync-alt"></i>
+        </div>
+        <div class="admin-stat-content">
+            <span class="admin-stat-value">{{ $empruntsEnCours }}</span>
+            <span class="admin-stat-label">En cours</span>
+        </div>
+    </div>
+
+    <div class="admin-stat-card admin-stat-danger">
+        <div class="admin-stat-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="admin-stat-content">
+            <span class="admin-stat-value">{{ $empruntsEnRetard }}</span>
+            <span class="admin-stat-label">En retard</span>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Demandes en attente -->
+@if($demandesEnAttente->isNotEmpty())
+<div class="admin-card admin-card-warning mb-4">
+    <div class="admin-card-header">
+        <div class="admin-card-title">
+            <i class="fas fa-clock"></i>
+            Demandes en attente de validation ({{ $demandesEnAttente->count() }})
+        </div>
+    </div>
+    <div class="admin-card-body">
+        <div class="admin-alert admin-alert-info mb-3">
+            <i class="fas fa-info-circle"></i>
+            Ces demandes d'emprunt nécessitent votre validation avant que les utilisateurs puissent accéder aux PDFs.
+        </div>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Utilisateur</th>
+                        <th>Livre</th>
+                        <th>Date demande</th>
+                        <th>Retour prévu</th>
+                        <th>Stock</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($demandesEnAttente as $demande)
                         <tr>
-                            <th>#</th>
-                            <th><i class="fa fa-user"></i> Utilisateur</th>
-                            <th><i class="fa fa-book"></i> Livre</th>
-                            <th><i class="fa fa-calendar-day"></i> Date demande</th>
-                            <th><i class="fa fa-calendar-check"></i> Retour prévu</th>
-                            <th><i class="fa fa-box"></i> Stock</th>
-                            <th class="text-center"><i class="fa fa-cogs"></i> Actions</th>
+                            <td><span class="admin-id">#{{ $demande->id }}</span></td>
+                            <td>
+                                <div class="admin-user-cell">
+                                    <div class="admin-user-avatar-sm">
+                                        {{ strtoupper(substr($demande->user->name ?? 'U', 0, 1)) }}
+                                    </div>
+                                    <div class="admin-user-info">
+                                        <span class="admin-user-name">{{ $demande->user->name ?? 'Utilisateur inconnu' }}</span>
+                                        <span class="admin-user-email">{{ $demande->user->email ?? '' }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="admin-book-cell">
+                                    @if($demande->livre && $demande->livre->image)
+                                        <img src="{{ asset($demande->livre->image) }}" alt="{{ $demande->livre->titre }}" class="admin-book-thumb">
+                                    @else
+                                        <div class="admin-book-thumb-placeholder">
+                                            <i class="fas fa-book"></i>
+                                        </div>
+                                    @endif
+                                    <div class="admin-book-info">
+                                        <span class="admin-book-title">{{ $demande->livre->titre ?? 'Livre supprimé' }}</span>
+                                        <span class="admin-book-author">{{ $demande->livre->auteur ?? '' }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="admin-date">{{ \Carbon\Carbon::parse($demande->date_emprunt)->format('d/m/Y') }}</span>
+                                <span class="admin-date-relative">{{ \Carbon\Carbon::parse($demande->created_at)->diffForHumans() }}</span>
+                            </td>
+                            <td>
+                                <span class="admin-date">{{ \Carbon\Carbon::parse($demande->date_retour)->format('d/m/Y') }}</span>
+                            </td>
+                            <td>
+                                @if($demande->livre)
+                                    <span class="admin-badge admin-badge-{{ $demande->livre->quantite > 0 ? 'success' : 'danger' }}">
+                                        {{ $demande->livre->quantite }} dispo.
+                                    </span>
+                                @else
+                                    <span class="admin-badge admin-badge-secondary">N/A</span>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                <div class="admin-action-buttons">
+                                    @if($demande->livre && $demande->livre->quantite > 0)
+                                        <button type="button" class="btn-admin btn-admin-success btn-admin-sm btn-valider-demande"
+                                                data-demande-id="{{ $demande->id }}"
+                                                data-user-name="{{ $demande->user->name ?? 'Inconnu' }}"
+                                                data-user-email="{{ $demande->user->email ?? '' }}"
+                                                data-livre-titre="{{ $demande->livre->titre ?? 'Inconnu' }}"
+                                                data-livre-auteur="{{ $demande->livre->auteur ?? '' }}"
+                                                title="Valider">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    @endif
+                                    <button type="button" class="btn-admin btn-admin-warning btn-admin-sm btn-rejeter-demande"
+                                            data-demande-id="{{ $demande->id }}"
+                                            data-user-name="{{ $demande->user->name ?? 'Inconnu' }}"
+                                            data-user-email="{{ $demande->user->email ?? '' }}"
+                                            data-livre-titre="{{ $demande->livre->titre ?? 'Inconnu' }}"
+                                            data-livre-auteur="{{ $demande->livre->auteur ?? '' }}"
+                                            title="Rejeter">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Hidden forms -->
+                                <form id="form-valider-demande-{{ $demande->id }}" action="{{ route('admin.emprunts.valider', $demande) }}" method="POST" style="display:none;">
+                                    @csrf
+                                </form>
+                                <form id="form-rejeter-demande-{{ $demande->id }}" action="{{ route('admin.emprunts.rejeter', $demande) }}" method="POST" style="display:none;">
+                                    @csrf
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endif
+
+<!-- Section: Livres empruntables -->
+<div class="admin-card mb-4">
+    <div class="admin-card-header">
+        <div class="admin-card-title">
+            <i class="fas fa-book"></i>
+            Livres disponibles à l'emprunt ({{ $livresEmpruntables->count() }})
+        </div>
+        <button class="btn-admin btn-admin-primary btn-admin-sm" data-bs-toggle="collapse" data-bs-target="#addBookForm">
+            <i class="fas fa-plus"></i> Ajouter un livre
+        </button>
+    </div>
+
+    <!-- Add Book Form (Collapsible) -->
+    <div class="collapse" id="addBookForm">
+        <div class="admin-card-body admin-form-section">
+            <form method="POST" action="{{ route('admin.emprunts.store') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="admin-form-grid">
+                    <div class="admin-form-group">
+                        <label class="admin-label">Titre</label>
+                        <input type="text" class="admin-input @error('titre') is-invalid @enderror" name="titre" value="{{ old('titre') }}" required>
+                        @error('titre')<span class="admin-error">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Auteur</label>
+                        <input type="text" class="admin-input @error('auteur') is-invalid @enderror" name="auteur" value="{{ old('auteur') }}" required>
+                        @error('auteur')<span class="admin-error">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Catégorie</label>
+                        <select class="admin-select @error('categorie') is-invalid @enderror" name="categorie" required>
+                            <option value="">Choisir...</option>
+                            @foreach(['Roman', 'Nouvelle', 'Essai', 'Jeunesse', 'Poésie', 'Théâtre', 'Biographie', 'Conte', 'Documentaire', 'Autre'] as $cat)
+                                <option value="{{ $cat }}" {{ old('categorie') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                            @endforeach
+                        </select>
+                        @error('categorie')<span class="admin-error">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Prix (FCFA)</label>
+                        <input type="number" class="admin-input @error('prix') is-invalid @enderror" name="prix" value="{{ old('prix', 0) }}" min="0">
+                        @error('prix')<span class="admin-error">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Quantité</label>
+                        <input type="number" class="admin-input @error('quantite') is-invalid @enderror" name="quantite" value="{{ old('quantite', 1) }}" min="0">
+                        @error('quantite')<span class="admin-error">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="admin-form-group admin-form-group-full">
+                        <label class="admin-label">Résumé</label>
+                        <textarea class="admin-textarea @error('resumer') is-invalid @enderror" name="resumer" rows="3">{{ old('resumer') }}</textarea>
+                        @error('resumer')<span class="admin-error">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Image de couverture</label>
+                        <input type="file" class="admin-input-file @error('image') is-invalid @enderror" name="image" accept="image/*">
+                        @error('image')<span class="admin-error">{{ $message }}</span>@enderror
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Fichier PDF</label>
+                        <input type="file" class="admin-input-file @error('pdf') is-invalid @enderror" name="pdf" accept="application/pdf">
+                        @error('pdf')<span class="admin-error">{{ $message }}</span>@enderror
+                    </div>
+                </div>
+                <div class="admin-form-actions">
+                    <button type="submit" class="btn-admin btn-admin-success">
+                        <i class="fas fa-plus"></i> Ajouter le livre
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="admin-card-body">
+        @if($livresEmpruntables->isEmpty())
+            <div class="admin-empty-state admin-empty-state-sm">
+                <i class="fas fa-book"></i>
+                <p>Aucun livre empruntable enregistré.</p>
+            </div>
+        @else
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">Image</th>
+                            <th>Titre</th>
+                            <th>Auteur</th>
+                            <th>Catégorie</th>
+                            <th>Prix</th>
+                            <th>Stock</th>
+                            <th>Statut</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($demandesEnAttente as $demande)
+                        @foreach($livresEmpruntables as $livre)
                             <tr>
-                                <td>{{ $demande->id }}</td>
                                 <td>
-                                    <strong>{{ $demande->user->name ?? 'Utilisateur inconnu' }}</strong><br>
-                                    <small class="text-muted">{{ $demande->user->email ?? '' }}</small>
+                                    @if($livre->image)
+                                        <img src="{{ asset($livre->image) }}" alt="{{ $livre->titre }}" class="admin-book-thumb">
+                                    @else
+                                        <div class="admin-book-thumb-placeholder">
+                                            <i class="fas fa-book"></i>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td><strong>{{ $livre->titre }}</strong></td>
+                                <td>{{ $livre->auteur }}</td>
+                                <td><span class="admin-badge admin-badge-info">{{ $livre->categorie }}</span></td>
+                                <td>{{ fcfa($livre->prix) }}</td>
+                                <td>
+                                    <span class="admin-badge admin-badge-{{ $livre->quantite > 0 ? 'success' : 'danger' }}">
+                                        {{ $livre->quantite }}
+                                    </span>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        @if($demande->livre && $demande->livre->image)
-                                            <img src="{{ asset($demande->livre->image) }}" alt="{{ $demande->livre->titre }}" class="img-thumbnail" style="width: 40px; height: 55px; object-fit: cover;">
-                                        @endif
-                                        <div>
-                                            <strong>{{ $demande->livre->titre ?? 'Livre supprimé' }}</strong><br>
-                                            <small class="text-muted">{{ $demande->livre->auteur ?? '' }}</small>
+                                    @if($livre->quantite > 0)
+                                        <span class="admin-badge admin-badge-success">Disponible</span>
+                                    @else
+                                        <span class="admin-badge admin-badge-danger">Épuisé</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <div class="admin-action-buttons">
+                                        <button type="button" class="btn-admin btn-admin-warning btn-admin-sm btn-edit-livre"
+                                                data-livre-id="{{ $livre->id }}"
+                                                data-livre-titre="{{ $livre->titre }}"
+                                                data-livre-auteur="{{ $livre->auteur }}"
+                                                data-livre-categorie="{{ $livre->categorie }}"
+                                                data-livre-prix="{{ $livre->prix }}"
+                                                data-livre-quantite="{{ $livre->quantite }}"
+                                                data-livre-resumer="{{ $livre->resumer ?? '' }}"
+                                                data-livre-image="{{ $livre->image ? asset($livre->image) : '' }}"
+                                                data-livre-has-pdf="{{ $livre->pdf ? 'oui' : 'non' }}"
+                                                data-update-url="{{ route('admin.emprunts.updateLivre', $livre->id) }}"
+                                                title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn-admin btn-admin-danger btn-admin-sm btn-delete-livre"
+                                                data-livre-id="{{ $livre->id }}"
+                                                data-livre-titre="{{ $livre->titre }}"
+                                                data-delete-url="{{ route('admin.emprunts.destroyLivre', $livre->id) }}"
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
+</div>
+
+<!-- Section: Emprunts enregistrés -->
+<div class="admin-card mb-4">
+    <div class="admin-card-header">
+        <div class="admin-card-title">
+            <i class="fas fa-list"></i>
+            Emprunts enregistrés ({{ $emprunts->total() }})
+        </div>
+        <button class="btn-admin btn-admin-warning btn-admin-sm" data-bs-toggle="collapse" data-bs-target="#createEmpruntForm">
+            <i class="fas fa-plus"></i> Créer un emprunt
+        </button>
+    </div>
+
+    <!-- Create Emprunt Form (Collapsible) -->
+    <div class="collapse" id="createEmpruntForm">
+        <div class="admin-card-body admin-form-section">
+            <form method="POST" action="{{ route('admin.emprunts.addBooks') }}">
+                @csrf
+                <div class="admin-form-grid admin-form-grid-4">
+                    <div class="admin-form-group">
+                        <label class="admin-label">Utilisateur</label>
+                        <select class="admin-select" name="user_id" required>
+                            <option value="">Sélectionner...</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Livre</label>
+                        <select class="admin-select" name="livre_id" required>
+                            <option value="">Sélectionner...</option>
+                            @foreach($livresEmpruntables as $livre)
+                                <option value="{{ $livre->id }}">{{ $livre->titre }} (Stock: {{ $livre->quantite }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Date d'emprunt</label>
+                        <input type="date" class="admin-input" name="date_emprunt" value="{{ now()->toDateString() }}" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Date de retour</label>
+                        <input type="date" class="admin-input" name="date_retour" value="{{ now()->addDays(14)->toDateString() }}">
+                    </div>
+                </div>
+                <div class="admin-form-actions">
+                    <button type="submit" class="btn-admin btn-admin-warning">
+                        <i class="fas fa-plus"></i> Créer l'emprunt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="admin-card-body">
+        @if($emprunts->isEmpty())
+            <div class="admin-empty-state admin-empty-state-sm">
+                <i class="fas fa-book-reader"></i>
+                <p>Aucun emprunt enregistré.</p>
+            </div>
+        @else
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Utilisateur</th>
+                            <th>Livre</th>
+                            <th>Emprunt</th>
+                            <th>Retour</th>
+                            <th>Statut</th>
+                            <th>Validé</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($emprunts as $emprunt)
+                            @php
+                                $statusConfig = match($emprunt->statut) {
+                                    'en_cours' => ['class' => 'warning', 'label' => 'En cours'],
+                                    'retourne' => ['class' => 'success', 'label' => 'Retourné'],
+                                    'en_retard' => ['class' => 'danger', 'label' => 'En retard'],
+                                    default => ['class' => 'secondary', 'label' => $emprunt->statut]
+                                };
+                            @endphp
+                            <tr>
+                                <td><span class="admin-id">#{{ $emprunt->id }}</span></td>
+                                <td>
+                                    <div class="admin-user-cell">
+                                        <div class="admin-user-avatar-sm">
+                                            {{ strtoupper(substr($emprunt->user->name ?? 'U', 0, 1)) }}
+                                        </div>
+                                        <div class="admin-user-info">
+                                            <span class="admin-user-name">{{ $emprunt->user->name ?? 'Inconnu' }}</span>
+                                            <span class="admin-user-email">{{ $emprunt->user->email ?? '' }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    {{ \Carbon\Carbon::parse($demande->date_emprunt)->format('d/m/Y') }}<br>
-                                    <small class="text-muted">{{ \Carbon\Carbon::parse($demande->created_at)->diffForHumans() }}</small>
+                                    <div class="admin-book-info-simple">
+                                        <span class="admin-book-title">{{ $emprunt->livre->titre ?? 'Livre supprimé' }}</span>
+                                        <span class="admin-book-author">{{ $emprunt->livre->auteur ?? '' }}</span>
+                                    </div>
                                 </td>
-                                <td>{{ \Carbon\Carbon::parse($demande->date_retour)->format('d/m/Y') }}</td>
                                 <td>
-                                    @if($demande->livre)
-                                        <span class="badge {{ $demande->livre->quantite > 0 ? 'bg-success' : 'bg-danger' }}">
-                                            {{ $demande->livre->quantite }} disponible(s)
+                                    <span class="admin-date">{{ \Carbon\Carbon::parse($emprunt->date_emprunt)->format('d/m/Y') }}</span>
+                                </td>
+                                <td>
+                                    @if($emprunt->date_retour)
+                                        <span class="admin-date">{{ \Carbon\Carbon::parse($emprunt->date_retour)->format('d/m/Y') }}</span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="admin-badge admin-badge-{{ $statusConfig['class'] }}">
+                                        {{ $statusConfig['label'] }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($emprunt->valide_le)
+                                        <span class="admin-badge admin-badge-success">
+                                            <i class="fas fa-check"></i> Oui
                                         </span>
                                     @else
-                                        <span class="badge bg-secondary">N/A</span>
+                                        <span class="admin-badge admin-badge-warning">
+                                            <i class="fas fa-clock"></i> Non
+                                        </span>
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    <select class="form-select form-select-sm action-select-demande" data-demande-id="{{ $demande->id }}" style="min-width: 140px;">
-                                        <option value="">-- Action --</option>
-                                        @if($demande->livre && $demande->livre->quantite > 0)
-                                            <option value="valider">✓ Valider</option>
-                                        @else
-                                            <option value="" disabled>✓ Valider (stock épuisé)</option>
+                                    <div class="admin-action-buttons">
+                                        @if(!$emprunt->valide_le && $emprunt->statut !== 'retourne')
+                                            @if($emprunt->livre && $emprunt->livre->quantite > 0)
+                                                <button type="button" class="btn-admin btn-admin-success btn-admin-sm btn-valider-emprunt"
+                                                        data-emprunt-id="{{ $emprunt->id }}"
+                                                        data-user-name="{{ $emprunt->user->name ?? 'Inconnu' }}"
+                                                        data-livre-titre="{{ $emprunt->livre->titre ?? 'Inconnu' }}"
+                                                        title="Valider">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            @endif
                                         @endif
-                                        <option value="rejeter">✕ Rejeter</option>
-                                    </select>
+                                        @if($emprunt->statut !== 'retourne')
+                                            <button type="button" class="btn-admin btn-admin-info btn-admin-sm btn-retourner-emprunt"
+                                                    data-emprunt-id="{{ $emprunt->id }}"
+                                                    title="Retourner">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        @endif
+                                        <button type="button" class="btn-admin btn-admin-danger btn-admin-sm btn-supprimer-emprunt"
+                                                data-emprunt-id="{{ $emprunt->id }}"
+                                                data-user-name="{{ $emprunt->user->name ?? 'Inconnu' }}"
+                                                data-livre-titre="{{ $emprunt->livre->titre ?? 'Inconnu' }}"
+                                                data-delete-url="{{ route('admin.emprunts.destroy', $emprunt) }}"
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
 
-                                    <!-- Forms cachés -->
-                                    <form id="form-valider-demande-{{ $demande->id }}" action="{{ route('admin.emprunts.valider', $demande) }}" method="POST" style="display:none;">
+                                    <!-- Hidden forms -->
+                                    <form id="form-valider-{{ $emprunt->id }}" action="{{ route('admin.emprunts.valider', $emprunt) }}" method="POST" style="display:none;">
                                         @csrf
                                     </form>
-                                    <form id="form-rejeter-demande-{{ $demande->id }}" action="{{ route('admin.emprunts.rejeter', $demande) }}" method="POST" style="display:none;">
+                                    <form id="form-retourner-{{ $emprunt->id }}" action="{{ route('admin.emprunts.updateStatus', $emprunt) }}" method="POST" style="display:none;">
                                         @csrf
+                                        <input type="hidden" name="statut" value="retourne">
                                     </form>
                                 </td>
                             </tr>
@@ -88,1035 +511,872 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-    @endif
 
-    <!-- Section 1: Liste des livres empruntables -->
-    <div class="card shadow border-0 mb-5">
-        <div class="card-header bg-primary text-white rounded-top-4">
-            <h4 class="mb-0 fw-bold text-white"><i class="fa fa-books me-2"></i>Livres disponibles à l'emprunt</h4>
-        </div>
-        <div class="card-body">
-            @if($livresEmpruntables->isEmpty())
-                <p class="text-muted text-center">Aucun livre empruntable enregistré. Ajoutez-en via le formulaire ci-dessous.</p>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-primary">
-                            <tr>
-                                <th><i class="fa fa-image"></i></th>
-                                <th>Titre</th>
-                                <th>Auteur</th>
-                                <th>Catégorie</th>
-                                <th>Prix</th>
-                                <th>Stock</th>
-                                <th>Statut</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($livresEmpruntables as $livre)
-                                <tr>
-                                    <td>
-                                        @if($livre->image)
-                                            <img src="{{ asset($livre->image) }}" alt="{{ $livre->titre }}" class="img-thumbnail" style="width: 50px; height: 70px; object-fit: cover;">
-                                        @else
-                                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 70px;">
-                                                <i class="fa fa-book"></i>
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td><strong>{{ $livre->titre }}</strong></td>
-                                    <td>{{ $livre->auteur }}</td>
-                                    <td><span class="badge bg-info">{{ $livre->categorie }}</span></td>
-                                    <td>{{ number_format($livre->prix, 0, ',', ' ') }} FCFA</td>
-                                    <td><span class="badge {{ $livre->quantite > 0 ? 'bg-success' : 'bg-danger' }}">{{ $livre->quantite }}</span></td>
-                                    <td>
-                                        @if($livre->quantite > 0)
-                                            <span class="badge bg-success">Disponible</span>
-                                        @else
-                                            <span class="badge bg-danger">Épuisé</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-warning btn-edit-livre"
-                                                    data-livre-id="{{ $livre->id }}"
-                                                    data-livre-titre="{{ $livre->titre }}"
-                                                    data-livre-auteur="{{ $livre->auteur }}"
-                                                    data-livre-categorie="{{ $livre->categorie }}"
-                                                    data-livre-prix="{{ $livre->prix }}"
-                                                    data-livre-quantite="{{ $livre->quantite }}"
-                                                    data-livre-resumer="{{ $livre->resumer ?? '' }}"
-                                                    data-livre-image="{{ $livre->image ? asset($livre->image) : '' }}"
-                                                    data-livre-has-pdf="{{ $livre->pdf ? 'oui' : 'non' }}"
-                                                    data-update-url="{{ route('admin.emprunts.updateLivre', $livre->id) }}"
-                                                    title="Modifier">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger btn-delete-livre"
-                                                    data-livre-id="{{ $livre->id }}"
-                                                    data-livre-titre="{{ $livre->titre }}"
-                                                    data-livre-auteur="{{ $livre->auteur }}"
-                                                    data-livre-categorie="{{ $livre->categorie }}"
-                                                    data-livre-prix="{{ $livre->prix }}"
-                                                    data-livre-quantite="{{ $livre->quantite }}"
-                                                    data-livre-image="{{ $livre->image ? asset($livre->image) : '' }}"
-                                                    data-delete-url="{{ route('admin.emprunts.destroyLivre', $livre->id) }}"
-                                                    title="Supprimer">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Modals de suppression des livres empruntables (en dehors de la carte) -->
-    @foreach($livresEmpruntables as $livre)
-        @php
-            $empruntsEnCours = \App\Models\Emprunt::where('livre_id', $livre->id)
-                ->whereIn('statut', ['en_cours', 'en_retard'])
-                ->count();
-        @endphp
-        <div class="modal fade" id="deleteLivreModal{{ $livre->id }}" tabindex="-1" aria-labelledby="deleteLivreModalLabel{{ $livre->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title text-white" id="deleteLivreModalLabel{{ $livre->id }}">
-                            <i class="fa fa-exclamation-triangle me-2"></i>Confirmer la suppression
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-warning d-flex align-items-center" role="alert">
-                            <i class="fa fa-exclamation-circle me-2 fs-4"></i>
-                            <div>
-                                <strong>Attention !</strong> Cette action est irréversible.
-                            </div>
-                        </div>
-
-                        <p class="mb-3">Êtes-vous sûr de vouloir supprimer ce livre empruntable ?</p>
-
-                        <div class="card border-0 bg-light p-3 mb-3">
-                            <div class="row g-2">
-                                <div class="col-3">
-                                    @if($livre->image)
-                                        <img src="{{ asset($livre->image) }}" alt="{{ $livre->titre }}" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
-                                    @else
-                                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 100px;">
-                                            <i class="fa fa-book fs-3"></i>
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="col-9">
-                                    <h6 class="fw-bold mb-2"><i class="fa fa-book text-primary me-1"></i> {{ $livre->titre }}</h6>
-                                    <p class="mb-1 small"><strong>Auteur :</strong> {{ $livre->auteur }}</p>
-                                    <p class="mb-1 small"><strong>Catégorie :</strong> <span class="badge bg-info">{{ $livre->categorie }}</span></p>
-                                    <p class="mb-1 small"><strong>Prix :</strong> {{ number_format($livre->prix ?? 0, 0, ',', ' ') }} FCFA</p>
-                                    <p class="mb-0 small"><strong>Stock disponible :</strong> <span class="badge {{ $livre->quantite > 0 ? 'bg-success' : 'bg-danger' }}">{{ $livre->quantite }}</span></p>
-                                </div>
-                            </div>
-                        </div>
-
-                        @if($empruntsEnCours > 0)
-                            <div class="alert alert-danger" role="alert">
-                                <i class="fa fa-times-circle me-2"></i>
-                                <strong>Impossible de supprimer :</strong> Ce livre a actuellement <strong>{{ $empruntsEnCours }}</strong> emprunt(s) en cours ou en retard.
-                            </div>
-                        @else
-                            <div class="alert alert-success" role="alert">
-                                <i class="fa fa-check-circle me-2"></i>
-                                Aucun emprunt en cours. La suppression est possible.
-                            </div>
-                        @endif
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fa fa-times me-1"></i>Annuler
-                        </button>
-                        @if($empruntsEnCours == 0)
-                            <form method="POST" action="{{ route('admin.emprunts.destroyLivre', $livre->id) }}" style="display: inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="fa fa-trash me-1"></i>Supprimer définitivement
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endforeach
-
-    <!-- Section 2: Formulaire d'ajout de livre empruntable -->
-    <div class="card shadow border-0 mb-5">
-        <div class="card-header bg-success text-white rounded-top-4">
-            <h4 class="mb-0 fw-bold text-white"><i class="fa fa-plus-circle me-2"></i>Ajouter un Livre Empruntable</h4>
-        </div>
-        <div class="card-body bg-light">
-            <form method="POST" action="{{ route('admin.emprunts.store') }}" enctype="multipart/form-data" class="needs-validation-confirm">
-                @csrf
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label for="titre" class="form-label fw-bold"><i class="fa fa-book me-1 text-primary"></i> Titre</label>
-                        <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre') }}" data-important="true">
-                        @error('titre')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-3">
-                        <label for="auteur" class="form-label fw-bold"><i class="fa fa-user-pen me-1 text-primary"></i> Auteur</label>
-                        <input type="text" class="form-control @error('auteur') is-invalid @enderror" id="auteur" name="auteur" value="{{ old('auteur') }}" data-important="true">
-                        @error('auteur')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-2">
-                        <label for="categorie" class="form-label fw-bold"><i class="fa fa-tags me-1 text-primary"></i> Catégorie</label>
-                        <select class="form-select @error('categorie') is-invalid @enderror" id="categorie" name="categorie" data-important="true">
-                            <option value="">Choisir...</option>
-                            <option value="Roman" {{ old('categorie') == 'Roman' ? 'selected' : '' }}>Roman</option>
-                            <option value="Essai" {{ old('categorie') == 'Essai' ? 'selected' : '' }}>Essai</option>
-                            <option value="Jeunesse" {{ old('categorie') == 'Jeunesse' ? 'selected' : '' }}>Jeunesse</option>
-                            <option value="Poésie" {{ old('categorie') == 'Poésie' ? 'selected' : '' }}>Poésie</option>
-                            <option value="Théâtre" {{ old('categorie') == 'Théâtre' ? 'selected' : '' }}>Théâtre</option>
-                            <option value="Biographie" {{ old('categorie') == 'Biographie' ? 'selected' : '' }}>Biographie</option>
-                            <option value="Conte" {{ old('categorie') == 'Conte' ? 'selected' : '' }}>Conte</option>
-                            <option value="Documentaire" {{ old('categorie') == 'Documentaire' ? 'selected' : '' }}>Documentaire</option>
-                            <option value="Autre" {{ old('categorie') == 'Autre' ? 'selected' : '' }}>Autre</option>
-                        </select>
-                        @error('categorie')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-2">
-                        <label for="prix" class="form-label fw-bold"><i class="fa fa-money-bill-wave me-1 text-primary"></i> Prix (FCFA)</label>
-                        <input type="number" class="form-control @error('prix') is-invalid @enderror" id="prix" name="prix" value="{{ old('prix', 0) }}" min="0" data-important="true">
-                        @error('prix')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-2">
-                        <label for="quantite" class="form-label fw-bold"><i class="fa fa-box me-1 text-primary"></i> Quantité</label>
-                        <input type="number" class="form-control @error('quantite') is-invalid @enderror" id="quantite" name="quantite" value="{{ old('quantite', 1) }}" min="0" data-important="true">
-                        @error('quantite')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="row g-3 mt-2">
-                    <div class="col-12">
-                        <label for="resumer" class="form-label fw-bold"><i class="fa fa-align-left me-1 text-primary"></i> Résumé</label>
-                        <textarea class="form-control @error('resumer') is-invalid @enderror" id="resumer" name="resumer" rows="4">{{ old('resumer') }}</textarea>
-                        @error('resumer')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="row g-3 mt-2">
-                    <div class="col-md-6">
-                        <label for="image" class="form-label fw-bold"><i class="fa fa-image me-1 text-primary"></i> Image de couverture</label>
-                        <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" accept="image/*">
-                        <small class="text-muted">Formats: JPEG, PNG, JPG, GIF, WEBP (jusqu'à 512 Mo)</small>
-                        @error('image')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-6">
-                        <label for="pdf" class="form-label fw-bold"><i class="fa fa-file-pdf me-1 text-danger"></i> Fichier PDF</label>
-                        <input type="file" class="form-control @error('pdf') is-invalid @enderror" id="pdf" name="pdf" accept="application/pdf">
-                        <small class="text-muted">Format: PDF (jusqu'à 512 Mo)</small>
-                        @error('pdf')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-success px-4 py-2 fw-bold">
-                        <i class="fa fa-plus me-1"></i> Ajouter le Livre
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Section 3: Liste des emprunts actifs -->
-    <div class="card shadow border-0 mb-5">
-        <div class="card-header bg-info text-white rounded-top-4">
-            <h4 class="mb-0 fw-bold text-white"><i class="fa fa-list me-2"></i>Emprunts Enregistrés</h4>
-        </div>
-        <div class="card-body">
-            @if($emprunts->isEmpty())
-                <p class="text-muted text-center">Aucun emprunt enregistré.</p>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-info">
-                            <tr>
-                                <th>#</th>
-                                <th><i class="fa fa-user"></i> Utilisateur</th>
-                                <th><i class="fa fa-book"></i> Livre</th>
-                                <th><i class="fa fa-calendar-day"></i> Date d'emprunt</th>
-                                <th><i class="fa fa-calendar-check"></i> Date de retour</th>
-                                <th><i class="fa fa-info-circle"></i> Statut</th>
-                                <th><i class="fa fa-check-circle"></i> Validé</th>
-                                <th class="text-center"><i class="fa fa-cogs"></i> Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($emprunts as $emprunt)
-                                <tr>
-                                    <td>{{ $emprunt->id }}</td>
-                                    <td>
-                                        <strong>{{ $emprunt->user->name ?? 'Utilisateur inconnu' }}</strong><br>
-                                        <small class="text-muted">{{ $emprunt->user->email ?? '' }}</small>
-                                    </td>
-                                    <td>
-                                        <strong>{{ $emprunt->livre->titre ?? 'Livre supprimé' }}</strong><br>
-                                        <small class="text-muted">{{ $emprunt->livre->auteur ?? '' }}</small>
-                                    </td>
-                                    <td>{{ \Carbon\Carbon::parse($emprunt->date_emprunt)->format('d/m/Y') }}</td>
-                                    <td>
-                                        @if($emprunt->date_retour)
-                                            {{ \Carbon\Carbon::parse($emprunt->date_retour)->format('d/m/Y') }}
-                                        @else
-                                            <span class="text-muted">Non retourné</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($emprunt->statut === 'en_cours')
-                                            <span class="badge bg-warning text-dark">En cours</span>
-                                        @elseif($emprunt->statut === 'retourne')
-                                            <span class="badge bg-success">Retourné</span>
-                                        @elseif($emprunt->statut === 'en_retard')
-                                            <span class="badge bg-danger">En retard</span>
-                                        @else
-                                            <span class="badge bg-secondary">{{ $emprunt->statut }}</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($emprunt->valide_le)
-                                            <span class="badge bg-success">
-                                                <i class="fa fa-check"></i> Oui
-                                            </span>
-                                            <br><small class="text-muted">{{ \Carbon\Carbon::parse($emprunt->valide_le)->format('d/m/Y H:i') }}</small>
-                                        @else
-                                            <span class="badge bg-warning text-dark">
-                                                <i class="fa fa-clock"></i> Non validé
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        <select class="form-select form-select-sm action-select"
-                                                data-emprunt-id="{{ $emprunt->id }}"
-                                                data-user-name="{{ $emprunt->user->name ?? 'Inconnu' }}"
-                                                data-livre-titre="{{ $emprunt->livre->titre ?? 'Inconnu' }}"
-                                                data-delete-url="{{ route('admin.emprunts.destroy', $emprunt) }}"
-                                                style="min-width: 140px;">
-                                            <option value="">-- Action --</option>
-                                            @if(!$emprunt->valide_le && $emprunt->statut !== 'retourne')
-                                                @if($emprunt->livre && $emprunt->livre->quantite > 0)
-                                                    <option value="valider">✓ Valider</option>
-                                                @else
-                                                    <option value="" disabled>✓ Valider (stock épuisé)</option>
-                                                @endif
-                                            @endif
-                                            @if($emprunt->statut !== 'retourne')
-                                                <option value="retourner">↺ Retourner</option>
-                                            @endif
-                                            <option value="supprimer">✕ {{ $emprunt->valide_le ? 'Annuler' : 'Rejeter' }}</option>
-                                        </select>
-
-                                        <!-- Forms cachés pour soumettre les actions -->
-                                        <form id="form-valider-{{ $emprunt->id }}" action="{{ route('admin.emprunts.valider', $emprunt) }}" method="POST" style="display:none;">
-                                            @csrf
-                                        </form>
-                                        <form id="form-retourner-{{ $emprunt->id }}" action="{{ route('admin.emprunts.updateStatus', $emprunt) }}" method="POST" style="display:none;">
-                                            @csrf
-                                            <input type="hidden" name="statut" value="retourne">
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
             <!-- Pagination -->
-            <div class="d-flex justify-content-center mt-4">
-                {{ $emprunts->links() }}
-            </div>
-
-
+            @if($emprunts->hasPages())
+                <div class="admin-pagination-wrapper">
+                    {{ $emprunts->links() }}
+                </div>
             @endif
-        </div>
+        @endif
     </div>
+</div>
 
-    <!-- Section 4: Créer un nouvel emprunt -->
-    <div class="card shadow border-0 mb-5">
-        <div class="card-header bg-warning text-dark rounded-top-4">
-            <h4 class="mb-0 fw-bold"><i class="fa fa-hand-holding-heart me-2"></i>Créer un Nouvel Emprunt</h4>
-        </div>
-        <div class="card-body bg-light">
-            <form method="POST" action="{{ route('admin.emprunts.addBooks') }}">
-                @csrf
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label for="user_id" class="form-label fw-bold"><i class="fa fa-user me-1 text-primary"></i> Utilisateur</label>
-                        <select class="form-select @error('user_id') is-invalid @enderror" id="user_id" name="user_id" required>
-                            <option value="">Sélectionner...</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                    {{ $user->name }} ({{ $user->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('user_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-3">
-                        <label for="livre_id" class="form-label fw-bold"><i class="fa fa-book me-1 text-primary"></i> Livre</label>
-                        <select class="form-select @error('livre_id') is-invalid @enderror" id="livre_id" name="livre_id" required>
-                            <option value="">Sélectionner...</option>
-                            @foreach($livresEmpruntables as $livre)
-                                <option value="{{ $livre->id }}" {{ old('livre_id') == $livre->id ? 'selected' : '' }}>
-                                    {{ $livre->titre }} (Stock: {{ $livre->quantite }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('livre_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-2">
-                        <label for="date_emprunt" class="form-label fw-bold"><i class="fa fa-calendar-day me-1 text-primary"></i> Date d'emprunt</label>
-                        <input type="date" class="form-control @error('date_emprunt') is-invalid @enderror" id="date_emprunt" name="date_emprunt" value="{{ old('date_emprunt', now()->toDateString()) }}" required>
-                        @error('date_emprunt')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-2">
-                        <label for="date_retour" class="form-label fw-bold"><i class="fa fa-calendar-check me-1 text-success"></i> Date de retour prévue</label>
-                        <input type="date" class="form-control @error('date_retour') is-invalid @enderror" id="date_retour" name="date_retour" value="{{ old('date_retour', now()->addDays(14)->toDateString()) }}">
-                        @error('date_retour')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-2">
-                        <label for="statut" class="form-label fw-bold"><i class="fa fa-info-circle me-1 text-primary"></i> Statut</label>
-                        <select class="form-select @error('statut') is-invalid @enderror" id="statut" name="statut" required>
-                            <option value="en_cours" {{ old('statut') == 'en_cours' ? 'selected' : '' }}>En cours</option>
-                            <option value="retourne" {{ old('statut') == 'retourne' ? 'selected' : '' }}>Retourné</option>
-                            <option value="en_retard" {{ old('statut') == 'en_retard' ? 'selected' : '' }}>En retard</option>
-                        </select>
-                        @error('statut')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-warning px-4 py-2 fw-bold">
-                        <i class="fa fa-plus me-1"></i> Créer l'Emprunt
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal de validation d'une demande -->
-    <div class="modal fade" id="validerModal" tabindex="-1" aria-labelledby="validerModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title text-white" id="validerModalLabel">
-                        <i class="fa fa-check-circle me-2"></i>Confirmer la validation
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-info mb-3">
-                        <i class="fa fa-info-circle me-2"></i>
+<!-- Modal: Valider demande/emprunt -->
+<div class="modal fade" id="validerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content admin-modal">
+            <div class="modal-header admin-modal-header admin-modal-header-success">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle"></i> Confirmer la validation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-alert admin-alert-info mb-3">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
                         <strong>Cette action va :</strong>
-                        <ul class="mb-0 mt-2">
+                        <ul class="mb-0 mt-1">
                             <li>Valider la demande d'emprunt</li>
                             <li>Décrémenter le stock du livre</li>
                             <li>Permettre à l'utilisateur d'accéder au PDF</li>
                         </ul>
                     </div>
-                    <p class="mb-2"><strong>Êtes-vous sûr de vouloir valider cette demande ?</strong></p>
-                    <div id="validerModalContent"></div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fa fa-times me-1"></i>Annuler
-                    </button>
-                    <form id="validerForm" method="POST" style="display:inline-block;">
-                        @csrf
-                        <button type="submit" class="btn btn-success">
-                            <i class="fa fa-check me-1"></i>Valider la demande
-                        </button>
-                    </form>
-                </div>
+                <div id="validerModalContent"></div>
             </div>
-        </div>
-    </div>
-
-    <!-- Modal de rejet d'une demande -->
-    <div class="modal fade" id="rejeterModal" tabindex="-1" aria-labelledby="rejeterModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title" id="rejeterModalLabel">
-                        <i class="fa fa-exclamation-triangle me-2"></i>Confirmer le rejet
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning mb-3">
-                        <i class="fa fa-exclamation-triangle me-2"></i>
-                        <strong>Attention :</strong> Cette action va supprimer définitivement la demande d'emprunt.
-                    </div>
-                    <p class="mb-2"><strong>Êtes-vous sûr de vouloir rejeter cette demande ?</strong></p>
-                    <div id="rejeterModalContent"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fa fa-times me-1"></i>Annuler
-                    </button>
-                    <form id="rejeterForm" method="POST" style="display:inline-block;">
-                        @csrf
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fa fa-ban me-1"></i>Rejeter la demande
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal unique de modification de livre -->
-    <div class="modal fade" id="editLivreModal" tabindex="-1" aria-labelledby="editLivreModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title" id="editLivreModalLabel">
-                        <i class="fa fa-edit me-2"></i>Modifier le livre
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="editLivreForm" method="POST" enctype="multipart/form-data">
+            <div class="modal-footer">
+                <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="validerForm" method="POST">
                     @csrf
-                    @method('PUT')
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="edit_titre" class="form-label fw-bold">Titre</label>
-                                <input type="text" class="form-control" id="edit_titre" name="titre">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="edit_auteur" class="form-label fw-bold">Auteur</label>
-                                <input type="text" class="form-control" id="edit_auteur" name="auteur">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="edit_categorie" class="form-label fw-bold">Catégorie</label>
-                                <input type="text" class="form-control" id="edit_categorie" name="categorie">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="edit_prix" class="form-label fw-bold">Prix (FCFA)</label>
-                                <input type="number" class="form-control" id="edit_prix" name="prix" min="0">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="edit_quantite" class="form-label fw-bold">Stock</label>
-                                <input type="number" class="form-control" id="edit_quantite" name="quantite" min="0">
-                            </div>
-                            <div class="col-12">
-                                <label for="edit_resumer" class="form-label fw-bold">Résumé</label>
-                                <textarea class="form-control" id="edit_resumer" name="resumer" rows="3"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="edit_image" class="form-label fw-bold">Image (optionnel)</label>
-                                <input type="file" class="form-control" id="edit_image" name="image" accept="image/*">
-                                <small class="text-muted" id="current_image_info">Formats: JPEG, PNG, JPG, GIF, WEBP (jusqu'à 512 Mo)</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="edit_pdf" class="form-label fw-bold">PDF (optionnel)</label>
-                                <input type="file" class="form-control" id="edit_pdf" name="pdf" accept="application/pdf">
-                                <small class="text-muted" id="current_pdf_info">Format: PDF (jusqu'à 512 Mo)</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fa fa-save me-2"></i>Enregistrer les modifications
-                        </button>
-                    </div>
+                    <button type="submit" class="btn-admin btn-admin-success">
+                        <i class="fas fa-check"></i> Valider
+                    </button>
                 </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal unique de suppression (dynamique) -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title text-white" id="deleteModalLabel">
-                        <i class="fa fa-exclamation-triangle me-2"></i>Confirmer la suppression
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+<!-- Modal: Rejeter demande -->
+<div class="modal fade" id="rejeterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content admin-modal">
+            <div class="modal-header admin-modal-header admin-modal-header-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Confirmer le rejet
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-alert admin-alert-warning mb-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Cette action va supprimer définitivement la demande d'emprunt.
                 </div>
-                <div class="modal-body">
-                    <p>Êtes-vous sûr de vouloir supprimer cet emprunt ?</p>
-                    <div id="deleteModalContent"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <form id="deleteForm" method="POST" style="display:inline-block;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa fa-trash me-1"></i>Supprimer
-                        </button>
-                    </form>
-                </div>
+                <div id="rejeterModalContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="rejeterForm" method="POST">
+                    @csrf
+                    <button type="submit" class="btn-admin btn-admin-warning">
+                        <i class="fas fa-ban"></i> Rejeter
+                    </button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modale de confirmation pour champs vides -->
-    @include('partials.confirmation-modal')
+<!-- Modal: Supprimer emprunt -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content admin-modal">
+            <div class="modal-header admin-modal-header admin-modal-header-danger">
+                <h5 class="modal-title">
+                    <i class="fas fa-trash"></i> Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cet emprunt ?</p>
+                <div id="deleteModalContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="deleteForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-admin btn-admin-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Modal: Modifier livre -->
+<div class="modal fade" id="editLivreModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content admin-modal">
+            <div class="modal-header admin-modal-header admin-modal-header-warning">
+                <h5 class="modal-title" id="editLivreModalLabel">
+                    <i class="fas fa-edit"></i> Modifier le livre
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editLivreForm" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="admin-form-grid">
+                        <div class="admin-form-group">
+                            <label class="admin-label">Titre</label>
+                            <input type="text" class="admin-input" id="edit_titre" name="titre" required>
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Auteur</label>
+                            <input type="text" class="admin-input" id="edit_auteur" name="auteur" required>
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Catégorie</label>
+                            <input type="text" class="admin-input" id="edit_categorie" name="categorie">
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Prix (FCFA)</label>
+                            <input type="number" class="admin-input" id="edit_prix" name="prix" min="0">
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Stock</label>
+                            <input type="number" class="admin-input" id="edit_quantite" name="quantite" min="0">
+                        </div>
+                        <div class="admin-form-group admin-form-group-full">
+                            <label class="admin-label">Résumé</label>
+                            <textarea class="admin-textarea" id="edit_resumer" name="resumer" rows="3"></textarea>
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Image (optionnel)</label>
+                            <input type="file" class="admin-input-file" id="edit_image" name="image" accept="image/*">
+                            <small class="admin-hint" id="current_image_info"></small>
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">PDF (optionnel)</label>
+                            <input type="file" class="admin-input-file" id="edit_pdf" name="pdf" accept="application/pdf">
+                            <small class="admin-hint" id="current_pdf_info"></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn-admin btn-admin-warning">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Supprimer livre -->
+<div class="modal fade" id="deleteLivreModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content admin-modal">
+            <div class="modal-header admin-modal-header admin-modal-header-danger">
+                <h5 class="modal-title">
+                    <i class="fas fa-trash"></i> Supprimer le livre
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-alert admin-alert-warning mb-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Cette action est irréversible.
+                </div>
+                <p>Êtes-vous sûr de vouloir supprimer ce livre ?</p>
+                <div id="deleteLivreModalContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="deleteLivreForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-admin btn-admin-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
 @push('styles')
 <style>
-    /* Style pour les selects d'action */
-    .action-select, .action-select-demande {
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 2px solid #e9ecef;
-        background: linear-gradient(to bottom, #ffffff, #f8f9fa);
-        font-weight: 500;
+    /* Page Header */
+    .admin-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
-    .action-select:hover, .action-select-demande:hover {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-        transform: translateY(-1px);
+    .admin-page-header-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
     }
 
-    .action-select:focus, .action-select-demande:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    .admin-page-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-light));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(30, 122, 47, 0.3);
     }
 
-    /* Animation pour les cartes */
-    .card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .admin-page-info h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--admin-gray-900);
     }
 
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    /* Style pour les badges */
-    .badge {
-        font-weight: 600;
-        padding: 0.5em 0.75em;
-    }
-
-    /* Table responsive améliorée */
-    .table-responsive {
-        border-radius: 8px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .table thead th {
-        border-bottom: 2px solid #dee2e6;
-        font-weight: 600;
-        text-transform: uppercase;
+    .admin-page-info p {
         font-size: 0.875rem;
-        letter-spacing: 0.5px;
+        color: var(--admin-gray-500);
+        margin: 0;
+    }
+
+    /* Stats Row */
+    .admin-stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .admin-stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .admin-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .admin-stat-card.admin-stat-primary { border-color: var(--admin-primary); }
+    .admin-stat-card.admin-stat-warning { border-color: #f59e0b; }
+    .admin-stat-card.admin-stat-info { border-color: #0ea5e9; }
+    .admin-stat-card.admin-stat-danger { border-color: #ef4444; }
+
+    .admin-stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .admin-stat-primary .admin-stat-icon { background: rgba(30, 122, 47, 0.1); color: var(--admin-primary); }
+    .admin-stat-warning .admin-stat-icon { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .admin-stat-info .admin-stat-icon { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
+    .admin-stat-danger .admin-stat-icon { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+    .admin-stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .admin-stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--admin-gray-900);
+        line-height: 1.2;
+    }
+
+    .admin-stat-label {
+        font-size: 0.8rem;
+        color: var(--admin-gray-500);
+    }
+
+    /* Card Variants */
+    .admin-card-warning {
+        border-left: 4px solid #f59e0b;
+    }
+
+    .admin-card-warning .admin-card-header {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+    }
+
+    .admin-card-warning .admin-card-title i {
+        color: #f59e0b;
+    }
+
+    /* Alert */
+    .admin-alert {
+        padding: 1rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .admin-alert i {
+        margin-top: 0.125rem;
+    }
+
+    .admin-alert-info {
+        background: rgba(14, 165, 233, 0.1);
+        color: #0369a1;
+        border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+
+    .admin-alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    /* Table Cell Styles */
+    .admin-id {
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: var(--admin-gray-500);
+        background: var(--admin-gray-100);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .admin-user-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .admin-user-avatar-sm {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-light));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .admin-user-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .admin-user-name {
+        font-weight: 600;
+        color: var(--admin-gray-900);
+        font-size: 0.875rem;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    .table tbody tr:hover {
-        background-color: rgba(13, 110, 253, 0.05);
-    }
-
-    .table td {
+    .admin-user-email {
+        font-size: 0.75rem;
+        color: var(--admin-gray-500);
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    /* Responsive mobile */
+    .admin-book-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .admin-book-thumb {
+        width: 40px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    .admin-book-thumb-placeholder {
+        width: 40px;
+        height: 56px;
+        background: var(--admin-gray-200);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--admin-gray-400);
+        flex-shrink: 0;
+    }
+
+    .admin-book-info,
+    .admin-book-info-simple {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .admin-book-title {
+        font-weight: 600;
+        color: var(--admin-gray-900);
+        font-size: 0.875rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .admin-book-author {
+        font-size: 0.75rem;
+        color: var(--admin-gray-500);
+    }
+
+    .admin-date {
+        display: block;
+        font-size: 0.875rem;
+        color: var(--admin-gray-700);
+    }
+
+    .admin-date-relative {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--admin-gray-500);
+    }
+
+    /* Action Buttons */
+    .admin-action-buttons {
+        display: flex;
+        gap: 0.375rem;
+        justify-content: center;
+    }
+
+    /* Form Styles */
+    .admin-form-section {
+        background: var(--admin-gray-50);
+        border-top: 1px solid var(--admin-gray-200);
+        border-bottom: 1px solid var(--admin-gray-200);
+    }
+
+    .admin-form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .admin-form-grid-4 {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+
+    .admin-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+    }
+
+    .admin-form-group-full {
+        grid-column: 1 / -1;
+    }
+
+    .admin-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--admin-gray-700);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .admin-input,
+    .admin-select,
+    .admin-textarea {
+        padding: 0.625rem 0.875rem;
+        border: 1px solid var(--admin-gray-300);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background: white;
+    }
+
+    .admin-input:focus,
+    .admin-select:focus,
+    .admin-textarea:focus {
+        outline: none;
+        border-color: var(--admin-primary);
+        box-shadow: 0 0 0 3px rgba(30, 122, 47, 0.1);
+    }
+
+    .admin-input-file {
+        padding: 0.5rem;
+        border: 1px dashed var(--admin-gray-300);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        background: white;
+    }
+
+    .admin-textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .admin-error {
+        font-size: 0.75rem;
+        color: #ef4444;
+    }
+
+    .admin-hint {
+        font-size: 0.75rem;
+        color: var(--admin-gray-500);
+    }
+
+    .admin-form-actions {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    /* Empty State Small */
+    .admin-empty-state-sm {
+        padding: 2rem;
+        text-align: center;
+        color: var(--admin-gray-500);
+    }
+
+    .admin-empty-state-sm i {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        opacity: 0.5;
+    }
+
+    .admin-empty-state-sm p {
+        margin: 0;
+    }
+
+    /* Modal Styles */
+    .admin-modal .modal-content {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .admin-modal-header {
+        padding: 1rem 1.25rem;
+        border: none;
+    }
+
+    .admin-modal-header .modal-title {
+        color: white;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .admin-modal-header-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .admin-modal-header-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .admin-modal-header-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    /* Modal Content Cards */
+    .admin-modal-info-card {
+        background: var(--admin-gray-50);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .admin-modal-info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--admin-gray-200);
+    }
+
+    .admin-modal-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .admin-modal-info-item i {
+        width: 20px;
+        color: var(--admin-primary);
+    }
+
+    /* Pagination */
+    .admin-pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--admin-gray-200);
+    }
+
+    /* Responsive */
     @media (max-width: 768px) {
-        .container-fluid {
-            padding-left: 10px;
-            padding-right: 10px;
+        .admin-stats-row {
+            grid-template-columns: repeat(2, 1fr);
         }
 
-        h2, h4 {
-            font-size: 1.25rem;
+        .admin-form-grid {
+            grid-template-columns: 1fr;
         }
 
-        .card-header h4 {
-            font-size: 1.1rem;
+        .admin-action-buttons {
+            flex-direction: column;
         }
 
-        /* Faire défiler les tableaux horizontalement sur mobile */
-        .table-responsive {
-            margin-bottom: 1rem;
+        .admin-user-cell {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
         }
 
-        .table {
-            font-size: 0.85rem;
-            min-width: 800px;
+        .admin-user-avatar-sm {
+            display: none;
         }
 
-        .table td, .table th {
-            padding: 0.5rem 0.4rem;
+        .admin-book-cell {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
         }
 
-        /* Rendre les images plus petites */
-        .table img.img-thumbnail {
-            width: 30px !important;
-            height: 42px !important;
-        }
-
-        /* Selects d'action */
-        .action-select, .action-select-demande {
-            min-width: 100px !important;
-            font-size: 0.8rem;
-            padding: 0.375rem 0.5rem;
-        }
-
-        /* Formulaires */
-        .form-label {
-            font-size: 0.9rem;
-        }
-
-        .form-control, .form-select {
-            font-size: 0.9rem;
-        }
-
-        /* Boutons */
-        .btn {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.9rem;
-        }
-
-        .btn-group .btn {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-
-        /* Badges */
-        .badge {
-            font-size: 0.75rem;
-            padding: 0.35em 0.5em;
-        }
-
-        /* Alerts */
-        .alert {
-            font-size: 0.9rem;
-            padding: 0.75rem;
-        }
-
-        /* Modales */
-        .modal-dialog {
-            margin: 0.5rem;
-        }
-
-        .modal-body {
-            padding: 1rem;
-        }
-
-        /* Cards */
-        .card-body {
-            padding: 1rem;
-        }
-
-        /* Colonnes de formulaire */
-        .col-md-3, .col-md-2, .col-md-6, .col-md-4 {
-            margin-bottom: 0.75rem;
-        }
-
-        /* Espacement */
-        .mb-5 {
-            margin-bottom: 2rem !important;
-        }
-
-        .py-4 {
-            padding-top: 1.5rem !important;
-            padding-bottom: 1.5rem !important;
+        .admin-book-thumb,
+        .admin-book-thumb-placeholder {
+            display: none;
         }
     }
 
     @media (max-width: 576px) {
-        h2 {
-            font-size: 1.1rem;
+        .admin-stats-row {
+            grid-template-columns: 1fr;
         }
 
-        .card-header h4 {
-            font-size: 1rem;
+        .admin-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
         }
 
-        .table {
-            font-size: 0.75rem;
-            min-width: 700px;
-        }
-
-        .btn-sm {
-            padding: 0.2rem 0.4rem;
-            font-size: 0.75rem;
+        .admin-card-header .btn-admin {
+            width: 100%;
         }
     }
 </style>
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/form-validation.js') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Références aux modals
-        const deleteModal = document.getElementById('deleteModal');
-        const deleteModalContent = document.getElementById('deleteModalContent');
-        const deleteForm = document.getElementById('deleteForm');
+document.addEventListener('DOMContentLoaded', function() {
+    // Modal instances
+    const validerModal = new bootstrap.Modal(document.getElementById('validerModal'));
+    const rejeterModal = new bootstrap.Modal(document.getElementById('rejeterModal'));
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const editLivreModal = new bootstrap.Modal(document.getElementById('editLivreModal'));
+    const deleteLivreModal = new bootstrap.Modal(document.getElementById('deleteLivreModal'));
 
-        const validerModal = document.getElementById('validerModal');
-        const validerModalContent = document.getElementById('validerModalContent');
-        const validerForm = document.getElementById('validerForm');
+    // Valider demande buttons
+    document.querySelectorAll('.btn-valider-demande').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const demandeId = this.dataset.demandeId;
+            const userName = this.dataset.userName;
+            const userEmail = this.dataset.userEmail;
+            const livreTitre = this.dataset.livreTitre;
+            const livreAuteur = this.dataset.livreAuteur;
 
-        const rejeterModal = document.getElementById('rejeterModal');
-        const rejeterModalContent = document.getElementById('rejeterModalContent');
-        const rejeterForm = document.getElementById('rejeterForm');
+            document.getElementById('validerModalContent').innerHTML = `
+                <div class="admin-modal-info-card">
+                    <div class="admin-modal-info-item">
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <strong>${userName}</strong><br>
+                            <small class="text-muted">${userEmail}</small>
+                        </div>
+                    </div>
+                    <div class="admin-modal-info-item">
+                        <i class="fas fa-book"></i>
+                        <div>
+                            <strong>${livreTitre}</strong><br>
+                            <small class="text-muted">${livreAuteur}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-        const editLivreModal = document.getElementById('editLivreModal');
-        const editLivreForm = document.getElementById('editLivreForm');
-
-        // Initialiser les instances des modals
-        let deleteModalInstance = null;
-        let validerModalInstance = null;
-        let rejeterModalInstance = null;
-        let editLivreModalInstance = null;
-
-        if (deleteModal) deleteModalInstance = new bootstrap.Modal(deleteModal);
-        if (validerModal) validerModalInstance = new bootstrap.Modal(validerModal);
-        if (rejeterModal) rejeterModalInstance = new bootstrap.Modal(rejeterModal);
-        if (editLivreModal) editLivreModalInstance = new bootstrap.Modal(editLivreModal);
-
-        // Gestion des boutons de suppression de livre
-        document.querySelectorAll('.btn-delete-livre').forEach(button => {
-            button.addEventListener('click', function() {
-                const livreId = this.getAttribute('data-livre-id');
-                const modalId = 'deleteLivreModal' + livreId;
-                const modal = document.getElementById(modalId);
-
-                if (modal) {
-                    const modalInstance = new bootstrap.Modal(modal);
-                    modalInstance.show();
-                }
-            });
+            document.getElementById('validerForm').action = document.getElementById('form-valider-demande-' + demandeId).action;
+            validerModal.show();
         });
-
-        // Gestion des boutons de modification de livre
-        document.querySelectorAll('.btn-edit-livre').forEach(button => {
-            button.addEventListener('click', function() {
-                const livreId = this.getAttribute('data-livre-id');
-                const titre = this.getAttribute('data-livre-titre');
-                const auteur = this.getAttribute('data-livre-auteur');
-                const categorie = this.getAttribute('data-livre-categorie');
-                const prix = this.getAttribute('data-livre-prix');
-                const quantite = this.getAttribute('data-livre-quantite');
-                const resumer = this.getAttribute('data-livre-resumer');
-                const image = this.getAttribute('data-livre-image');
-                const hasPdf = this.getAttribute('data-livre-has-pdf');
-                const updateUrl = this.getAttribute('data-update-url');
-
-                // Remplir le formulaire
-                document.getElementById('edit_titre').value = titre;
-                document.getElementById('edit_auteur').value = auteur;
-                document.getElementById('edit_categorie').value = categorie;
-                document.getElementById('edit_prix').value = prix;
-                document.getElementById('edit_quantite').value = quantite;
-                document.getElementById('edit_resumer').value = resumer;
-
-                // Mettre à jour le titre du modal
-                document.getElementById('editLivreModalLabel').innerHTML = '<i class="fa fa-edit me-2"></i>Modifier le livre: ' + titre;
-
-                // Afficher les infos sur les fichiers existants
-                if (image) {
-                    document.getElementById('current_image_info').innerHTML = 'Image actuelle: <img src="' + image + '" alt="Image" style="height: 30px;">';
-                } else {
-                    document.getElementById('current_image_info').innerHTML = '';
-                }
-
-                if (hasPdf === 'oui') {
-                    document.getElementById('current_pdf_info').innerHTML = 'PDF actuel disponible';
-                } else {
-                    document.getElementById('current_pdf_info').innerHTML = '';
-                }
-
-                // Définir l'action du formulaire
-                editLivreForm.setAttribute('action', updateUrl);
-
-                // Afficher le modal
-                if (editLivreModalInstance) {
-                    editLivreModalInstance.show();
-                }
-            });
-        });
-
-        // Gestion des actions pour les demandes en attente
-        document.querySelectorAll('.action-select-demande').forEach(select => {
-            select.addEventListener('change', function(e) {
-                const action = this.value;
-                const demandeId = this.getAttribute('data-demande-id');
-
-                if (!action) return;
-
-                const selectElement = this;
-
-                // Récupérer les infos de la ligne du tableau
-                const row = this.closest('tr');
-                const userName = row.querySelector('td:nth-child(2) strong').textContent;
-                const userEmail = row.querySelector('td:nth-child(2) small').textContent;
-                const livreTitre = row.querySelector('td:nth-child(3) strong').textContent;
-                const livreAuteur = row.querySelector('td:nth-child(3) small').textContent;
-
-                switch(action) {
-                    case 'valider':
-                        // Afficher le modal de validation
-                        if (validerModalContent && validerForm && validerModalInstance) {
-                            validerModalContent.innerHTML = `
-                                <div class="border-start border-primary border-4 ps-3 mb-2">
-                                    <strong class="text-primary"><i class="fa fa-user me-1"></i>Utilisateur :</strong><br>
-                                    <span class="ms-3">${userName}</span><br>
-                                    <small class="text-muted ms-3">${userEmail}</small>
-                                </div>
-                                <div class="border-start border-success border-4 ps-3">
-                                    <strong class="text-success"><i class="fa fa-book me-1"></i>Livre :</strong><br>
-                                    <span class="ms-3">${livreTitre}</span><br>
-                                    <small class="text-muted ms-3">${livreAuteur}</small>
-                                </div>
-                            `;
-                            validerForm.setAttribute('action', document.getElementById('form-valider-demande-' + demandeId).action);
-                            validerModalInstance.show();
-                        }
-                        selectElement.value = '';
-                        break;
-
-                    case 'rejeter':
-                        // Afficher le modal de rejet
-                        if (rejeterModalContent && rejeterForm && rejeterModalInstance) {
-                            rejeterModalContent.innerHTML = `
-                                <div class="border-start border-warning border-4 ps-3 mb-2">
-                                    <strong class="text-dark"><i class="fa fa-user me-1"></i>Utilisateur :</strong><br>
-                                    <span class="ms-3">${userName}</span><br>
-                                    <small class="text-muted ms-3">${userEmail}</small>
-                                </div>
-                                <div class="border-start border-warning border-4 ps-3">
-                                    <strong class="text-dark"><i class="fa fa-book me-1"></i>Livre :</strong><br>
-                                    <span class="ms-3">${livreTitre}</span><br>
-                                    <small class="text-muted ms-3">${livreAuteur}</small>
-                                </div>
-                            `;
-                            rejeterForm.setAttribute('action', document.getElementById('form-rejeter-demande-' + demandeId).action);
-                            rejeterModalInstance.show();
-                        }
-                        selectElement.value = '';
-                        break;
-                }
-            }, { once: false });
-        });
-
-        // Gestion des actions via select pour les emprunts enregistrés
-        document.querySelectorAll('.action-select').forEach(select => {
-            select.addEventListener('change', function(e) {
-                const action = this.value;
-                const empruntId = this.getAttribute('data-emprunt-id');
-                const userName = this.getAttribute('data-user-name');
-                const livreTitre = this.getAttribute('data-livre-titre');
-                const deleteUrl = this.getAttribute('data-delete-url');
-
-                if (!action) return;
-
-                const selectElement = this;
-
-                switch(action) {
-                    case 'valider':
-                        // Afficher le modal de validation
-                        if (validerModalContent && validerForm && validerModalInstance) {
-                            validerModalContent.innerHTML = `
-                                <div class="border-start border-primary border-4 ps-3 mb-2">
-                                    <strong class="text-primary"><i class="fa fa-user me-1"></i>Utilisateur :</strong><br>
-                                    <span class="ms-3">${userName}</span>
-                                </div>
-                                <div class="border-start border-success border-4 ps-3">
-                                    <strong class="text-success"><i class="fa fa-book me-1"></i>Livre :</strong><br>
-                                    <span class="ms-3">${livreTitre}</span>
-                                </div>
-                            `;
-                            validerForm.setAttribute('action', document.getElementById('form-valider-' + empruntId).action);
-                            validerModalInstance.show();
-                        }
-                        selectElement.value = '';
-                        break;
-
-                    case 'retourner':
-                        if (confirm('Marquer cet emprunt comme retourné ?')) {
-                            document.getElementById('form-retourner-' + empruntId).submit();
-                        } else {
-                            selectElement.value = '';
-                        }
-                        break;
-
-                    case 'supprimer':
-                        // Mettre à jour le contenu du modal unique
-                        if (deleteModalContent && deleteForm && deleteModalInstance) {
-                            deleteModalContent.innerHTML = `
-                                <strong>Utilisateur :</strong> ${userName}<br>
-                                <strong>Livre :</strong> ${livreTitre}
-                            `;
-                            deleteForm.setAttribute('action', deleteUrl);
-                            deleteModalInstance.show();
-                        }
-                        selectElement.value = '';
-                        break;
-                }
-            }, { once: false });
-        });
-
-        // Auto-hide toasts après 5 secondes
-        setTimeout(function() {
-            const toasts = document.querySelectorAll('.toast');
-            toasts.forEach(toast => {
-                const bsToast = new bootstrap.Toast(toast);
-                bsToast.hide();
-            });
-        }, 5000);
     });
+
+    // Rejeter demande buttons
+    document.querySelectorAll('.btn-rejeter-demande').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const demandeId = this.dataset.demandeId;
+            const userName = this.dataset.userName;
+            const userEmail = this.dataset.userEmail;
+            const livreTitre = this.dataset.livreTitre;
+            const livreAuteur = this.dataset.livreAuteur;
+
+            document.getElementById('rejeterModalContent').innerHTML = `
+                <div class="admin-modal-info-card">
+                    <div class="admin-modal-info-item">
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <strong>${userName}</strong><br>
+                            <small class="text-muted">${userEmail}</small>
+                        </div>
+                    </div>
+                    <div class="admin-modal-info-item">
+                        <i class="fas fa-book"></i>
+                        <div>
+                            <strong>${livreTitre}</strong><br>
+                            <small class="text-muted">${livreAuteur}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('rejeterForm').action = document.getElementById('form-rejeter-demande-' + demandeId).action;
+            rejeterModal.show();
+        });
+    });
+
+    // Valider emprunt buttons
+    document.querySelectorAll('.btn-valider-emprunt').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const empruntId = this.dataset.empruntId;
+            const userName = this.dataset.userName;
+            const livreTitre = this.dataset.livreTitre;
+
+            document.getElementById('validerModalContent').innerHTML = `
+                <div class="admin-modal-info-card">
+                    <div class="admin-modal-info-item">
+                        <i class="fas fa-user"></i>
+                        <strong>${userName}</strong>
+                    </div>
+                    <div class="admin-modal-info-item">
+                        <i class="fas fa-book"></i>
+                        <strong>${livreTitre}</strong>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('validerForm').action = document.getElementById('form-valider-' + empruntId).action;
+            validerModal.show();
+        });
+    });
+
+    // Retourner emprunt buttons
+    document.querySelectorAll('.btn-retourner-emprunt').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const empruntId = this.dataset.empruntId;
+            if (confirm('Marquer cet emprunt comme retourné ?')) {
+                document.getElementById('form-retourner-' + empruntId).submit();
+            }
+        });
+    });
+
+    // Supprimer emprunt buttons
+    document.querySelectorAll('.btn-supprimer-emprunt').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userName = this.dataset.userName;
+            const livreTitre = this.dataset.livreTitre;
+            const deleteUrl = this.dataset.deleteUrl;
+
+            document.getElementById('deleteModalContent').innerHTML = `
+                <div class="admin-modal-info-card">
+                    <div class="admin-modal-info-item">
+                        <i class="fas fa-user"></i>
+                        <strong>${userName}</strong>
+                    </div>
+                    <div class="admin-modal-info-item">
+                        <i class="fas fa-book"></i>
+                        <strong>${livreTitre}</strong>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('deleteForm').action = deleteUrl;
+            deleteModal.show();
+        });
+    });
+
+    // Edit livre buttons
+    document.querySelectorAll('.btn-edit-livre').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('edit_titre').value = this.dataset.livreTitre;
+            document.getElementById('edit_auteur').value = this.dataset.livreAuteur;
+            document.getElementById('edit_categorie').value = this.dataset.livreCategorie;
+            document.getElementById('edit_prix').value = this.dataset.livrePrix;
+            document.getElementById('edit_quantite').value = this.dataset.livreQuantite;
+            document.getElementById('edit_resumer').value = this.dataset.livreResumer;
+
+            document.getElementById('editLivreModalLabel').innerHTML = '<i class="fas fa-edit"></i> Modifier: ' + this.dataset.livreTitre;
+
+            if (this.dataset.livreImage) {
+                document.getElementById('current_image_info').innerHTML = 'Image actuelle: <img src="' + this.dataset.livreImage + '" style="height: 30px; border-radius: 4px;">';
+            } else {
+                document.getElementById('current_image_info').textContent = '';
+            }
+
+            document.getElementById('current_pdf_info').textContent = this.dataset.livreHasPdf === 'oui' ? 'PDF actuel disponible' : '';
+
+            document.getElementById('editLivreForm').action = this.dataset.updateUrl;
+            editLivreModal.show();
+        });
+    });
+
+    // Delete livre buttons
+    document.querySelectorAll('.btn-delete-livre').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const livreTitre = this.dataset.livreTitre;
+            const deleteUrl = this.dataset.deleteUrl;
+
+            document.getElementById('deleteLivreModalContent').innerHTML = `
+                <div class="admin-modal-info-card">
+                    <div class="admin-modal-info-item">
+                        <i class="fas fa-book"></i>
+                        <strong>${livreTitre}</strong>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('deleteLivreForm').action = deleteUrl;
+            deleteLivreModal.show();
+        });
+    });
+});
 </script>
 @endpush

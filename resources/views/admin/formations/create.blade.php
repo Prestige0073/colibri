@@ -18,19 +18,10 @@
 
                         <div class="row">
                             <!-- Titre -->
-                            <div class="col-md-8 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label for="titre" class="form-label">Titre de la formation <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('titre') is-invalid @enderror" id="titre" name="titre" value="{{ old('titre') }}" data-important="true">
                                 @error('titre')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Prix -->
-                            <div class="col-md-4 mb-3">
-                                <label for="prix" class="form-label">Prix (FCFA) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" min="0" class="form-control @error('prix') is-invalid @enderror" id="prix" name="prix" value="{{ old('prix', 0) }}" data-important="true">
-                                @error('prix')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -56,16 +47,24 @@
                         </div>
 
                         <div class="row">
-                            <!-- Niveau -->
+                            <!-- Type de formation (Payant/Gratuit) -->
                             <div class="col-md-4 mb-3">
-                                <label for="niveau" class="form-label">Niveau <span class="text-danger">*</span></label>
-                                <select class="form-select @error('niveau') is-invalid @enderror" id="niveau" name="niveau" data-important="true">
-                                    <option value="">-- Sélectionner --</option>
-                                    <option value="debutant" {{ old('niveau') === 'debutant' ? 'selected' : '' }}>Débutant</option>
-                                    <option value="intermediaire" {{ old('niveau') === 'intermediaire' ? 'selected' : '' }}>Intermédiaire</option>
-                                    <option value="avance" {{ old('niveau') === 'avance' ? 'selected' : '' }}>Avancé</option>
+                                <label for="est_gratuit" class="form-label">Type de formation <span class="text-danger">*</span></label>
+                                <select class="form-select @error('est_gratuit') is-invalid @enderror" id="est_gratuit" name="est_gratuit" data-important="true" onchange="togglePrixField()">
+                                    <option value="" {{ old('est_gratuit') === null ? 'selected' : '' }}>-- Choisir --</option>
+                                    <option value="0" {{ old('est_gratuit') === '0' ? 'selected' : '' }}>Payante</option>
+                                    <option value="1" {{ old('est_gratuit') === '1' ? 'selected' : '' }}>Gratuite</option>
                                 </select>
-                                @error('niveau')
+                                @error('est_gratuit')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Prix (affiché uniquement si Payante) -->
+                            <div class="col-md-4 mb-3" id="prix_container" style="display: none;">
+                                <label for="prix" class="form-label">Prix (FCFA) <span class="text-danger">*</span></label>
+                                <input type="number" step="1" min="0" class="form-control @error('prix') is-invalid @enderror" id="prix" name="prix" value="{{ old('prix', '') }}" placeholder="Ex: 25000">
+                                @error('prix')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -78,7 +77,9 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
 
+                        <div class="row">
                             <!-- Catégorie -->
                             <div class="col-md-4 mb-3">
                                 <label for="categorie" class="form-label">Catégorie</label>
@@ -113,7 +114,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="image" class="form-label">Image de couverture</label>
                                 <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" accept="image/*">
-                                <small class="form-text text-muted">Format: JPG, PNG (max 2MB)</small>
+                                <small class="form-text text-muted">Tous formats d'images acceptés (JPG, PNG, GIF, WEBP, SVG, etc.)</small>
                                 @error('image')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -153,4 +154,31 @@
 
 @push('scripts')
 <script src="{{ asset('js/form-validation.js') }}"></script>
+<script>
+function togglePrixField() {
+    var estGratuit = document.getElementById('est_gratuit').value;
+    var prixContainer = document.getElementById('prix_container');
+    var prixInput = document.getElementById('prix');
+
+    if (estGratuit === '0') {
+        // Formation payante : afficher le champ prix
+        prixContainer.style.display = '';
+        prixInput.required = true;
+    } else if (estGratuit === '1') {
+        // Formation gratuite : cacher le champ prix et mettre à 0
+        prixContainer.style.display = 'none';
+        prixInput.value = '0';
+        prixInput.required = false;
+    } else {
+        // Aucune option choisie : cacher le champ prix
+        prixContainer.style.display = 'none';
+        prixInput.value = '';
+        prixInput.required = false;
+    }
+}
+// Appeler au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    togglePrixField();
+});
+</script>
 @endpush

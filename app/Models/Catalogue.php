@@ -9,15 +9,17 @@ class Catalogue extends Model
     use HasFactory;
 
     protected $fillable = [
-    'titre',
-    'auteur',
-    'categorie',
-    'prix',
-    'quantite',
-    'type',
-    'type_categorie',
-    'resumer',
-    'image',
-    'pdf',
+        'titre',
+        'auteur',
+        'categorie',
+        'prix',
+        'quantite',
+        'type',
+        'type_categorie',
+        'resumer',
+        'image',
+        'pdf',
+        'audio',
+        'type_contenu',
     ];
 }

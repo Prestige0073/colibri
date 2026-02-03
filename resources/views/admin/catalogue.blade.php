@@ -1,430 +1,1071 @@
 @extends('admin.layout')
-@section('title', 'Admin - Catalogue')
+
+@section('title', 'Gestion du Catalogue')
+@section('subtitle', '{{ $catalogues->total() }} livre(s) au catalogue')
+
 @section('content')
-    <div class="container-fluid py-4">
-        <!-- Toast notification -->
-        <div aria-live="polite" aria-atomic="true"
-            style="position: fixed; top: 1.5rem; right: 1.5rem; min-width: 320px; z-index: 1080; pointer-events: none;">
-            @if (session('success'))
-                <div id="toast-success"
-                    class="toast align-items-center border-0 shadow-lg show animate__animated animate__slideInDown"
-                    role="alert" aria-live="assertive" aria-atomic="true"
-                    style="pointer-events:auto; background:#1bc47d; color:#fff; font-weight:500;">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="fa fa-check-circle me-2"></i> {{ session('success') }}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                            aria-label="Fermer"></button>
-                    </div>
+
+<!-- Header avec stats rapides -->
+<div class="page-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center gap-3">
+                <div class="page-header-icon">
+                    <i class="fas fa-book"></i>
                 </div>
-            @endif
-            @if (session('error'))
-                <div id="toast-error"
-                    class="toast align-items-center border-0 shadow-lg show animate__animated animate__slideInDown"
-                    role="alert" aria-live="assertive" aria-atomic="true"
-                    style="pointer-events:auto; background:#e53935; color:#fff; font-weight:500;">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="fa fa-exclamation-triangle me-2"></i> {{ session('error') }}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                            aria-label="Fermer"></button>
-                    </div>
-                </div>
-            @endif
-        </div>
-        <h2 class="mb-4"><i class="fa fa-book me-2"></i>Gestion du catalogue</h2>
-        <div class="card shadow border-0">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle border border-primary-subtle table-transition">
-                        <thead class="table-primary">
-                            <tr>
-                                <th><i class="fa fa-hashtag text-primary"></i></th>
-                                <th><i class="fa fa-book text-primary"></i> Titre</th>
-                                <th><i class="fa fa-user-pen text-primary"></i> Auteur</th>
-                                <th><i class="fa fa-tags text-primary"></i> Catégorie</th>
-                                <th><i class="fa fa-money-bill-wave text-success"></i> Prix</th>
-                                <th><i class="fa fa-box text-primary"></i> Quantité</th>
-                                <th><i class="fa fa-traffic-light text-primary"></i> Statut</th>
-                                <th><i class="fa fa-align-left text-primary"></i> Résumé</th>
-                                <th><i class="fa fa-image text-primary"></i> Image</th>
-                                <th><i class="fa fa-file-pdf text-danger"></i> PDF</th>
-                                <th><i class="fa fa-edit text-info"></i> Modifier</th>
-                                <th><i class="fa fa-trash text-danger"></i> Supprimer</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($catalogues as $cat)
-                                <tr class="catalogue-row"
-                                    data-id="{{ $cat->id }}"
-                                    data-titre="{{ $cat->titre ?? '' }}"
-                                    data-auteur="{{ $cat->auteur ?? '' }}"
-                                    data-categorie="{{ $cat->categorie ?? '' }}"
-                                    data-prix="{{ $cat->prix ?? 0 }}"
-                                    data-prix-formatted="{{ $cat->prix ? fcfa($cat->prix) : '0 FCFA' }}"
-                                    data-quantite="{{ $cat->quantite ?? 0 }}"
-                                    data-image="{{ $cat->image ? asset($cat->image) : '' }}"
-                                    data-pdf="{{ $cat->pdf ? asset($cat->pdf) : '' }}"
-                                    data-resumer="{{ strip_tags($cat->resumer ?? '') }}">
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $cat->titre ?? '-' }}</td>
-                                    <td>{{ $cat->auteur ?? '-' }}</td>
-                                    <td>{{ $cat->categorie ?? '-' }}</td>
-                                    <td>{{ $cat->prix ? fcfa($cat->prix) : '-' }}</td>
-                                    <td>{{ $cat->quantite ?? 0 }}</td>
-                                    <td>
-                                        @php
-                                            $q = $cat->quantite ?? 0;
-                                            if ($q == 0) {
-                                                $statut = 'Épuisé';
-                                                $badgeClass = 'bg-danger text-white';
-                                                $blink = 'badge-blink';
-                                            } else {
-                                                $statut = 'OK';
-                                                $badgeClass = 'bg-success text-white';
-                                                $blink = '';
-                                            }
-                                        @endphp
-                                        <span class="badge {{ $badgeClass }} {{ $blink }}">{{ $statut }}</span>
-                                    </td>
-                                    <td>{{ Str::limit(strip_tags($cat->resumer ?? ''), 20) }}</td>
-                                    <td>
-                                        @if ($cat->image)
-                                            <img src="{{ asset($cat->image) }}" alt="image"
-                                                style="width:40px;height:40px;object-fit:cover;border-radius:6px;">
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($cat->pdf)
-                                            <a href="{{ asset($cat->pdf) }}" target="_blank"
-                                                class="btn btn-sm btn-outline-danger"><i class="fa fa-file-pdf"></i></a>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-gradient-blue btn-edit-catalogue"><i class="fa fa-edit"></i>
-                                            Modifier</button>
-                                    </td>
-                                    <td>
-                                        <!-- Bouton Supprimer avec modal -->
-                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                                            data-bs-target="#deleteCatalogueModal{{ $cat->id }}">
-                                            <i class="fa fa-trash"></i> Supprimer
-                                        </button>
-                                        <!-- Modal de confirmation Suppression -->
-                                        <div class="modal fade" id="deleteCatalogueModal{{ $cat->id }}" tabindex="-1"
-                                            aria-labelledby="deleteCatalogueModalLabel{{ $cat->id }}"
-                                            aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title"
-                                                            id="deleteCatalogueModalLabel{{ $cat->id }}">
-                                                            Confirmation de suppression
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Fermer"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        Êtes-vous sûr de vouloir supprimer le livre
-                                                        <strong>{{ $cat->titre }}</strong> ?
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Annuler</button>
-                                                        <form method="POST"
-                                                            action="{{ route('admin.catalogue.destroy', $cat->id) }}"
-                                                            style="display:inline-block;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger">Oui,
-                                                                supprimer</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="8" class="text-center text-muted">Aucun livre enregistré</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                        <!-- Modal catalogue info -->
-                        <div class="modal fade" id="catalogueModal" tabindex="-1" aria-labelledby="catalogueModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-lg modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header bg-primary text-white">
-                                        <h5 class="modal-title text-white" id="catalogueModalLabel"><i
-                                                class="fa fa-book-open me-2"></i><i
-                                                class="fa fa-info-circle me-1"></i>Détail du livre</h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                            aria-label="Fermer"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="row g-3">
-                                            <div class="col-md-4 text-center">
-                                                <img id="modalImage" src="" alt="image"
-                                                    class="img-fluid rounded-3 mb-2"
-                                                    style="max-height:180px;object-fit:cover;">
-                                                <div id="modalPdfLink"></div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <p><strong>Titre :</strong> <span id="modalTitre"></span></p>
-                                                <p><strong>Auteur :</strong> <span id="modalAuteur"></span></p>
-                                                <p><strong>Catégorie :</strong> <span id="modalCategorie"></span></p>
-                                                <p><strong>Prix :</strong> <span id="modalPrix"></span></p>
-                                                <p><strong>Quantité :</strong> <span id="modalQuantite"></span></p>
-                                                <p><strong>Statut :</strong> <span id="modalStatut"></span></p>
-                                                <p><strong>Résumé :</strong> <span id="modalResumerShort"></span><span
-                                                        id="modalResumerFull" style="display:none;"></span>
-                                                    <button id="modalResumerToggle" class="btn btn-link btn-sm p-0 ms-2"
-                                                        style="vertical-align:baseline;display:none;">Lire la
-                                                        suite</button>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </table>
-                    
-                    <!-- Pagination Catalogues -->
-                    @if($catalogues->hasPages())
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $catalogues->links() }}
-                        </div>
-                    @endif
+                <div>
+                    <h1 class="page-title">Catalogue des livres</h1>
+                    <p class="page-subtitle">{{ $catalogues->total() }} livre(s) enregistré(s)</p>
                 </div>
             </div>
         </div>
-        <!-- Formulaire d'ajout de catalogue -->
-        <div class="row justify-content-center mt-5">
-            <div class="col-lg-8">
-                <div class="card shadow border-0 rounded-4">
-                    <div class="card-header bg-primary text-white rounded-top-4">
-                        <h4 class="mb-0 fw-bold text-white"><i class="fa fa-folder-plus me-2"></i>Formulaire d'ajout de
-                            livre</h4>
+        <div class="col-md-6">
+            <div class="d-flex gap-2 justify-content-md-end mt-3 mt-md-0">
+                <button class="btn-admin btn-admin-primary" data-bs-toggle="collapse" data-bs-target="#addBookForm">
+                    <i class="fas fa-plus me-2"></i>Ajouter un livre
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-3 mb-4">
+    @php
+        $totalBooks = $catalogues->total();
+        $inStock = $catalogues->where('quantite', '>', 0)->count();
+        $outOfStock = $catalogues->where('quantite', 0)->count();
+    @endphp
+    <div class="col-6 col-md-3">
+        <div class="quick-stat">
+            <div class="quick-stat-icon bg-primary-soft text-primary">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="quick-stat-content">
+                <span class="quick-stat-value">{{ $totalBooks }}</span>
+                <span class="quick-stat-label">Total livres</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="quick-stat">
+            <div class="quick-stat-icon bg-success-soft text-success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="quick-stat-content">
+                <span class="quick-stat-value">{{ $inStock }}</span>
+                <span class="quick-stat-label">En stock</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="quick-stat">
+            <div class="quick-stat-icon bg-danger-soft text-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="quick-stat-content">
+                <span class="quick-stat-value">{{ $outOfStock }}</span>
+                <span class="quick-stat-label">Épuisés</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="quick-stat">
+            <div class="quick-stat-icon bg-info-soft text-info">
+                <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="quick-stat-content">
+                <span class="quick-stat-value">{{ $catalogues->whereNotNull('pdf')->count() }}</span>
+                <span class="quick-stat-label">Avec PDF</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulaire d'ajout (collapsible) -->
+<div class="collapse mb-4" id="addBookForm">
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h3 class="admin-card-title">
+                <i class="fas fa-plus-circle"></i>
+                <span id="formTitle">Ajouter un nouveau livre</span>
+            </h3>
+            <button class="btn-admin btn-admin-sm btn-admin-secondary" data-bs-toggle="collapse" data-bs-target="#addBookForm">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="admin-card-body">
+            <form id="catalogueForm" method="POST" enctype="multipart/form-data" action="{{ route('admin.catalogue.store') }}">
+                @csrf
+                <input type="hidden" id="catalogue_id" name="catalogue_id" value="">
+
+                <div class="row g-4">
+                    <!-- Infos principales -->
+                    <div class="col-md-6">
+                        <div class="form-section">
+                            <h4 class="form-section-title"><i class="fas fa-info-circle me-2"></i>Informations générales</h4>
+
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">
+                                    <i class="fas fa-heading"></i>Titre du livre <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="admin-form-control" id="titre" name="titre" placeholder="Ex: Les Soleils des Indépendances" required>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label class="admin-form-label">
+                                            <i class="fas fa-user-edit"></i>Auteur <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="admin-form-control" id="auteur" name="auteur" placeholder="Ex: Ahmadou Kourouma" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label class="admin-form-label">
+                                            <i class="fas fa-tag"></i>Catégorie <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="admin-form-control" id="categorie" name="categorie" required>
+                                            <option value="">Sélectionner...</option>
+                                            <option value="Roman">Roman</option>
+                                            <option value="Nouvelle">Nouvelle</option>
+                                            <option value="Essai">Essai</option>
+                                            <option value="Jeunesse">Jeunesse</option>
+                                            <option value="Poésie">Poésie</option>
+                                            <option value="Théâtre">Théâtre</option>
+                                            <option value="Biographie">Biographie</option>
+                                            <option value="Conte">Conte</option>
+                                            <option value="Documentaire">Documentaire</option>
+                                            <option value="Autre">Autre</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label class="admin-form-label">
+                                            <i class="fas fa-coins"></i>Prix (FCFA) <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number" class="admin-form-control" id="prix" name="prix" placeholder="5000" min="0" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="admin-form-group">
+                                        <label class="admin-form-label">
+                                            <i class="fas fa-boxes"></i>Quantité en stock
+                                        </label>
+                                        <input type="number" class="admin-form-control" id="quantite" name="quantite" placeholder="10" min="0" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body bg-light">
-                        <form id="catalogueForm" method="POST" enctype="multipart/form-data" class="needs-validation-confirm">
-                            @csrf
-                            <input type="hidden" id="catalogue_id" name="catalogue_id" value="">
-                            <div class="row g-3 align-items-end">
-                                <div class="col-md-3">
-                                    <label for="titre" class="form-label fw-bold"><i
-                                            class="fa fa-book me-1 text-primary"></i> Titre</label>
-                                    <input type="text" class="form-control rounded-3" id="titre" name="titre"
-                                        placeholder="Titre du livre" data-important="true">
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="auteur" class="form-label fw-bold"><i
-                                            class="fa fa-user-pen me-1 text-primary"></i> Auteur</label>
-                                    <input type="text" class="form-control rounded-3" id="auteur" name="auteur"
-                                        placeholder="Auteur" data-important="true">
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="categorie" class="form-label fw-bold"><i
-                                            class="fa fa-tags me-1 text-primary"></i> Catégorie</label>
-                                    <select class="form-select rounded-3" id="categorie" name="categorie" data-important="true">
-                                        <option value="">Choisir une catégorie</option>
-                                        <option value="Roman">Roman</option>
-                                        <option value="Essai">Essai</option>
-                                        <option value="Jeunesse">Jeunesse</option>
-                                        <option value="Poésie">Poésie</option>
-                                        <option value="Théâtre">Théâtre</option>
-                                        <option value="Biographie">Biographie</option>
-                                        <option value="Conte">Conte</option>
-                                        <option value="Documentaire">Documentaire</option>
-                                        <option value="Autre">Autre</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="prix" class="form-label fw-bold"><i
-                                            class="fa fa-money-bill-wave me-1 text-primary"></i> Prix (FCFA)</label>
-                                    <input type="number" class="form-control rounded-3" id="prix" name="prix"
-                                        placeholder="Prix" min="0" data-important="true">
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="quantite" class="form-label fw-bold"><i class="fa fa-box me-1 text-primary"></i> Quantité</label>
-                                    <input type="number" class="form-control rounded-3" id="quantite" name="quantite" placeholder="Quantité" min="0" data-important="true">
+
+                    <!-- Fichiers -->
+                    <div class="col-md-6">
+                        <div class="form-section">
+                            <h4 class="form-section-title"><i class="fas fa-cloud-upload-alt me-2"></i>Fichiers & Médias</h4>
+
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">
+                                    <i class="fas fa-image"></i>Image de couverture
+                                </label>
+                                <div class="file-upload-wrapper">
+                                    <input type="file" class="file-upload-input" id="image" name="image" accept="image/*">
+                                    <div class="file-upload-content">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span>Glissez une image ou cliquez pour sélectionner</span>
+                                        <small>PNG, JPG, WEBP (max 2MB)</small>
+                                    </div>
+                                    <div class="file-upload-preview" id="imagePreview"></div>
                                 </div>
                             </div>
-                            <div class="row g-3 mt-2">
-                                <div class="col-12">
-                                    <label for="resumer" class="form-label fw-bold"><i
-                                            class="fa fa-align-left me-1 text-primary"></i> Résumé</label>
-                                    <textarea class="form-control rounded-3" id="resumer-catalogue-editor" name="resumer" rows="5"
-                                        placeholder="Résumé du livre"></textarea>
-                                </div>
+
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">
+                                    <i class="fas fa-file-alt"></i>Type de contenu numérique
+                                </label>
+                                <select class="admin-form-control" id="type_contenu" name="type_contenu" onchange="toggleContentFields()">
+                                    <option value="">Livre physique uniquement</option>
+                                    <option value="pdf">PDF (livre numérique)</option>
+                                    <option value="audio">Audio (livre audio)</option>
+                                </select>
                             </div>
-                            <div class="row g-3 mt-2 align-items-end">
-                                <div class="col-md-6">
-                                    <label for="image" class="form-label fw-bold"><i
-                                            class="fa fa-image me-1 text-primary"></i> Image de couverture</label>
-                                    <input type="file" class="form-control rounded-3" id="image" name="image">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="pdf" class="form-label fw-bold"><i
-                                            class="fa fa-file-pdf me-1 text-danger"></i> Fichier PDF</label>
-                                    <input type="file" class="form-control rounded-3" id="pdf" name="pdf">
-                                </div>
+
+                            <div id="pdf_field" class="admin-form-group">
+                                <label class="admin-form-label">
+                                    <i class="fas fa-file-pdf text-danger"></i>Fichier PDF
+                                </label>
+                                <input type="file" class="admin-form-control" id="pdf" name="pdf" accept=".pdf,application/pdf">
                             </div>
-                            <div class="text-end mt-4">
-                                <button type="submit" id="catalogueSubmitBtn"
-                                    class="btn btn-gradient-blue px-4 py-2 rounded-pill fw-bold shadow-sm">
-                                    <i class="fa fa-plus me-1"></i><span id="catalogueSubmitText">Ajouter</span>
-                                </button>
-                                <button type="button" id="catalogueCancelEdit"
-                                    class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-bold shadow-sm"
-                                    style="display:none;">Annuler</button>
+
+                            <div id="audio_field" class="admin-form-group" style="display:none;">
+                                <label class="admin-form-label">
+                                    <i class="fas fa-headphones text-info"></i>Fichier Audio
+                                </label>
+                                <input type="file" class="admin-form-control" id="audio" name="audio" accept="audio/*">
+                                <small class="text-muted">Formats: MP3, WAV, OGG, M4A</small>
                             </div>
-                        </form>
-                        @include('partials.confirmation-modal')
+                        </div>
+                    </div>
+
+                    <!-- Résumé -->
+                    <div class="col-12">
+                        <div class="admin-form-group">
+                            <label class="admin-form-label">
+                                <i class="fas fa-align-left"></i>Résumé du livre
+                            </label>
+                            <textarea class="admin-form-control" id="resumer-catalogue-editor" name="resumer" rows="4" placeholder="Description et résumé du livre..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-admin btn-admin-secondary" id="catalogueCancelEdit" style="display:none;">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="submit" class="btn-admin btn-admin-primary" id="catalogueSubmitBtn">
+                        <i class="fas fa-save me-2"></i><span id="catalogueSubmitText">Enregistrer le livre</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Table des livres -->
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h3 class="admin-card-title">
+            <i class="fas fa-list"></i>
+            Liste des livres
+        </h3>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchCatalogue" placeholder="Rechercher..." class="search-input">
+            </div>
+        </div>
+    </div>
+    <div class="admin-card-body p-0">
+        <div class="admin-table-wrapper">
+            <table class="admin-table" id="catalogueTable">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Image</th>
+                        <th>Livre</th>
+                        <th>Catégorie</th>
+                        <th>Prix</th>
+                        <th>Stock</th>
+                        <th>Statut</th>
+                        <th>Fichiers</th>
+                        <th class="text-center" style="width: 140px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($catalogues as $cat)
+                        <tr class="catalogue-row"
+                            data-id="{{ $cat->id }}"
+                            data-titre="{{ $cat->titre ?? '' }}"
+                            data-auteur="{{ $cat->auteur ?? '' }}"
+                            data-categorie="{{ $cat->categorie ?? '' }}"
+                            data-prix="{{ $cat->prix ?? 0 }}"
+                            data-prix-formatted="{{ $cat->prix ? fcfa($cat->prix) : 'Gratuit' }}"
+                            data-quantite="{{ $cat->quantite ?? 0 }}"
+                            data-image="{{ $cat->image ? asset($cat->image) : '' }}"
+                            data-pdf="{{ $cat->pdf ? asset($cat->pdf) : '' }}"
+                            data-resumer="{{ strip_tags($cat->resumer ?? '') }}">
+                            <td>
+                                <div class="table-image">
+                                    @if($cat->image)
+                                        <img src="{{ asset($cat->image) }}" alt="{{ $cat->titre }}">
+                                    @else
+                                        <div class="table-image-placeholder">
+                                            <i class="fas fa-book"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
+                                <div class="table-book-info">
+                                    <h4 class="book-title">{{ $cat->titre ?? '-' }}</h4>
+                                    <p class="book-author">{{ $cat->auteur ?? '-' }}</p>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="admin-badge admin-badge-info">{{ $cat->categorie ?? '-' }}</span>
+                            </td>
+                            <td>
+                                <span class="price-tag">{{ $cat->prix ? fcfa($cat->prix) : 'Gratuit' }}</span>
+                            </td>
+                            <td>
+                                <span class="stock-value {{ ($cat->quantite ?? 0) == 0 ? 'text-danger' : 'text-success' }}">
+                                    {{ $cat->quantite ?? 0 }}
+                                </span>
+                            </td>
+                            <td>
+                                @php
+                                    $q = $cat->quantite ?? 0;
+                                @endphp
+                                @if($q == 0)
+                                    <span class="admin-badge admin-badge-danger pulse-badge">
+                                        <i class="fas fa-times-circle me-1"></i>Épuisé
+                                    </span>
+                                @elseif($q <= 5)
+                                    <span class="admin-badge admin-badge-warning">
+                                        <i class="fas fa-exclamation-circle me-1"></i>Stock bas
+                                    </span>
+                                @else
+                                    <span class="admin-badge admin-badge-success">
+                                        <i class="fas fa-check-circle me-1"></i>Disponible
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="file-icons">
+                                    @if($cat->pdf)
+                                        <a href="{{ asset($cat->pdf) }}" target="_blank" class="file-icon file-icon-pdf" title="Voir PDF">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </a>
+                                    @endif
+                                    @if($cat->audio)
+                                        <a href="{{ asset($cat->audio) }}" target="_blank" class="file-icon file-icon-audio" title="Écouter">
+                                            <i class="fas fa-headphones"></i>
+                                        </a>
+                                    @endif
+                                    @if(!$cat->pdf && !$cat->audio)
+                                        <span class="text-muted small">—</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-action-view" title="Voir détails" onclick="showBookDetails(this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-action btn-action-edit btn-edit-catalogue" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-action btn-action-delete" title="Supprimer" data-bs-toggle="modal" data-bs-target="#deleteCatalogueModal{{ $cat->id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Modal de suppression -->
+                                <div class="modal fade" id="deleteCatalogueModal{{ $cat->id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                                <h5 class="modal-title text-white">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmer la suppression
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body text-center py-4">
+                                                <div class="delete-icon mb-3">
+                                                    <i class="fas fa-book"></i>
+                                                </div>
+                                                <p class="mb-1">Êtes-vous sûr de vouloir supprimer</p>
+                                                <h5 class="fw-bold text-danger">{{ $cat->titre }}</h5>
+                                                <p class="text-muted small">Cette action est irréversible</p>
+                                            </div>
+                                            <div class="modal-footer justify-content-center">
+                                                <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">
+                                                    <i class="fas fa-times me-2"></i>Annuler
+                                                </button>
+                                                <form method="POST" action="{{ route('admin.catalogue.destroy', $cat->id) }}" style="display:inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn-admin btn-admin-danger">
+                                                        <i class="fas fa-trash me-2"></i>Supprimer
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fas fa-book-open"></i>
+                                    <h4>Aucun livre dans le catalogue</h4>
+                                    <p>Commencez par ajouter votre premier livre</p>
+                                    <button class="btn-admin btn-admin-primary" data-bs-toggle="collapse" data-bs-target="#addBookForm">
+                                        <i class="fas fa-plus me-2"></i>Ajouter un livre
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if($catalogues->hasPages())
+        <div class="admin-card-footer">
+            <div class="pagination-wrapper">
+                {{ $catalogues->links() }}
+            </div>
+        </div>
+    @endif
+</div>
+
+<!-- Modal détails livre -->
+<div class="modal fade" id="bookDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-light));">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-book-open me-2"></i>Détails du livre
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-md-4 text-center">
+                        <div class="book-detail-image">
+                            <img id="modalImage" src="" alt="" class="img-fluid rounded">
+                        </div>
+                        <div id="modalPdfLink" class="mt-3"></div>
+                    </div>
+                    <div class="col-md-8">
+                        <h3 id="modalTitre" class="mb-2"></h3>
+                        <p class="text-muted mb-4">Par <strong id="modalAuteur"></strong></p>
+
+                        <div class="book-detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Catégorie</span>
+                                <span class="detail-value" id="modalCategorie"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Prix</span>
+                                <span class="detail-value text-success fw-bold" id="modalPrix"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Stock</span>
+                                <span class="detail-value" id="modalQuantite"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Statut</span>
+                                <span id="modalStatut"></span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6 class="text-muted mb-2">Résumé</h6>
+                            <p id="modalResumer" class="text-justify"></p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+@include('partials.confirmation-modal')
 
 @endsection
 
 @push('styles')
-    <style>
-        .btn-gradient-blue {
-            background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
-            color: #fff;
-            border: none;
-            box-shadow: 0 2px 8px 0 rgba(33, 150, 243, 0.10);
-            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-        }
+<style>
+    /* Page Header */
+    .page-header {
+        padding: 1.5rem;
+        background: var(--admin-surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--admin-gray-200);
+    }
 
-        .btn-gradient-blue:hover {
-            background: #2196f3;
-            color: #fff;
-            box-shadow: 0 4px 16px 0 rgba(33, 150, 243, 0.13);
-        }
-        .badge-blink {
-            animation: blink 1s linear infinite;
-        }
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-    </style>
+    .page-header-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-light));
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.5rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--admin-text);
+        margin: 0;
+    }
+
+    .page-subtitle {
+        color: var(--admin-text-muted);
+        margin: 0;
+        font-size: 0.875rem;
+    }
+
+    /* Quick Stats */
+    .quick-stat {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: var(--admin-surface);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--admin-gray-200);
+    }
+
+    .quick-stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+    }
+
+    .quick-stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .quick-stat-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--admin-text);
+        line-height: 1.2;
+    }
+
+    .quick-stat-label {
+        font-size: 0.75rem;
+        color: var(--admin-text-muted);
+    }
+
+    /* Form Sections */
+    .form-section {
+        background: var(--admin-gray-100);
+        padding: 1.25rem;
+        border-radius: var(--radius-md);
+        height: 100%;
+    }
+
+    .form-section-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--admin-text);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--admin-gray-300);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--admin-gray-200);
+    }
+
+    /* File Upload */
+    .file-upload-wrapper {
+        position: relative;
+        border: 2px dashed var(--admin-gray-300);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        text-align: center;
+        transition: all var(--transition-fast);
+        cursor: pointer;
+    }
+
+    .file-upload-wrapper:hover {
+        border-color: var(--admin-primary);
+        background: var(--admin-primary-bg);
+    }
+
+    .file-upload-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .file-upload-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--admin-text-muted);
+    }
+
+    .file-upload-content i {
+        font-size: 2rem;
+        color: var(--admin-primary);
+    }
+
+    .file-upload-content small {
+        font-size: 0.75rem;
+    }
+
+    /* Search Box */
+    .search-box {
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--admin-text-muted);
+    }
+
+    .search-input {
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        border: 1px solid var(--admin-gray-300);
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        width: 200px;
+        transition: all var(--transition-fast);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--admin-primary);
+        width: 250px;
+    }
+
+    /* Table Styles */
+    .table-image {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .table-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .table-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--admin-gray-200);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--admin-text-muted);
+    }
+
+    .table-book-info {
+        min-width: 0;
+    }
+
+    .book-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--admin-text);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+    }
+
+    .book-author {
+        font-size: 0.75rem;
+        color: var(--admin-text-muted);
+        margin: 0;
+    }
+
+    .price-tag {
+        font-weight: 600;
+        color: var(--admin-success);
+    }
+
+    .stock-value {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .pulse-badge {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* File Icons */
+    .file-icons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .file-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-fast);
+    }
+
+    .file-icon-pdf {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--admin-danger);
+    }
+
+    .file-icon-pdf:hover {
+        background: var(--admin-danger);
+        color: #fff;
+    }
+
+    .file-icon-audio {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--admin-info);
+    }
+
+    .file-icon-audio:hover {
+        background: var(--admin-info);
+        color: #fff;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.375rem;
+        justify-content: center;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        font-size: 0.8rem;
+    }
+
+    .btn-action-view {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--admin-info);
+    }
+
+    .btn-action-view:hover {
+        background: var(--admin-info);
+        color: #fff;
+    }
+
+    .btn-action-edit {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--admin-warning);
+    }
+
+    .btn-action-edit:hover {
+        background: var(--admin-warning);
+        color: #fff;
+    }
+
+    .btn-action-delete {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--admin-danger);
+    }
+
+    .btn-action-delete:hover {
+        background: var(--admin-danger);
+        color: #fff;
+    }
+
+    /* Delete Modal Icon */
+    .delete-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(239, 68, 68, 0.1);
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        color: var(--admin-danger);
+        font-size: 2rem;
+    }
+
+    /* Book Detail Modal */
+    .book-detail-image img {
+        max-height: 250px;
+        object-fit: cover;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .book-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .detail-label {
+        font-size: 0.75rem;
+        color: var(--admin-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .detail-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--admin-text);
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--admin-gray-400);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        font-size: 1.25rem;
+        color: var(--admin-text);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--admin-text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Pagination */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+    }
+</style>
 @endpush
 
 @push('scripts')
-    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-    <script src="{{ asset('js/form-validation.js') }}"></script>
-    <script>
-        // Petite intégration pour CKEditor + gestion edit/add
-        (function(){
-            let catalogueEditorInstance = null;
-            let editMode = false;
-            let editId = null;
-            const form = document.getElementById('catalogueForm');
-            const submitBtn = document.getElementById('catalogueSubmitBtn');
-            const submitText = document.getElementById('catalogueSubmitText');
-            const cancelEditBtn = document.getElementById('catalogueCancelEdit');
-            const textarea = document.getElementById('resumer-catalogue-editor');
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<script src="{{ asset('js/form-validation.js') }}"></script>
+<script>
+(function(){
+    let catalogueEditorInstance = null;
+    let editMode = false;
+    let editId = null;
+    const form = document.getElementById('catalogueForm');
+    const submitBtn = document.getElementById('catalogueSubmitBtn');
+    const submitText = document.getElementById('catalogueSubmitText');
+    const cancelEditBtn = document.getElementById('catalogueCancelEdit');
+    const formTitle = document.getElementById('formTitle');
+    const textarea = document.getElementById('resumer-catalogue-editor');
+    const addBookCollapse = document.getElementById('addBookForm');
 
-            if (textarea) {
-                ClassicEditor.create(textarea, {
-                    toolbar: ['undo','redo','|','bold','italic','bulletedList','numberedList','link'],
-                    language: 'fr'
-                }).then(editor => catalogueEditorInstance = editor).catch(()=>{});
+    // Initialize CKEditor
+    if (textarea) {
+        ClassicEditor.create(textarea, {
+            toolbar: ['undo', 'redo', '|', 'bold', 'italic', 'bulletedList', 'numberedList', 'link'],
+            language: 'fr'
+        }).then(editor => catalogueEditorInstance = editor).catch(() => {});
+    }
+
+    // Form default action
+    form.action = "{{ route('admin.catalogue.store') }}";
+
+    // Form submit handler
+    form.addEventListener('submit', function(e) {
+        if (catalogueEditorInstance && textarea) {
+            textarea.value = catalogueEditorInstance.getData();
+        }
+
+        if (editMode && editId) {
+            form.action = `/admin/catalogue/${editId}`;
+            let methodInput = form.querySelector('input[name="_method"]');
+            if (!methodInput) {
+                methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                form.appendChild(methodInput);
             }
+            methodInput.value = 'PATCH';
+        }
+    });
 
-            // Prepare form default action
-            form.action = "{{ route('admin.catalogue.store') }}";
+    // Cancel edit
+    cancelEditBtn.addEventListener('click', function() {
+        resetForm();
+    });
 
-            // Before any submission triggered by the shared validator, ensure editor is synced and method spoofing is set
-            form.addEventListener('submit', function(e){
-                if (catalogueEditorInstance && textarea) {
-                    textarea.value = catalogueEditorInstance.getData();
-                }
+    function resetForm() {
+        editMode = false;
+        editId = null;
+        form.reset();
+        form.action = "{{ route('admin.catalogue.store') }}";
+        let methodInput = form.querySelector('input[name="_method"]');
+        if (methodInput) methodInput.remove();
+        if (catalogueEditorInstance) catalogueEditorInstance.setData('');
+        formTitle.textContent = 'Ajouter un nouveau livre';
+        submitText.textContent = 'Enregistrer le livre';
+        submitBtn.classList.remove('btn-admin-warning');
+        submitBtn.classList.add('btn-admin-primary');
+        cancelEditBtn.style.display = 'none';
+    }
 
-                // If edit mode, adapt action and method
-                if (editMode && editId) {
-                    form.action = `/admin/catalogue/${editId}`;
-                    if (!form.querySelector('input[name="_method"]')) {
-                        let methodInput = document.createElement('input');
-                        methodInput.type = 'hidden'; methodInput.name = '_method'; methodInput.value = 'PATCH';
-                        form.appendChild(methodInput);
-                    } else {
-                        form.querySelector('input[name="_method"]').value = 'PATCH';
-                    }
-                }
+    // Edit button handler
+    document.querySelectorAll('.btn-edit-catalogue').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const row = this.closest('tr');
+            if (!row) return;
+
+            editMode = true;
+            editId = row.dataset.id;
+            document.getElementById('catalogue_id').value = editId;
+            document.getElementById('titre').value = row.dataset.titre || '';
+            document.getElementById('auteur').value = row.dataset.auteur || '';
+            document.getElementById('categorie').value = row.dataset.categorie || '';
+            document.getElementById('prix').value = row.dataset.prix || '';
+            document.getElementById('quantite').value = row.dataset.quantite || '';
+            if (catalogueEditorInstance) catalogueEditorInstance.setData(row.dataset.resumer || '');
+
+            formTitle.textContent = 'Modifier le livre';
+            submitText.textContent = 'Mettre à jour';
+            submitBtn.classList.remove('btn-admin-primary');
+            submitBtn.classList.add('btn-admin-warning');
+            cancelEditBtn.style.display = '';
+
+            // Open the form
+            const collapse = bootstrap.Collapse.getOrCreateInstance(addBookCollapse);
+            collapse.show();
+
+            // Scroll to form
+            setTimeout(() => {
+                addBookCollapse.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        });
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('searchCatalogue');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('#catalogueTable tbody tr').forEach(function(row) {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
             });
+        });
+    }
 
-            cancelEditBtn.addEventListener('click', function(){
-                editMode = false; editId = null;
-                form.reset();
-                if (catalogueEditorInstance) catalogueEditorInstance.setData('');
-                submitText.textContent = 'Ajouter';
-                submitBtn.classList.remove('btn-warning');
-                submitBtn.classList.add('btn-gradient-blue');
-                cancelEditBtn.style.display = 'none';
-            });
+    // Image preview
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+    if (imageInput && imagePreview) {
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.innerHTML = `<img src="${e.target.result}" style="max-height: 100px; border-radius: 8px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+})();
 
-            // Prefill edit
-            document.querySelectorAll('.btn-edit-catalogue').forEach(function(btn){
-                btn.addEventListener('click', function(e){
-                    e.preventDefault();
-                    const row = this.closest('tr'); if (!row) return;
-                    editMode = true; editId = row.dataset.id;
-                    document.getElementById('catalogue_id').value = editId;
-                    document.getElementById('titre').value = row.dataset.titre || '';
-                    document.getElementById('auteur').value = row.dataset.auteur || '';
-                    document.getElementById('categorie').value = row.dataset.categorie || '';
-                    document.getElementById('prix').value = row.dataset.prix || '';
-                    document.getElementById('quantite').value = row.dataset.quantite || '';
-                    if (catalogueEditorInstance) catalogueEditorInstance.setData(row.dataset.resumer || '');
-                    submitText.textContent = 'Modifier';
-                    submitBtn.classList.remove('btn-gradient-blue');
-                    submitBtn.classList.add('btn-warning');
-                    cancelEditBtn.style.display = '';
-                    window.scrollTo({top: form.offsetTop - 80, behavior: 'smooth'});
-                });
-            });
+// Toggle content fields
+function toggleContentFields() {
+    const typeContenu = document.getElementById('type_contenu').value;
+    const pdfField = document.getElementById('pdf_field');
+    const audioField = document.getElementById('audio_field');
 
-            // Modal display for rows (existing behavior)
-            document.querySelectorAll('.catalogue-row').forEach(function(row){
-                row.addEventListener('click', function(e){
-                    if (e.target.closest('button')) return;
-                    document.getElementById('modalTitre').textContent = this.dataset.titre || '';
-                    document.getElementById('modalAuteur').textContent = this.dataset.auteur || '';
-                    document.getElementById('modalCategorie').textContent = this.dataset.categorie || '';
-                    document.getElementById('modalPrix').textContent = this.dataset.prixFormatted || '';
-                    document.getElementById('modalImage').src = this.dataset.image || '';
-                    document.getElementById('modalQuantite').textContent = this.dataset.quantite || '';
-                    let q = parseInt(this.dataset.quantite);
-                    let statut = (q === 0) ? 'Épuisé' : 'OK';
-                    let badgeClass = (q === 0) ? 'bg-danger text-white' : 'bg-success text-white';
-                    let blink = (q === 0) ? 'badge-blink' : '';
-                    document.getElementById('modalStatut').innerHTML = `<span class='badge ${badgeClass} ${blink}'>${statut}</span>`;
-                    if (this.dataset.pdf) {
-                        document.getElementById('modalPdfLink').innerHTML = `<a href="${this.dataset.pdf}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-file-pdf"></i> PDF</a>`;
-                    } else { document.getElementById('modalPdfLink').innerHTML = ''; }
-                    const resumer = this.dataset.resumer || '';
-                    const short = resumer.substring(0,50); const full = resumer.substring(50);
-                    document.getElementById('modalResumerShort').textContent = short;
-                    document.getElementById('modalResumerFull').textContent = full;
-                    document.getElementById('modalResumerFull').style.display = 'none';
-                    const toggleBtn = document.getElementById('modalResumerToggle');
-                    if (full.length > 0) { toggleBtn.style.display = ''; toggleBtn.textContent = 'Lire la suite'; toggleBtn.onclick = function(){ const fullSpan = document.getElementById('modalResumerFull'); if (fullSpan.style.display === 'none'){ fullSpan.style.display = ''; toggleBtn.textContent = 'Réduire'; } else { fullSpan.style.display = 'none'; toggleBtn.textContent = 'Lire la suite'; } } }
-                    else { toggleBtn.style.display = 'none'; }
-                    const modal = new bootstrap.Modal(document.getElementById('catalogueModal'));
-                    modal.show();
-                });
-            });
-        })();
-    </script>
+    if (typeContenu === 'pdf') {
+        pdfField.style.display = '';
+        audioField.style.display = 'none';
+        document.getElementById('audio').value = '';
+    } else if (typeContenu === 'audio') {
+        pdfField.style.display = 'none';
+        audioField.style.display = '';
+        document.getElementById('pdf').value = '';
+    } else {
+        pdfField.style.display = '';
+        audioField.style.display = 'none';
+    }
+}
+
+// Show book details modal
+function showBookDetails(btn) {
+    const row = btn.closest('tr');
+    if (!row) return;
+
+    document.getElementById('modalTitre').textContent = row.dataset.titre || '';
+    document.getElementById('modalAuteur').textContent = row.dataset.auteur || '';
+    document.getElementById('modalCategorie').textContent = row.dataset.categorie || '';
+    document.getElementById('modalPrix').textContent = row.dataset.prixFormatted || '';
+    document.getElementById('modalQuantite').textContent = row.dataset.quantite || '0';
+    document.getElementById('modalResumer').textContent = row.dataset.resumer || 'Aucun résumé disponible';
+
+    const img = document.getElementById('modalImage');
+    if (row.dataset.image) {
+        img.src = row.dataset.image;
+        img.style.display = '';
+    } else {
+        img.style.display = 'none';
+    }
+
+    const q = parseInt(row.dataset.quantite);
+    let statusHtml = '';
+    if (q === 0) {
+        statusHtml = '<span class="admin-badge admin-badge-danger">Épuisé</span>';
+    } else if (q <= 5) {
+        statusHtml = '<span class="admin-badge admin-badge-warning">Stock bas</span>';
+    } else {
+        statusHtml = '<span class="admin-badge admin-badge-success">Disponible</span>';
+    }
+    document.getElementById('modalStatut').innerHTML = statusHtml;
+
+    const pdfLink = document.getElementById('modalPdfLink');
+    if (row.dataset.pdf) {
+        pdfLink.innerHTML = `<a href="${row.dataset.pdf}" target="_blank" class="btn-admin btn-admin-sm btn-admin-danger"><i class="fas fa-file-pdf me-2"></i>Voir le PDF</a>`;
+    } else {
+        pdfLink.innerHTML = '';
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('bookDetailModal'));
+    modal.show();
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleContentFields();
+});
+</script>
 @endpush

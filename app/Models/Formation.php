@@ -15,7 +15,7 @@ class Formation extends Model
         'objectifs',
         'image',
         'prix',
-        'niveau',
+        'est_gratuit',
         'duree',
         'nombre_modules',
         'active',
@@ -27,6 +27,7 @@ class Formation extends Model
 
     protected $casts = [
         'active' => 'boolean',
+        'est_gratuit' => 'boolean',
         'prix' => 'decimal:2',
         'nombre_modules' => 'integer',
         'note_minimale_certification' => 'integer',

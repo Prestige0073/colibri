@@ -84,19 +84,6 @@
     </div>
     <!-- Video End -->
 
-    <!-- Section Recherche de Catalogue Start -->
-    <div class="container-fluid bg-light py-5 wow fadeIn" data-wow-delay="0.1s">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h5 class="text-primary text-uppercase">Notre Catalogue</h5>
-                <h1 class="display-5 mb-0">Recherchez Vos Livres Préférés</h1>
-            </div>
-
-            @include('partials.catalogue-search')
-        </div>
-    </div>
-    <!-- Section Recherche de Catalogue End -->
-
     <!-- Video Modal Start -->
     <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -159,158 +146,188 @@
     <!-- About End -->
 
     <!-- Catalogue Start -->
-    <div class="container-fluid py-5">
+    <div class="container-fluid py-5 home-catalogue-section">
         <div class="container">
-            <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
+            <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 600px;">
                 <p class="section-title bg-white text-center text-success px-3">Catalogue</p>
-                <h1 class="display-6 mb-4">Découvrez notre sélection de livres africains</h1>
+                <h1 class="display-6 mb-2">Découvrez notre sélection de livres africains</h1>
+                <p class="text-muted mb-4">Livres à acheter pour enrichir votre bibliothèque personnelle</p>
             </div>
 
-            <style>
-                /* Truncate résumé text responsively for catalogue cards - max 3 lines */
-                .catalogue-resumer {
-                    line-height: 1.2em; /* control line height */
-                    max-height: calc(1.2em * 3); /* fallback for non-webkit browsers: 3 lines */
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    display: -webkit-box;
-                    -webkit-box-orient: vertical;
-                    -webkit-line-clamp: 3; /* number of lines to show (webkit) */
-                    word-wrap: break-word;
-                    word-break: break-word;
-                    hyphens: auto;
-                    text-align: justify;
-                    flex: 1 1 auto;
-                }
-
-                /* Slight adjustment for icon alignment */
-                .catalogue-resumer-icon {
-                    margin-top: 4px;
-                    flex: 0 0 auto;
-                }
-
-                /* Ensure still 3 lines on very small screens */
-                @media (max-width: 576px) {
-                    .catalogue-resumer {
-                        -webkit-line-clamp: 3;
-                        max-height: calc(1.2em * 3);
-                    }
-                }
-            </style>
-
-            <div class="row g-4">
+            <!-- Grille des produits moderne -->
+            <div class="home-products-grid">
                 @foreach ($Catalogues as $catalogue)
                     @if ($catalogue->type_categorie === 'catalogue')
-                        <div class="col-md-6 col-lg-4 col-xl-4 wow fadeIn" data-wow-delay="0.1s">
-                            <div class="catalogue-item card h-100 border-0 shadow-lg"
-                                style="background: transparent; backdrop-filter: blur(6px); border-top-left-radius: 12px; border-top-right-radius: 12px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
-                                <img class="card-img-top" src="{{ $catalogue->image ? asset($catalogue->image) : asset('img/default-book.jpg') }}"
-                                    alt="{{ $catalogue->titre ?? 'Livre' }}"
-                                    style="border-top-left-radius: 12px; border-top-right-radius: 12px; width:100%; height:240px; object-fit:cover;">
-                                <div class="card-body d-flex flex-column justify-content-between"
-                                    style="padding: 1.2rem;">
-                                    <h5 class="card-title mb-2 d-flex align-items-center"
-                                        style="color: #212529; font-weight: 700; font-size: 1.15rem;">
-                                        <i class="fa fa-feather-alt"
-                                            style="color: #000000ff; margin-right: 0.5em;"></i>{{ $catalogue->titre ?? 'Sans titre' }}
-                                    </h5>
-                                    <p class="mb-1 d-flex align-items-center" style="color: #607d8b; font-size: 1rem;">
-                                        <i class="fa fa-user" style="color: #000000ff; margin-right: 0.4em;"></i>
-                                        {{ $catalogue->auteur ?? 'Auteur inconnu' }} &bull; {{ $catalogue->categorie ?? 'Non catégorisé' }}
-                                    </p>
-                                    <hr style="margin: 0.5rem 0; padding: 0;">
-                                    <p class="mb-2 d-flex align-items-start"
-                                        style="color: #6d838fff; font-size: 1.05rem;">
-                                        <i class="fa fa-star catalogue-resumer-icon" style="color: #FFAC00; margin-right: 0.5em;"></i>
-                                        <span class="catalogue-resumer">
-                                            {{ Str::limit(strip_tags($catalogue->resumer ?? 'Aucune description disponible'), 300) }}
+                        <div class="home-product-card wow fadeIn" data-wow-delay="0.1s">
+                            <!-- Image Section -->
+                            <div class="home-product-image">
+                                <img src="{{ $catalogue->image ? asset($catalogue->image) : asset('img/default-book.jpg') }}"
+                                     alt="{{ $catalogue->titre ?? 'Livre' }}"
+                                     loading="lazy">
+
+                                <!-- Badges -->
+                                <div class="home-product-badges">
+                                    @if (($catalogue->quantite ?? 0) > 0)
+                                        <span class="home-badge-stock in-stock">
+                                            <i class="fa fa-check me-1"></i>En stock
                                         </span>
-                                    </p>
-                                    <div class="mb-3 d-flex justify-content-between align-items-center">
-                                        <span class="badge"
-                                            style="background: #ffe7e7ff; color: #b30000ff; font-size: 1.1rem; padding: 0.25em 0.5em; border-radius: 8px;">
-                                            <i class="fa fa-tag me-2" aria-hidden="true"></i>Prix&nbsp;:
-                                            {{ $catalogue->prix ?? 0 }}&nbsp;FCFA
+                                    @else
+                                        <span class="home-badge-stock out-of-stock">
+                                            <i class="fa fa-times me-1"></i>Épuisé
                                         </span>
-                                        @if (($catalogue->quantite ?? 0) > 0)
-                                            <span class="badge"
-                                                style="background: #198754; color: #fff; font-size: 0.8rem; padding: 0.25em 0.5em; border-radius: 8px;">En
-                                                stock</span>
-                                        @else
-                                            <span class="badge"
-                                                style="background: #e53935; color: #fff; font-size: 0.8rem; padding: 0.25em 0.5em; border-radius: 8px;">Pas
-                                                en stock</span>
-                                        @endif
-                                    </div>
-                                    <form method="POST" action="{{ route('panier.ajouter') }}"
-                                        onsubmit="return checkStock{{ $catalogue->id }}(event)">
+                                    @endif
+
+                                    @if($catalogue->categorie)
+                                        <span class="home-badge-category">{{ $catalogue->categorie }}</span>
+                                    @endif
+                                </div>
+
+                                <!-- Badge nouveau -->
+                                @if($catalogue->created_at && $catalogue->created_at->gt(now()->subDays(7)))
+                                    <span class="home-badge-new">
+                                        <i class="fa fa-star me-1"></i>Nouveau
+                                    </span>
+                                @endif
+
+                                <!-- Overlay aperçu rapide -->
+                                <div class="home-product-overlay">
+                                    <button type="button" class="home-quick-view-btn" data-bs-toggle="modal" data-bs-target="#homeCatalogueModal{{ $catalogue->id }}">
+                                        <i class="fa fa-eye me-2"></i>Aperçu rapide
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Content Section -->
+                            <div class="home-product-content">
+                                <h3 class="home-product-title">
+                                    <i class="fa fa-book home-title-icon"></i>
+                                    {{ $catalogue->titre ?? 'Sans titre' }}
+                                </h3>
+
+                                <div class="home-product-author">
+                                    <i class="fa fa-pen-fancy"></i>
+                                    <span>{{ $catalogue->auteur ?? 'Auteur inconnu' }}</span>
+                                </div>
+
+                                @if($catalogue->categorie)
+                                <div class="home-product-category-info">
+                                    <i class="fa fa-tag"></i>
+                                    <span>{{ $catalogue->categorie }}</span>
+                                </div>
+                                @endif
+
+                                <p class="home-product-description">
+                                    <i class="fa fa-align-left home-desc-icon"></i>
+                                    {{ Str::limit(strip_tags($catalogue->resumer ?? 'Aucune description disponible'), 80) }}
+                                </p>
+
+                                <!-- Prix -->
+                                <div class="home-product-price-section">
+                                    <span class="home-product-price">
+                                        <i class="fa fa-coins home-price-icon"></i>
+                                        {{ number_format($catalogue->prix ?? 0, 0, ',', ' ') }} FCFA
+                                    </span>
+                                    @if (($catalogue->quantite ?? 0) > 0 && ($catalogue->quantite ?? 0) <= 5)
+                                        <span class="home-stock-warning">
+                                            <i class="fa fa-exclamation-triangle"></i> Plus que {{ $catalogue->quantite }}!
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="home-product-actions">
+                                    <form method="POST" action="{{ route('panier.ajouter') }}" class="home-add-form home-ajax-cart-form">
                                         @csrf
                                         <input type="hidden" name="catalogue_id" value="{{ $catalogue->id }}">
-                                        <div class="mb-2 d-flex align-items-center">
-                                            <label for="quantite-{{ $catalogue->id }}"
-                                                class="form-label me-2 mb-0">Quantité :</label>
-                                            <div class="input-group" style="width: 90px;">
-                                                <button type="button" class="btn btn-outline-secondary p-1"
-                                                    style="width:28px; height:28px;"
-                                                    onclick="decrementQuantite{{ $catalogue->id }}()">
-                                                    <i class="fa fa-minus"></i>
-                                                </button>
-                                                <input type="number" min="1" max="{{ $catalogue->quantite ?? 0 }}"
-                                                    name="quantite" id="quantite-{{ $catalogue->id }}"
-                                                    class="form-control text-center" value="1"
-                                                    style="width: 34px; height:28px; padding:0; font-size:1rem;">
-                                                <button type="button" class="btn btn-outline-secondary p-1"
-                                                    style="width:28px; height:28px;"
-                                                    onclick="incrementQuantite{{ $catalogue->id }}()">
-                                                    <i class="fa fa-plus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <script>
-                                            function decrementQuantite{{ $catalogue->id }}() {
-                                                var input = document.getElementById('quantite-{{ $catalogue->id }}');
-                                                var min = parseInt(input.min);
-                                                var val = parseInt(input.value);
-                                                if (val > min) input.value = val - 1;
-                                            }
-
-                                            function incrementQuantite{{ $catalogue->id }}() {
-                                                var input = document.getElementById('quantite-{{ $catalogue->id }}');
-                                                var max = parseInt(input.max);
-                                                var val = parseInt(input.value);
-                                                if (val < max) input.value = val + 1;
-                                            }
-                                        </script>
-                                        <button type="submit" class="btn w-100 catalogue-buy-btn"
-                                            style="background: #198754; color: #ffffffff; border-radius: 0; font-weight: 600; font-size: 1.05rem; border: none; transition: background 0.2s;"
-                                            @if (($catalogue->quantite ?? 0) == 0) disabled @endif>
-                                            <i class="fa fa-shopping-cart me-2"></i>Acheter
+                                        <input type="hidden" name="quantite" value="1">
+                                        <button type="submit" class="home-btn-buy" @if(($catalogue->quantite ?? 0) == 0) disabled @endif>
+                                            <i class="fa fa-shopping-cart"></i>
+                                            <span>Ajouter au panier</span>
                                         </button>
                                     </form>
-                                    <script>
-                                        function checkStock{{ $catalogue->id }}(e) {
-                                            if ({{ $catalogue->quantite ?? 0 }} == 0) {
-                                                e.preventDefault();
-                                                alert('Ce livre n\'est pas en stock. Veuillez choisir un autre article.');
-                                                return false;
-                                            }
-                                            return true;
-                                        }
-                                    </script>
-                                    <style>
-                                        .catalogue-buy-btn:hover {
-                                            background: #00a008ff !important;
-                                            color: #fff !important;
-                                        }
-                                    </style>
                                 </div>
                             </div>
                         </div>
                     @endif
                 @endforeach
             </div>
+
+            <!-- Bouton voir plus -->
+            <div class="text-center mt-4 wow fadeIn" data-wow-delay="0.3s">
+                <a href="{{ route('catalogue.index') }}" class="btn btn-success btn-lg px-5">
+                    <i class="fa fa-book me-2"></i>Voir tout le catalogue
+                    <i class="fa fa-arrow-right ms-2"></i>
+                </a>
+            </div>
         </div>
     </div>
+
+    <!-- Modals Catalogue - Aperçu rapide -->
+    @foreach ($Catalogues as $catalogue)
+        @if ($catalogue->type_categorie === 'catalogue')
+            <div class="modal fade" id="homeCatalogueModal{{ $catalogue->id }}" tabindex="-1" aria-labelledby="homeCatalogueModalLabel{{ $catalogue->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content home-modal-content">
+                        <div class="modal-header home-modal-header">
+                            <h5 class="modal-title" id="homeCatalogueModalLabel{{ $catalogue->id }}">
+                                <i class="fa fa-book me-2"></i>{{ $catalogue->titre ?? 'Sans titre' }}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-4">
+                                <div class="col-md-4">
+                                    <img src="{{ $catalogue->image ? asset($catalogue->image) : asset('img/default-book.jpg') }}"
+                                         alt="{{ $catalogue->titre }}"
+                                         class="img-fluid rounded home-modal-image">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="home-modal-info">
+                                        <p class="home-modal-author">
+                                            <i class="fa fa-pen-fancy me-2 text-warning"></i>
+                                            <strong>Auteur:</strong> {{ $catalogue->auteur ?? 'Inconnu' }}
+                                        </p>
+                                        <p class="home-modal-category">
+                                            <i class="fa fa-tag me-2 text-info"></i>
+                                            <strong>Catégorie:</strong> {{ $catalogue->categorie ?? 'Non classé' }}
+                                        </p>
+                                        <p class="home-modal-price">
+                                            <i class="fa fa-money-bill me-2 text-success"></i>
+                                            <strong>Prix:</strong>
+                                            <span class="badge bg-success fs-6">{{ number_format($catalogue->prix ?? 0, 0, ',', ' ') }} FCFA</span>
+                                        </p>
+                                    </div>
+                                    <hr>
+                                    <h6><i class="fa fa-align-left me-2"></i>Résumé</h6>
+                                    <div class="home-modal-resume">
+                                        {!! $catalogue->resumer ?? 'Aucune description disponible pour ce livre.' !!}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fa fa-times me-2"></i>Fermer
+                            </button>
+                            <a href="{{ route('catalogue.show', $catalogue->id) }}" class="btn btn-outline-success">
+                                <i class="fa fa-info-circle me-2"></i>Voir détails
+                            </a>
+                            @if(($catalogue->quantite ?? 0) > 0)
+                                <form method="POST" action="{{ route('panier.ajouter') }}" class="d-inline home-ajax-cart-form">
+                                    @csrf
+                                    <input type="hidden" name="catalogue_id" value="{{ $catalogue->id }}">
+                                    <input type="hidden" name="quantite" value="1">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fa fa-shopping-cart me-2"></i>Ajouter au panier
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
     <!-- Catalogue End -->
 
     <!-- Features Start -->
@@ -323,48 +340,48 @@
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.1s">
                                 <div class="text-center bg-success py-5 px-4 h-100">
                                     <i class="fa fa-users fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">10</h1>
-                                    <span class="text-white">Membres de l’équipe</span>
+                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">{{ $totalMembres ?? 11 }}</h1>
+                                    <span class="text-white">Membres de l'équipe</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.3s">
                                 <div class="text-center bg-secondary py-5 px-4 h-100">
-                                    <i class="fa fa-award fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">0</h1>
-                                    <span class="text-white">Prix et distinctions</span>
+                                    <i class="fa fa-book fa-3x text-white mb-3"></i>
+                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">{{ $totalLivres ?? 0 }}</h1>
+                                    <span class="text-white">Livres au catalogue</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.5s">
                                 <div class="text-center bg-secondary py-5 px-4 h-100">
-                                    <i class="fa fa-list-check fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">0</h1>
-                                    <span class="text-white">Projets réalisés</span>
+                                    <i class="fa fa-graduation-cap fa-3x text-white mb-3"></i>
+                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">{{ $totalFormations ?? 0 }}</h1>
+                                    <span class="text-white">Formations disponibles</span>
                                 </div>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.7s">
                                 <div class="text-center bg-success py-5 px-4 h-100">
-                                    <i class="fa fa-comments fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">0</h1>
-                                    <span class="text-white">Avis des membres</span>
+                                    <i class="fa fa-user-graduate fa-3x text-white mb-3"></i>
+                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">{{ $totalUtilisateurs ?? 0 }}</h1>
+                                    <span class="text-white">Utilisateurs inscrits</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <p class="section-title bg-white text-start text-success pe-3">Pourquoi nous choisir ?</p>
-                    <p class="mb-4 wow fadeIn" data-wow-delay="0.3s">Pour la qualité de nos formations, la force de notre
-                        réseau et notre engagement pour la littérature africaine. Rejoignez une communauté dynamique et
-                        solidaire !</p>
+                    <h1 class="display-6 mb-4 wow fadeIn" data-wow-delay="0.2s">Pourquoi choisir notre plateforme ?</h1>
+                    <p class="mb-4 wow fadeIn" data-wow-delay="0.3s">Des formations certifiantes, un catalogue riche de
+                        livres africains, un accompagnement personnalisé, et une vision engagée pour la démocratisation de
+                        la culture du livre.</p>
                     <p class="text-dark wow fadeIn" data-wow-delay="0.4s"><i
-                            class="fa fa-check text-success me-2"></i>Formations certifiantes</p>
+                            class="fa fa-check text-success me-2"></i>Formations et certifications reconnues</p>
                     <p class="text-dark wow fadeIn" data-wow-delay="0.5s"><i
-                            class="fa fa-check text-success me-2"></i>Réseau panafricain</p>
+                            class="fa fa-check text-success me-2"></i>Accès à des livres africains et béninois</p>
                     <p class="text-dark wow fadeIn" data-wow-delay="0.6s"><i
-                            class="fa fa-check text-success me-2"></i>Accompagnement personnalisé</p>
+                            class="fa fa-check text-success me-2"></i>Accompagnement et évolution professionnelle</p>
                     <div class="d-flex mt-4 wow fadeIn" data-wow-delay="0.7s">
-                        <a class="btn btn-success py-3 px-4 me-3" href="#don">Faire un don</a>
-                        <a class="btn btn-secondary py-3 px-4" href="#rejoindre">Nous rejoindre</a>
+                        <a class="btn btn-success py-3 px-4 me-3" href="{{ route('formation.modules') }}">Voir les formations</a>
+                        <a class="btn btn-secondary py-3 px-4" href="{{ route('catalogue.index') }}">Accéder au catalogue</a>
                     </div>
                 </div>
             </div>
@@ -373,126 +390,205 @@
     <!-- Features End -->
 
     <!-- Bibliothèque Start -->
-    <div class="container-fluid py-5">
+    <div class="container-fluid py-5 home-bibliotheque-section">
         <div class="container">
-            <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
-                <p class="section-title bg-white text-center text-success px-3">Bibliothèque</p>
-                <h1 class="display-6 mb-4">Empruntez nos livres</h1>
+            <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 600px;">
+                <p class="section-title bg-white text-center text-primary px-3">Bibliothèque</p>
+                <h1 class="display-6 mb-2">Empruntez nos livres</h1>
+                <p class="text-muted mb-4">Accédez gratuitement à notre collection - 14 jours de prêt</p>
             </div>
 
-            <style>
-                /* Truncate résumé text to at most 3 lines across all viewports */
-                .livre-resumer {
-                    line-height: 1.2em; /* control line height */
-                    max-height: calc(1.2em * 3); /* fallback for non-webkit browsers: 3 lines */
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    display: -webkit-box;
-                    -webkit-box-orient: vertical;
-                    -webkit-line-clamp: 3; /* number of lines to show (webkit) */
-                    word-wrap: break-word;
-                    word-break: break-word;
-                    hyphens: auto;
-                    text-align: justify;
-                }
-
-                /* Slight adjustment for icon alignment */
-                .livre-resumer-icon {
-                    margin-top: 4px;
-                    flex: 0 0 auto;
-                }
-            </style>
-
-            <div class="row g-4">
+            <!-- Grille des emprunts moderne -->
+            <div class="home-products-grid home-emprunts-grid">
                 @foreach ($Bibliotheques as $livre)
                     @if ($livre->type_categorie === 'emprunt')
-                        <div class="col-md-6 col-lg-4 col-xl-4 wow fadeIn" data-wow-delay="0.1s">
-                            <div class="catalogue-item card h-100 border-0 shadow-lg"
-                                style="background: transparent; backdrop-filter: blur(6px); border-top-left-radius: 12px; border-top-right-radius: 12px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
-                                <img class="card-img-top" src="{{ asset($livre->image) }}" alt="{{ $livre->titre }}"
-                                    style="width: 100%; height: 280px; object-fit: cover; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                                <div class="card-body d-flex flex-column justify-content-between"
-                                    style="padding: 1.2rem;">
-                                    <h5 class="card-title mb-2 d-flex align-items-center"
-                                        style="color: #212529; font-weight: 700; font-size: 1.15rem;">
-                                        <i class="fa fa-feather-alt"
-                                            style="color: #000000ff; margin-right: 0.5em;"></i>{{ $livre->titre }}
-                                    </h5>
-                                    <p class="mb-1 d-flex align-items-center" style="color: #607d8b; font-size: 1rem;">
-                                        <i class="fa fa-user" style="color: #000000ff; margin-right: 0.4em;"></i>
-                                        {{ $livre->auteur }} &bull; {{ $livre->categorie }}
-                                    </p>
-                                    <hr style="margin: 0.5rem 0; padding: 0;">
-                                    <p class="mb-2 d-flex" style="color: #6d838fff; font-size: 1.05rem;">
-                                        <i class="fa fa-star livre-resumer-icon"
-                                            style="color: #FFAC00; margin-right: 0.5em;"></i>
-                                        <span class="livre-resumer" style="display:block; text-align: justify; flex:1;">
-                                            {{ Str::limit(strip_tags($livre->resumer), 300) }}
-                                        </span>
-                                    </p>
-                                    <div class="mb-3">
-                                        <span class="badge"
-                                            style="background: #198754; color: #fff; font-size: 0.8rem; padding: 0.25em 0.5em; border-radius: 8px;">
-                                            {{ $livre->statut ?? 'Disponible' }}
-                                        </span>
-                                    </div>
-                                    <form method="POST" action="{{ route('bibliotheque.emprunter') }}">
-                                        @csrf
-                                        <input type="hidden" name="livre_id" value="{{ $livre->id }}">
-                                        <div class="mb-2 d-flex align-items-center">
-                                            <label for="quantite-emprunt-{{ $livre->id }}"
-                                                class="form-label me-2 mb-0">Quantité :</label>
-                                            <div class="input-group" style="width: 90px;">
-                                                <button type="button" class="btn btn-outline-secondary p-1"
-                                                    style="width:28px; height:28px;"
-                                                    onclick="decrementQuantiteEmprunt{{ $livre->id }}()">
-                                                    <i class="fa fa-minus"></i>
-                                                </button>
-                                                <input type="number" min="1" max="{{ $livre->quantite }}"
-                                                    name="quantite" id="quantite-emprunt-{{ $livre->id }}"
-                                                    class="form-control text-center" value="1"
-                                                    style="width: 34px; height:28px; padding:0; font-size:1rem;">
-                                                <button type="button" class="btn btn-outline-secondary p-1"
-                                                    style="width:28px; height:28px;"
-                                                    onclick="incrementQuantiteEmprunt{{ $livre->id }}()">
-                                                    <i class="fa fa-plus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <script>
-                                            function decrementQuantiteEmprunt{{ $livre->id }}() {
-                                                var input = document.getElementById('quantite-emprunt-{{ $livre->id }}');
-                                                var min = parseInt(input.min);
-                                                var val = parseInt(input.value);
-                                                if (val > min) input.value = val - 1;
-                                            }
+                        <div class="home-product-card home-emprunt-card wow fadeIn" data-wow-delay="0.1s">
+                            <!-- Image Section -->
+                            <div class="home-product-image">
+                                <img src="{{ $livre->image ? asset($livre->image) : asset('img/default-book.jpg') }}"
+                                     alt="{{ $livre->titre ?? 'Livre' }}"
+                                     loading="lazy">
 
-                                            function incrementQuantiteEmprunt{{ $livre->id }}() {
-                                                var input = document.getElementById('quantite-emprunt-{{ $livre->id }}');
-                                                var max = parseInt(input.max);
-                                                var val = parseInt(input.value);
-                                                if (val < max) input.value = val + 1;
-                                            }
-                                        </script>
-                                        <button type="submit" class="btn w-100 catalogue-buy-btn"
-                                            style="background: #198754; color: #ffffffff; border-radius: 0; font-weight: 600; font-size: 1.05rem; border: none; transition: background 0.2s;">
-                                            <i class="fa fa-book-reader me-2"></i>Emprunter
-                                        </button>
-                                    </form>
-                                    <style>
-                                        .catalogue-buy-btn:hover {
-                                            background: #00a008ff !important;
-                                            color: #fff !important;
-                                        }
-                                    </style>
+                                <!-- Badges -->
+                                <div class="home-product-badges">
+                                    @if (($livre->quantite ?? 0) > 0)
+                                        <span class="home-badge-stock in-stock emprunt-stock">
+                                            <i class="fa fa-check me-1"></i>Disponible
+                                        </span>
+                                    @else
+                                        <span class="home-badge-stock out-of-stock">
+                                            <i class="fa fa-times me-1"></i>Épuisé
+                                        </span>
+                                    @endif
+
+                                    @if($livre->categorie)
+                                        <span class="home-badge-category">{{ $livre->categorie }}</span>
+                                    @endif
+                                </div>
+
+                                <!-- Badge nouveau -->
+                                @if($livre->created_at && $livre->created_at->gt(now()->subDays(7)))
+                                    <span class="home-badge-new emprunt-new">
+                                        <i class="fa fa-star me-1"></i>Nouveau
+                                    </span>
+                                @endif
+
+                                <!-- Overlay aperçu rapide -->
+                                <div class="home-product-overlay home-emprunt-overlay">
+                                    <button type="button" class="home-quick-view-btn home-emprunt-quick-btn" data-bs-toggle="modal" data-bs-target="#homeEmpruntModal{{ $livre->id }}">
+                                        <i class="fa fa-eye me-2"></i>Aperçu rapide
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Content Section -->
+                            <div class="home-product-content">
+                                <h3 class="home-product-title">
+                                    <i class="fa fa-book-reader home-title-icon home-title-icon-blue"></i>
+                                    {{ $livre->titre ?? 'Sans titre' }}
+                                </h3>
+
+                                <div class="home-product-author">
+                                    <i class="fa fa-pen-fancy"></i>
+                                    <span>{{ $livre->auteur ?? 'Auteur inconnu' }}</span>
+                                </div>
+
+                                @if($livre->categorie)
+                                <div class="home-product-category-info home-category-blue">
+                                    <i class="fa fa-tag"></i>
+                                    <span>{{ $livre->categorie }}</span>
+                                </div>
+                                @endif
+
+                                <p class="home-product-description">
+                                    <i class="fa fa-align-left home-desc-icon"></i>
+                                    {{ Str::limit(strip_tags($livre->resumer ?? 'Aucune description disponible'), 80) }}
+                                </p>
+
+                                <!-- Info emprunt -->
+                                <div class="home-emprunt-info">
+                                    <span class="home-emprunt-duration">
+                                        <i class="fa fa-clock"></i> 14 jours
+                                    </span>
+                                    @if (($livre->quantite ?? 0) > 0)
+                                        <span class="home-emprunt-stock">
+                                            <i class="fa fa-box"></i> {{ $livre->quantite }} dispo.
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="home-product-actions">
+                                    @auth
+                                        @if(($livre->quantite ?? 0) > 0)
+                                            <form method="POST" action="{{ route('emprunts.demander') }}" class="home-add-form">
+                                                @csrf
+                                                <input type="hidden" name="livre_id" value="{{ $livre->id }}">
+                                                <button type="submit" class="home-btn-borrow">
+                                                    <i class="fa fa-hand-holding"></i>
+                                                    <span>Emprunter</span>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <button class="home-btn-borrow" disabled>
+                                                <i class="fa fa-ban"></i>
+                                                <span>Indisponible</span>
+                                            </button>
+                                        @endif
+                                    @else
+                                        <a href="{{ route('login') }}" class="home-btn-borrow home-btn-login">
+                                            <i class="fa fa-sign-in-alt"></i>
+                                            <span>Connexion requise</span>
+                                        </a>
+                                    @endauth
                                 </div>
                             </div>
                         </div>
                     @endif
                 @endforeach
             </div>
+
+            <!-- Bouton voir plus -->
+            <div class="text-center mt-4 wow fadeIn" data-wow-delay="0.3s">
+                <a href="{{ route('catalogue.acheter') }}" class="btn btn-primary btn-lg px-5">
+                    <i class="fa fa-book-reader me-2"></i>Voir tous les emprunts
+                    <i class="fa fa-arrow-right ms-2"></i>
+                </a>
+            </div>
         </div>
     </div>
+
+    <!-- Modals Emprunts - Aperçu rapide -->
+    @foreach ($Bibliotheques as $livre)
+        @if ($livre->type_categorie === 'emprunt')
+            <div class="modal fade" id="homeEmpruntModal{{ $livre->id }}" tabindex="-1" aria-labelledby="homeEmpruntModalLabel{{ $livre->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content home-modal-content home-emprunt-modal">
+                        <div class="modal-header home-modal-header home-emprunt-modal-header">
+                            <h5 class="modal-title" id="homeEmpruntModalLabel{{ $livre->id }}">
+                                <i class="fa fa-book-reader me-2"></i>{{ $livre->titre ?? 'Sans titre' }}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-4">
+                                <div class="col-md-4">
+                                    <img src="{{ $livre->image ? asset($livre->image) : asset('img/default-book.jpg') }}"
+                                         alt="{{ $livre->titre }}"
+                                         class="img-fluid rounded home-modal-image">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="home-modal-info">
+                                        <p class="home-modal-author">
+                                            <i class="fa fa-pen-fancy me-2 text-warning"></i>
+                                            <strong>Auteur:</strong> {{ $livre->auteur ?? 'Inconnu' }}
+                                        </p>
+                                        <p class="home-modal-category">
+                                            <i class="fa fa-tag me-2 text-info"></i>
+                                            <strong>Catégorie:</strong> {{ $livre->categorie ?? 'Non classé' }}
+                                        </p>
+                                        <p class="home-modal-duration">
+                                            <i class="fa fa-clock me-2 text-primary"></i>
+                                            <strong>Durée d'emprunt:</strong>
+                                            <span class="badge bg-primary">14 jours</span>
+                                        </p>
+                                    </div>
+                                    <hr>
+                                    <h6><i class="fa fa-align-left me-2"></i>Résumé</h6>
+                                    <div class="home-modal-resume">
+                                        {!! $livre->resumer ?? 'Aucune description disponible pour ce livre.' !!}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fa fa-times me-2"></i>Fermer
+                            </button>
+                            <a href="{{ route('catalogue.show', $livre->id) }}" class="btn btn-outline-primary">
+                                <i class="fa fa-info-circle me-2"></i>Voir détails
+                            </a>
+                            @auth
+                                @if(($livre->quantite ?? 0) > 0)
+                                    <form method="POST" action="{{ route('emprunts.demander') }}" class="d-inline">
+                                        @csrf
+                                        <input type="hidden" name="livre_id" value="{{ $livre->id }}">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-hand-holding me-2"></i>Emprunter ce livre
+                                        </button>
+                                    </form>
+                                @endif
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-warning">
+                                    <i class="fa fa-sign-in-alt me-2"></i>Connexion requise
+                                </a>
+                            @endauth
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
     <!-- Bibliothèque End -->
 
     <!-- Testimonials Start -->
@@ -749,7 +845,628 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/catalogue-search.css') }}">
+<style>
+    /* ============================================
+       HOME PAGE - MODERN PRODUCT CARDS
+       ============================================ */
+
+    /* Variables CSS */
+    :root {
+        --home-primary-green: #1e7a2f;
+        --home-primary-dark: #0b5e34;
+        --home-accent-gold: #d4a853;
+        --home-accent-orange: #e67e22;
+        --home-accent-blue: #3498db;
+        --home-text-dark: #2c3e50;
+        --home-text-muted: #6c7a89;
+        --home-bg-cream: #faf8f5;
+        --home-shadow-soft: 0 4px 20px rgba(0,0,0,0.08);
+        --home-shadow-hover: 0 12px 35px rgba(30,122,47,0.15);
+        --home-radius-lg: 16px;
+        --home-radius-md: 12px;
+        --home-radius-sm: 8px;
+        --home-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Product Grid */
+    .home-products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* Product Card */
+    .home-product-card {
+        background: white;
+        border-radius: var(--home-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--home-shadow-soft);
+        transition: var(--home-transition);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .home-product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--home-shadow-hover);
+    }
+
+    /* Image container */
+    .home-product-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e8ecef 100%);
+    }
+
+    .home-product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .home-product-card:hover .home-product-image img {
+        transform: scale(1.08);
+    }
+
+    /* Overlay aperçu rapide */
+    .home-product-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(30, 122, 47, 0.95), rgba(30, 122, 47, 0.7));
+        padding: 1.5rem;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .home-product-card:hover .home-product-overlay {
+        transform: translateY(0);
+    }
+
+    .home-quick-view-btn {
+        background: white;
+        color: var(--home-primary-green);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .home-quick-view-btn:hover {
+        background: var(--home-primary-dark);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Overlay bleu pour emprunts */
+    .home-emprunt-overlay {
+        background: linear-gradient(to top, rgba(52, 152, 219, 0.95), rgba(52, 152, 219, 0.7));
+    }
+
+    .home-emprunt-quick-btn {
+        color: var(--home-accent-blue);
+    }
+
+    .home-emprunt-quick-btn:hover {
+        background: #2980b9;
+        color: white;
+    }
+
+    /* Badges */
+    .home-product-badges {
+        position: absolute;
+        top: 0.75rem;
+        left: 0.75rem;
+        right: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        z-index: 2;
+    }
+
+    .home-badge-stock {
+        padding: 0.35rem 0.7rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .home-badge-stock.in-stock {
+        background: linear-gradient(135deg, #27ae60, #1e8449);
+        color: white;
+        box-shadow: 0 2px 8px rgba(39,174,96,0.35);
+    }
+
+    .home-badge-stock.out-of-stock {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+    }
+
+    .home-badge-category {
+        padding: 0.35rem 0.7rem;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(4px);
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: var(--home-text-dark);
+    }
+
+    .home-badge-new {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        padding: 0.35rem 0.7rem;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        z-index: 2;
+        box-shadow: 0 2px 10px rgba(245, 87, 108, 0.4);
+    }
+
+    /* Product content */
+    .home-product-content {
+        padding: 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .home-product-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--home-text-dark);
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .home-product-title span,
+    .home-product-title:not(:has(i)) {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .home-title-icon {
+        color: var(--home-primary-green);
+        font-size: 0.9rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .home-title-icon-blue {
+        color: var(--home-accent-blue);
+    }
+
+    .home-product-author {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        color: var(--home-text-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    .home-product-author i {
+        color: var(--home-accent-gold);
+        font-size: 0.75rem;
+    }
+
+    .home-product-category-info {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        color: var(--home-primary-green);
+        margin-bottom: 0.75rem;
+        font-weight: 500;
+    }
+
+    .home-product-category-info i {
+        font-size: 0.7rem;
+    }
+
+    .home-category-blue {
+        color: var(--home-accent-blue);
+    }
+
+    .home-product-description {
+        font-size: 0.8rem;
+        color: var(--home-text-muted);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.4rem;
+        flex: 1;
+    }
+
+    .home-desc-icon {
+        color: #bdc3c7;
+        font-size: 0.7rem;
+        flex-shrink: 0;
+        margin-top: 3px;
+    }
+
+    .home-price-icon {
+        color: var(--home-accent-gold);
+        margin-right: 0.25rem;
+    }
+
+    /* Price section */
+    .home-product-price-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.75rem;
+        border-top: 1px solid #f0f0f0;
+        margin-bottom: 1rem;
+    }
+
+    .home-product-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--home-primary-green);
+    }
+
+    .home-stock-warning {
+        font-size: 0.75rem;
+        color: var(--home-accent-orange);
+        font-weight: 600;
+    }
+
+    /* Buy button */
+    .home-product-actions {
+        margin-top: auto;
+    }
+
+    .home-btn-buy {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        background: linear-gradient(135deg, var(--home-primary-green) 0%, var(--home-primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: var(--home-radius-md);
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: var(--home-transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .home-btn-buy::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: 0.5s;
+    }
+
+    .home-btn-buy:hover::before {
+        left: 100%;
+    }
+
+    .home-btn-buy:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(30,122,47,0.35);
+        color: white;
+    }
+
+    .home-btn-buy:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* ============================================
+       EMPRUNTS SECTION (Blue theme)
+       ============================================ */
+    .home-bibliotheque-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .home-emprunt-card .home-badge-stock.emprunt-stock {
+        background: linear-gradient(135deg, var(--home-accent-blue), #2980b9);
+    }
+
+    .home-emprunt-card .home-badge-new.emprunt-new {
+        background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+    }
+
+    .home-emprunt-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.75rem;
+        border-top: 1px solid #f0f0f0;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+        color: var(--home-text-muted);
+    }
+
+    .home-emprunt-duration,
+    .home-emprunt-stock {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .home-emprunt-duration i {
+        color: var(--home-accent-blue);
+    }
+
+    .home-emprunt-stock i {
+        color: #27ae60;
+    }
+
+    .home-btn-borrow {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        background: linear-gradient(135deg, var(--home-accent-blue) 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        border-radius: var(--home-radius-md);
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: var(--home-transition);
+        text-decoration: none;
+    }
+
+    .home-btn-borrow:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(52,152,219,0.35);
+        color: white;
+    }
+
+    .home-btn-borrow:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .home-btn-borrow.home-btn-login {
+        background: linear-gradient(135deg, var(--home-accent-gold) 0%, #c89530 100%);
+    }
+
+    .home-btn-borrow.home-btn-login:hover {
+        box-shadow: 0 6px 20px rgba(212,168,83,0.35);
+    }
+
+    /* ============================================
+       HOME PAGE - MODALS STYLES
+       ============================================ */
+    .home-modal-content {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .home-modal-header {
+        background: linear-gradient(135deg, var(--home-primary-green) 0%, var(--home-primary-dark) 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+
+    .home-modal-header .modal-title {
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .home-emprunt-modal-header {
+        background: linear-gradient(135deg, var(--home-accent-blue) 0%, #2980b9 100%);
+    }
+
+    .home-modal-image {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .home-modal-info p {
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .home-modal-resume {
+        font-size: 0.9rem;
+        line-height: 1.7;
+        color: #333 !important;
+        max-height: 150px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .home-modal-resume p,
+    .home-modal-resume span,
+    .home-modal-resume div,
+    .home-modal-resume * {
+        color: #333 !important;
+        background: transparent !important;
+    }
+
+    .home-modal-resume::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .home-modal-resume::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .home-modal-resume::-webkit-scrollbar-thumb {
+        background: var(--home-primary-green);
+        border-radius: 4px;
+    }
+
+    .home-emprunt-modal .home-modal-resume::-webkit-scrollbar-thumb {
+        background: var(--home-accent-blue);
+    }
+
+    .modal-footer {
+        border-top: 1px solid #eee;
+        padding: 1rem 1.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .home-products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .home-product-image {
+            height: 180px;
+        }
+
+        .home-product-content {
+            padding: 1rem;
+        }
+
+        .home-product-title {
+            font-size: 0.95rem;
+        }
+
+        .home-product-price {
+            font-size: 1rem;
+        }
+    }
+
+    /* Animation */
+    @keyframes homeSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .home-product-card {
+        animation: homeSlideIn 0.5s ease forwards;
+    }
+
+    /* ============================================
+       Search Home Box
+       ============================================ */
+    .search-home-box {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .search-input-wrapper {
+        position: relative;
+    }
+
+    .search-input-wrapper .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c7a89;
+        font-size: 1rem;
+    }
+
+    .search-input-home {
+        padding: 0.85rem 1rem 0.85rem 2.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input-home:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.1);
+        outline: none;
+    }
+
+    .search-link-btn {
+        padding: 0.85rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .search-link-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .search-link-btn.btn-success {
+        background: linear-gradient(135deg, #198754 0%, #0b5e34 100%);
+        border: none;
+    }
+
+    .search-link-btn.btn-primary {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        border: none;
+    }
+
+    @media (max-width: 768px) {
+        .search-home-box {
+            padding: 1rem 1.25rem;
+        }
+
+        .search-input-wrapper {
+            width: 100%;
+            max-width: 100% !important;
+            margin-bottom: 0.75rem;
+        }
+
+        .search-buttons {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .search-link-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
 <style>
     /* Testimonial Cards */
     .testimonial-card {
@@ -789,12 +1506,270 @@
     .rating-input input[type="radio"]:checked ~ label.star {
         color: #ffc107;
     }
+
+    /* ============================================
+       TOAST NOTIFICATION - CENTREE
+       ============================================ */
+    .home-cart-toast-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(4px);
+    }
+
+    .home-cart-toast-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .home-cart-toast-content {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem 3rem;
+        text-align: center;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+        transform: scale(0.8) translateY(20px);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .home-cart-toast-overlay.show .home-cart-toast-content {
+        transform: scale(1) translateY(0);
+    }
+
+    .home-cart-toast-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--home-primary-green) 0%, var(--home-primary-dark) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 10px 30px rgba(30, 122, 47, 0.4);
+        animation: pulseSuccess 0.6s ease;
+    }
+
+    .home-cart-toast-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    @keyframes pulseSuccess {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .home-cart-toast-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3436;
+        margin-bottom: 0.5rem;
+    }
+
+    .home-cart-toast-message {
+        font-size: 1rem;
+        color: #636e72;
+        margin-bottom: 1.75rem;
+    }
+
+    .home-cart-toast-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .home-cart-toast-btn {
+        padding: 0.875rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        border: none;
+    }
+
+    .home-cart-toast-continue {
+        background: #f1f3f4;
+        color: #2d3436;
+    }
+
+    .home-cart-toast-continue:hover {
+        background: #e2e6ea;
+        color: #2d3436;
+    }
+
+    .home-cart-toast-cart {
+        background: linear-gradient(135deg, var(--home-primary-green) 0%, var(--home-primary-dark) 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(30, 122, 47, 0.35);
+    }
+
+    .home-cart-toast-cart:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(30, 122, 47, 0.45);
+    }
+
+    /* ============================================
+       BOUTON AJOUTE - SUCCES
+       ============================================ */
+    .home-btn-added-success {
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.75rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        animation: successBounce 0.5s ease;
+        cursor: default;
+    }
+
+    .home-btn-added-success i {
+        font-size: 1.1rem;
+        animation: checkPop 0.4s ease;
+    }
+
+    @keyframes successBounce {
+        0% { transform: scale(1); }
+        30% { transform: scale(1.1); }
+        50% { transform: scale(0.95); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes checkPop {
+        0% { transform: scale(0) rotate(-45deg); }
+        50% { transform: scale(1.3) rotate(0deg); }
+        100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .home-btn-error {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.75rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        cursor: default;
+    }
+
+    /* Toast connexion requise */
+    .home-cart-toast-icon-warning {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%) !important;
+        box-shadow: 0 10px 30px rgba(243, 156, 18, 0.4) !important;
+    }
+
+    .home-cart-toast-login {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.35);
+    }
+
+    .home-cart-toast-login:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.45);
+    }
+
+    @media (max-width: 576px) {
+        .home-cart-toast-content {
+            padding: 2rem 1.5rem;
+        }
+
+        .home-cart-toast-icon {
+            width: 65px;
+            height: 65px;
+        }
+
+        .home-cart-toast-icon i {
+            font-size: 2rem;
+        }
+
+        .home-cart-toast-title {
+            font-size: 1.25rem;
+        }
+
+        .home-cart-toast-actions {
+            flex-direction: column;
+        }
+
+        .home-cart-toast-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/catalogue-search.js') }}"></script>
 <script>
+    // Recherche sur la page d'accueil - redirection vers catalogue ou emprunts
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('homeSearchInput');
+        const catalogueBtn = document.getElementById('searchCatalogueBtn');
+        const empruntsBtn = document.getElementById('searchEmpruntsBtn');
+
+        // Vérifier si les éléments existent avant d'ajouter les événements
+        if (!searchInput || !catalogueBtn || !empruntsBtn) {
+            return; // Sortir si les éléments n'existent pas
+        }
+
+        // Mettre à jour les liens avec le terme de recherche
+        function updateSearchLinks() {
+            const searchTerm = searchInput.value.trim();
+            const catalogueUrl = '{{ route("catalogue.index") }}';
+            const empruntsUrl = '{{ route("catalogue.acheter") }}';
+
+            if (searchTerm) {
+                catalogueBtn.href = catalogueUrl + '?search=' + encodeURIComponent(searchTerm);
+                empruntsBtn.href = empruntsUrl + '?search=' + encodeURIComponent(searchTerm);
+            } else {
+                catalogueBtn.href = catalogueUrl;
+                empruntsBtn.href = empruntsUrl;
+            }
+        }
+
+        // Mettre à jour les liens à chaque frappe
+        searchInput.addEventListener('input', updateSearchLinks);
+
+        // Permettre la recherche avec Enter (rediriger vers le catalogue par défaut)
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                updateSearchLinks();
+                window.location.href = catalogueBtn.href;
+            }
+        });
+    });
+
     // Compteur de caractères pour le message
     document.addEventListener('DOMContentLoaded', function() {
         const messageTextarea = document.getElementById('message');
@@ -824,6 +1799,198 @@
             var testimonialModal = new bootstrap.Modal(document.getElementById('testimonialModal'));
             testimonialModal.show();
         @endif
+    });
+
+    // ======= AJAX AJOUT AU PANIER =======
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sélectionner tous les formulaires d'ajout au panier
+        document.querySelectorAll('.home-ajax-cart-form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const btn = form.querySelector('button[type="submit"]');
+                const originalContent = btn.innerHTML;
+                const originalClasses = btn.className;
+
+                // Animation de chargement
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i>Ajout...';
+
+                // Envoi AJAX
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Succès - afficher confirmation avec animation
+                        btn.innerHTML = '<i class="fa fa-check-circle me-2"></i>Ajouté au panier !';
+                        btn.className = 'home-btn-added-success';
+
+                        // Mettre à jour le compteur du panier dans la navbar
+                        updateCartCount();
+
+                        // Afficher une notification toast au centre
+                        showCartToast('Livre ajouté au panier avec succès !');
+
+                        // Réinitialiser le bouton après 2.5 secondes
+                        setTimeout(() => {
+                            btn.innerHTML = originalContent;
+                            btn.className = originalClasses;
+                            btn.disabled = false;
+
+                            // Fermer le modal si ouvert
+                            const modal = btn.closest('.modal');
+                            if (modal) {
+                                const bsModal = bootstrap.Modal.getInstance(modal);
+                                if (bsModal) {
+                                    bsModal.hide();
+                                }
+                            }
+                        }, 2500);
+                    } else if (response.status === 401) {
+                        // Non authentifié - demander de se connecter
+                        showLoginRequiredToast();
+                        btn.innerHTML = originalContent;
+                        btn.className = originalClasses;
+                        btn.disabled = false;
+                    } else {
+                        // Autre erreur
+                        btn.innerHTML = '<i class="fa fa-times me-2"></i>Erreur';
+                        btn.className = 'home-btn-error';
+
+                        setTimeout(() => {
+                            btn.innerHTML = originalContent;
+                            btn.className = originalClasses;
+                            btn.disabled = false;
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    btn.innerHTML = '<i class="fa fa-times me-2"></i>Erreur';
+                    btn.className = 'home-btn-error';
+
+                    setTimeout(() => {
+                        btn.innerHTML = originalContent;
+                        btn.className = originalClasses;
+                        btn.disabled = false;
+                    }, 2000);
+                });
+            });
+        });
+
+        // Fonction pour mettre à jour le compteur du panier
+        function updateCartCount() {
+            fetch('{{ route("panier.count") }}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const cartBadges = document.querySelectorAll('.cart-count-badge, .navbar .badge');
+                cartBadges.forEach(badge => {
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline-flex';
+                    }
+                });
+            })
+            .catch(error => console.log('Impossible de mettre à jour le compteur'));
+        }
+
+        // Fonction pour afficher une notification toast au centre
+        function showCartToast(message) {
+            // Supprimer l'ancien toast s'il existe
+            let existingToast = document.getElementById('homeCartToastCenter');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Créer le nouveau toast centré
+            const toastContainer = document.createElement('div');
+            toastContainer.id = 'homeCartToastCenter';
+            toastContainer.innerHTML = `
+                <div class="home-cart-toast-overlay">
+                    <div class="home-cart-toast-content">
+                        <div class="home-cart-toast-icon">
+                            <i class="fa fa-check"></i>
+                        </div>
+                        <h3 class="home-cart-toast-title">Ajouté au panier !</h3>
+                        <p class="home-cart-toast-message">${message}</p>
+                        <div class="home-cart-toast-actions">
+                            <button type="button" class="home-cart-toast-btn home-cart-toast-continue" onclick="this.closest('#homeCartToastCenter').remove()">
+                                <i class="fa fa-arrow-left me-2"></i>Continuer mes achats
+                            </button>
+                            <a href="{{ route('panier.index') }}" class="home-cart-toast-btn home-cart-toast-cart">
+                                <i class="fa fa-shopping-cart me-2"></i>Voir le panier
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toastContainer);
+
+            // Animation d'entrée
+            setTimeout(() => {
+                toastContainer.querySelector('.home-cart-toast-overlay').classList.add('show');
+            }, 10);
+
+            // Fermer automatiquement après 4 secondes
+            setTimeout(() => {
+                const overlay = toastContainer.querySelector('.home-cart-toast-overlay');
+                if (overlay) {
+                    overlay.classList.remove('show');
+                    setTimeout(() => toastContainer.remove(), 300);
+                }
+            }, 4000);
+        }
+
+        // Fonction pour afficher une notification de connexion requise
+        function showLoginRequiredToast() {
+            // Supprimer l'ancien toast s'il existe
+            let existingToast = document.getElementById('homeCartToastCenter');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Créer le toast de connexion requise
+            const toastContainer = document.createElement('div');
+            toastContainer.id = 'homeCartToastCenter';
+            toastContainer.innerHTML = `
+                <div class="home-cart-toast-overlay">
+                    <div class="home-cart-toast-content">
+                        <div class="home-cart-toast-icon home-cart-toast-icon-warning">
+                            <i class="fa fa-user-lock"></i>
+                        </div>
+                        <h3 class="home-cart-toast-title">Connexion requise</h3>
+                        <p class="home-cart-toast-message">Veuillez vous connecter pour ajouter des articles à votre panier.</p>
+                        <div class="home-cart-toast-actions">
+                            <button type="button" class="home-cart-toast-btn home-cart-toast-continue" onclick="this.closest('#homeCartToastCenter').remove()">
+                                <i class="fa fa-times me-2"></i>Fermer
+                            </button>
+                            <a href="{{ route('login') }}" class="home-cart-toast-btn home-cart-toast-login">
+                                <i class="fa fa-sign-in-alt me-2"></i>Se connecter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toastContainer);
+
+            // Animation d'entrée
+            setTimeout(() => {
+                toastContainer.querySelector('.home-cart-toast-overlay').classList.add('show');
+            }, 10);
+
+            // Ne pas fermer automatiquement - laisser l'utilisateur décider
+        }
     });
 </script>
 @endpush

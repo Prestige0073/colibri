@@ -295,9 +295,12 @@ class PanierController extends Controller
         // Créer une commande pour le paiement en ligne
         $commande = \App\Models\Commande::create([
             'user_id' => $user->id,
+            'nom' => $user->name,
+            'telephone' => $user->phone ?? '',
+            'adresse' => $user->address ?? '',
             'total' => $cartItems->sum(fn($i) => $i->catalogue->prix * $i->quantite),
-            'statut' => 'en_attente',
-            'mode_paiement' => $paymentMethod,
+            'statut' => 'pending',
+            'payment_method' => $paymentMethod,
             'paiement_valide' => false,
         ]);
 
@@ -306,8 +309,9 @@ class PanierController extends Controller
             \App\Models\CommandeItem::create([
                 'commande_id' => $commande->id,
                 'catalogue_id' => $cartItem->catalogue_id,
+                'titre' => $cartItem->catalogue->titre,
                 'quantite' => $cartItem->quantite,
-                'prix_unitaire' => $cartItem->catalogue->prix,
+                'prix' => $cartItem->catalogue->prix,
             ]);
         }
 
@@ -323,5 +327,21 @@ class PanierController extends Controller
                 return redirect()->route('paiement.show')
                     ->with('error', 'Méthode de paiement non reconnue.');
         }
+    }
+
+    /**
+     * Retourne le nombre d'articles dans le panier (pour AJAX)
+     */
+    public function count()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['count' => 0]);
+        }
+
+        $count = $user->cartItems()->sum('quantite');
+
+        return response()->json(['count' => $count]);
     }
 }

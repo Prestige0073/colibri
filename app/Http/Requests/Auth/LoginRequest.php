@@ -49,6 +49,18 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Vérifier si l'utilisateur connecté est un admin
+        // Les admins ne peuvent pas se connecter via le formulaire utilisateur
+        $user = Auth::user();
+        if ($user && $user->role === 'admin') {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Les administrateurs doivent utiliser le portail d\'administration pour se connecter.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

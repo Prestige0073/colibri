@@ -68,6 +68,46 @@ class User extends Authenticatable
     }
 
     /**
+     * Retourne les inscriptions aux formations de l'utilisateur
+     */
+    public function inscriptions()
+    {
+        return $this->hasMany(\App\Models\FormationInscription::class);
+    }
+
+    /**
+     * Retourne les tentatives de quiz de l'utilisateur
+     */
+    public function quizAttempts()
+    {
+        return $this->hasMany(\App\Models\UserQuizAttempt::class);
+    }
+
+    /**
+     * Retourne les certificats de l'utilisateur
+     */
+    public function certificats()
+    {
+        return $this->hasMany(\App\Models\Certificat::class);
+    }
+
+    /**
+     * Vérifie si l'utilisateur est administrateur
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Vérifie si l'utilisateur est bloqué
+     */
+    public function isBlocked()
+    {
+        return $this->blocked === true;
+    }
+
+    /**
      * Retourne tous les livres achetés par l'utilisateur (commandes validées)
      */
     public function purchasedBooks()

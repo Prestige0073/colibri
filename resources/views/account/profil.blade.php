@@ -34,7 +34,7 @@
                                                 alt="Avatar" class="rounded-circle shadow mb-3 profile-avatar img-fluid"
                                                 id="avatarPreview" style="width:180px;height:180px;object-fit:cover;">
                                             <span
-                                                class="position-absolute top-50 start-50 translate-middle bg-dark text-white small rounded-pill px-3 py-1"
+                                                class="position-absolute top-50 start-50 translate-middle bg-dark text-white small rounded-2 px-3 py-1"
                                                 style="opacity:0.85;z-index:3;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,0.35);">
                                                 Cliquer pour changer
                                             </span>
@@ -48,14 +48,14 @@
                             <h4 class="fw-bold text-success mb-1">{{ Auth::user()->name }}</h4>
 
                             <div class="mt-2 d-flex align-items-center gap-2">
-                                <button type="button" class="btn btn-outline-success btn-sm rounded-pill profile-btn"
+                                <button type="button" class="btn btn-outline-success btn-sm rounded-2 profile-btn"
                                     data-bs-toggle="modal" data-bs-target="#editProfileModal"
                                     aria-label="Modifier le profil">
                                     <i class="fa fa-edit me-1" aria-hidden="true"></i>
                                     <span class="d-none d-sm-inline">Modifier le profil</span>
                                 </button>
                                 <a href="{{ route('account.commandes') }}"
-                                    class="btn btn-outline-success btn-sm rounded-pill d-flex align-items-center gap-2 position-relative"
+                                    class="btn btn-outline-success btn-sm rounded-2 d-flex align-items-center gap-2 position-relative"
                                     style="padding-right:2.2rem;" aria-label="Suivre mes commandes">
                                     <i class="fa fa-truck me-1" aria-hidden="true"></i>
                                     <span class="d-none d-sm-inline">Suivre mes commandes</span>
@@ -63,7 +63,7 @@
                                         class="position-absolute top-0 end-0 translate-middle badge rounded-circle bg-danger text-white"
                                         style="width:1.5rem;height:1.5rem;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;border:2px solid #fff;">{{ $commandesEnLivraison->count() ?? 0 }}</span>
                                 </a>
-                                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill ms-2"
+                                <button type="button" class="btn btn-outline-danger btn-sm rounded-2 ms-2"
                                     data-bs-toggle="modal" data-bs-target="#logoutModal" aria-label="Se déconnecter">
                                     <i class="fa fa-sign-out-alt me-1" aria-hidden="true"></i>
                                     <span class="d-none d-sm-inline">Se déconnecter</span>
@@ -134,42 +134,91 @@
             <div class="col-12">
                 <div class="card border-0 rounded-4 shadow-lg p-4 profile-card mb-4">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <h5 class="mb-0 text-secondary"><i class="fa fa-graduation-cap me-2"></i>Modules suivis</h5>
-                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#modulesSuivis" aria-expanded="true" aria-controls="modulesSuivis">
-                            <i class="fa fa-chevron-up modules-chevron"></i>
-                        </button>
+                        <h5 class="mb-0 text-secondary"><i class="fa fa-graduation-cap me-2"></i>Mes Formations</h5>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('account.formations') }}" class="btn btn-sm btn-success rounded-2">
+                                <i class="fa fa-list me-1"></i>Voir tout
+                            </a>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#modulesSuivis" aria-expanded="true" aria-controls="modulesSuivis">
+                                <i class="fa fa-chevron-up modules-chevron"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="collapse show" id="modulesSuivis">
-                        <div class="row">
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title text-success mb-2"><i class="fa fa-book me-1"></i>
-                                            Introduction à
-                                            l’édition</h6>
-                                        <p class="card-text mb-2">Découverte du métier d’éditeur et du processus de
-                                            publication.</p>
-                                        <span class="badge bg-success mb-2">En cours</span>
-                                        <a href="#" class="btn btn-outline-success btn-sm rounded-pill">Voir le
-                                            module</a>
-                                    </div>
-                                </div>
+                        @php
+                            $mesFormations = \App\Models\FormationInscription::where('user_id', Auth::id())
+                                ->with('formation')
+                                ->where('paiement_valide', true)
+                                ->orderByDesc('created_at')
+                                ->take(3)
+                                ->get();
+                        @endphp
+
+                        @if($mesFormations->isEmpty())
+                            <div class="text-center py-4">
+                                <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Aucune formation en cours</h6>
+                                <p class="text-muted small">Découvrez nos formations pour développer vos compétences</p>
+                                <a href="{{ route('formation.modules') }}" class="btn btn-success btn-sm rounded-2 mt-2">
+                                    <i class="fa fa-search me-1"></i>Explorer les formations
+                                </a>
                             </div>
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title text-success mb-2"><i class="fa fa-pencil-alt me-1"></i>
-                                            Techniques de
-                                            rédaction</h6>
-                                        <p class="card-text mb-2">Apprendre à structurer et enrichir ses écrits.</p>
-                                        <span class="badge bg-warning text-dark mb-2">À venir</span>
-                                        <a href="#" class="btn btn-outline-success btn-sm rounded-pill">Voir le
-                                            module</a>
+                        @else
+                            <div class="row">
+                                @foreach($mesFormations as $inscription)
+                                    @php
+                                        $formation = $inscription->formation;
+                                        $totalContenus = 0;
+                                        $completedContenus = 0;
+                                        if ($formation) {
+                                            foreach ($formation->modules as $module) {
+                                                $totalContenus += $module->contenus->count();
+                                                $completedContenus += \App\Models\UserModuleProgression::where('user_id', Auth::id())
+                                                    ->where('module_id', $module->id)
+                                                    ->where('completed', true)
+                                                    ->count();
+                                            }
+                                        }
+                                        $progression = $totalContenus > 0 ? round(($completedContenus / $totalContenus) * 100) : 0;
+                                    @endphp
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="card border-0 shadow-sm h-100">
+                                            @if($formation && $formation->image)
+                                                <img src="{{ asset($formation->image) }}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="{{ $formation->titre }}">
+                                            @endif
+                                            <div class="card-body">
+                                                <h6 class="card-title text-success mb-2">
+                                                    <i class="fa fa-book me-1"></i>
+                                                    {{ $formation ? Str::limit($formation->titre, 30) : 'Formation' }}
+                                                </h6>
+                                                <div class="mb-2">
+                                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                                        <span>Progression</span>
+                                                        <span>{{ $progression }}%</span>
+                                                    </div>
+                                                    <div class="progress" style="height: 6px;">
+                                                        <div class="progress-bar bg-success" style="width: {{ $progression }}%"></div>
+                                                    </div>
+                                                </div>
+                                                @if($progression >= 100)
+                                                    <span class="badge bg-success mb-2">Terminée</span>
+                                                @elseif($progression > 0)
+                                                    <span class="badge bg-primary mb-2">En cours</span>
+                                                @else
+                                                    <span class="badge bg-warning text-dark mb-2">Non commencée</span>
+                                                @endif
+                                                @if($formation)
+                                                    <a href="{{ route('formation.show', $formation) }}" class="btn btn-outline-success btn-sm rounded-2 w-100">
+                                                        <i class="fa fa-play me-1"></i>Continuer
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                @endforeach
                             </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -198,7 +247,7 @@
                                         livre
                                         africain.</p>
                                     <span class="badge bg-info text-dark mb-2">Obtenue le 15/09/2025</span>
-                                    <a href="#" class="btn btn-outline-info btn-sm rounded-pill">Voir la
+                                    <a href="#" class="btn btn-outline-info btn-sm rounded-2">Voir la
                                         certification</a>
                                 </div>
                             </div>
@@ -217,7 +266,7 @@
                         <h5 class="mb-0 text-secondary"><i class="fa fa-book-reader me-2"></i>Mes emprunts
                             ({{ $emprunts->count() }})</h5>
                         <div class="d-flex gap-2">
-                            <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-sm btn-success rounded-pill">
+                            <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-sm btn-success rounded-2">
                                 <i class="fa fa-list me-1"></i>Voir tout
                             </a>
                             <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
@@ -236,7 +285,7 @@
                                 <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
                                 <h6 class="text-muted">Aucun emprunt en cours</h6>
                                 <p class="text-muted small">Explorez notre bibliothèque pour emprunter des livres</p>
-                                <a href="{{ route('emprunts.index') }}" class="btn btn-success btn-sm rounded-pill mt-2">
+                                <a href="{{ route('emprunts.index') }}" class="btn btn-success btn-sm rounded-2 mt-2">
                                     <i class="fa fa-search me-1"></i>Parcourir la bibliothèque
                                 </a>
                             </div>
@@ -361,7 +410,7 @@
 
                             @if ($emprunts->count() > 6)
                                 <div class="text-center mt-4">
-                                    <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-success rounded-pill">
+                                    <a href="{{ route('emprunts.mes-emprunts') }}" class="btn btn-success rounded-2">
                                         <i class="fa fa-eye me-2"></i>Voir tous mes emprunts ({{ $emprunts->count() }})
                                     </a>
                                 </div>
@@ -384,7 +433,7 @@
                             ({{ $livresAchetes->count() }})
                         </h5>
                         <div class="d-flex gap-2">
-                            <a href="{{ route('account.bibliotheque') }}" class="btn btn-sm btn-primary rounded-pill">
+                            <a href="{{ route('account.bibliotheque') }}" class="btn btn-sm btn-primary rounded-2">
                                 <i class="fa fa-list me-1"></i>Voir tout
                             </a>
                             <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
@@ -399,7 +448,7 @@
                                 <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
                                 <h6 class="text-muted">Votre bibliothèque est vide</h6>
                                 <p class="text-muted small">Achetez des livres pour les ajouter à votre bibliothèque personnelle</p>
-                                <a href="{{ route('catalogue.decouvrir') }}" class="btn btn-primary btn-sm rounded-pill mt-2">
+                                <a href="{{ route('catalogue.decouvrir') }}" class="btn btn-primary btn-sm rounded-2 mt-2">
                                     <i class="fa fa-shopping-cart me-1"></i>Découvrir le catalogue
                                 </a>
                             </div>
@@ -480,7 +529,7 @@
 
                             @if ($livresAchetes->count() >= 6)
                                 <div class="text-center mt-4">
-                                    <a href="{{ route('account.bibliotheque') }}" class="btn btn-primary rounded-pill">
+                                    <a href="{{ route('account.bibliotheque') }}" class="btn btn-primary rounded-2">
                                         <i class="fa fa-eye me-2"></i>Voir toute ma bibliothèque
                                     </a>
                                 </div>
@@ -597,10 +646,10 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary rounded-2" data-bs-dismiss="modal">
                             <i class="fa fa-times me-1"></i>Annuler
                         </button>
-                        <button type="submit" class="btn btn-success rounded-pill">
+                        <button type="submit" class="btn btn-success rounded-2">
                             <i class="fa fa-check me-1"></i>Enregistrer les modifications
                         </button>
                     </div>
@@ -621,11 +670,11 @@
                     Êtes-vous sûr de vouloir vous déconnecter ?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary rounded-pill"
+                    <button type="button" class="btn btn-secondary rounded-2"
                         data-bs-dismiss="modal">Annuler</button>
                     <form method="POST" action="{{ route('logout') }}" id="logoutForm">
                         @csrf
-                        <button type="button" class="btn btn-danger rounded-pill"
+                        <button type="button" class="btn btn-danger rounded-2"
                             onclick="document.getElementById('logoutForm').submit();">Se déconnecter</button>
                     </form>
                 </div>

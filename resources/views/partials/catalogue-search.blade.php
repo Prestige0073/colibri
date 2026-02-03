@@ -1,10 +1,10 @@
 <!-- Système de Recherche Avancée de Catalogues -->
-<div class="catalogue-search-container mb-5">
+<div class="catalogue-search-container">
     <!-- Barre de recherche principale -->
     <div class="search-bar-wrapper">
-        <div class="search-bar shadow-lg">
+        <div class="search-bar">
             <div class="search-input-group">
-                <i class="fas fa-search search-icon"></i>
+                <i class="fa fa-search search-icon"></i>
                 <input
                     type="text"
                     id="searchInput"
@@ -12,168 +12,131 @@
                     placeholder="Rechercher par titre, auteur, catégorie..."
                     autocomplete="off">
                 <button type="button" id="clearSearch" class="clear-search-btn" style="display: none;">
-                    <i class="fas fa-times"></i>
+                    <i class="fa fa-times"></i>
                 </button>
             </div>
             <button type="button" id="toggleFilters" class="filter-toggle-btn">
-                <i class="fas fa-sliders-h me-2"></i>
+                <i class="fa fa-sliders-h"></i>
                 <span>Filtres</span>
-                <span class="filter-count badge bg-primary ms-2" style="display: none;">0</span>
+                <span class="filter-count" style="display: none;">0</span>
             </button>
             <button type="button" id="searchButton" class="search-btn">
-                <i class="fas fa-search me-2"></i>Rechercher
+                <i class="fa fa-search"></i>
+                <span>Rechercher</span>
             </button>
         </div>
 
         <!-- Panel de filtres avancés -->
-        <div id="filtersPanel" class="filters-panel shadow-lg" style="display: none;">
+        <div id="filtersPanel" class="filters-panel" style="display: none;">
             <div class="filters-header">
-                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtres avancés</h5>
-                <button type="button" id="resetFilters" class="btn btn-sm btn-outline-secondary">
-                    <i class="fas fa-redo me-1"></i>Réinitialiser
+                <h5><i class="fa fa-filter"></i>Filtres avancés</h5>
+                <button type="button" id="resetFilters" class="reset-filters-btn">
+                    <i class="fa fa-redo"></i>Réinitialiser
                 </button>
             </div>
 
             <div class="filters-body">
-                <div class="row g-3">
-                    <!-- Type de catalogue -->
-                    <div class="col-md-6">
-                        <label class="filter-label">
-                            <i class="fas fa-layer-group me-2 text-primary"></i>Type de catalogue
-                        </label>
-                        <select id="filterType" class="form-select">
-                            <option value="all">Tous les types</option>
-                            <option value="catalogue">À découvrir</option>
-                            <option value="emprunt">À emprunter</option>
-                        </select>
-                    </div>
-
+                <div class="filters-grid">
                     <!-- Catégorie -->
-                    <div class="col-md-6">
+                    <div class="filter-group">
                         <label class="filter-label">
-                            <i class="fas fa-tags me-2 text-success"></i>Catégorie
+                            <i class="fa fa-tags"></i>Catégorie
                         </label>
-                        <select id="filterCategorie" class="form-select">
+                        <select id="filterCategorie" class="filter-select">
                             <option value="all">Toutes les catégories</option>
                         </select>
                     </div>
 
                     <!-- Prix minimum -->
-                    <div class="col-md-6">
+                    <div class="filter-group">
                         <label class="filter-label">
-                            <i class="fas fa-money-bill-wave me-2 text-warning"></i>Prix minimum (FCFA)
+                            <i class="fa fa-money-bill-wave"></i>Prix minimum
                         </label>
-                        <input type="number" id="filterPrixMin" class="form-control" placeholder="0" min="0">
+                        <div class="price-input-wrapper">
+                            <input type="number" id="filterPrixMin" class="filter-input" placeholder="0" min="0">
+                            <span class="price-suffix">FCFA</span>
+                        </div>
                     </div>
 
                     <!-- Prix maximum -->
-                    <div class="col-md-6">
+                    <div class="filter-group">
                         <label class="filter-label">
-                            <i class="fas fa-money-bill-wave me-2 text-warning"></i>Prix maximum (FCFA)
+                            <i class="fa fa-money-bill-wave"></i>Prix maximum
                         </label>
-                        <input type="number" id="filterPrixMax" class="form-control" placeholder="Illimité" min="0">
-                    </div>
-
-                    <!-- Disponibilité -->
-                    <div class="col-md-6">
-                        <div class="form-check form-switch mt-4">
-                            <input class="form-check-input" type="checkbox" id="filterDisponible">
-                            <label class="form-check-label" for="filterDisponible">
-                                <i class="fas fa-check-circle me-2 text-success"></i>Disponible uniquement
-                            </label>
+                        <div class="price-input-wrapper">
+                            <input type="number" id="filterPrixMax" class="filter-input" placeholder="Illimité" min="0">
+                            <span class="price-suffix">FCFA</span>
                         </div>
                     </div>
 
                     <!-- Tri -->
-                    <div class="col-md-6">
+                    <div class="filter-group">
                         <label class="filter-label">
-                            <i class="fas fa-sort me-2 text-info"></i>Trier par
+                            <i class="fa fa-sort"></i>Trier par
                         </label>
-                        <div class="input-group">
-                            <select id="filterSortBy" class="form-select">
+                        <div class="sort-group">
+                            <select id="filterSortBy" class="filter-select">
                                 <option value="created_at">Date d'ajout</option>
                                 <option value="titre">Titre</option>
                                 <option value="auteur">Auteur</option>
                                 <option value="prix">Prix</option>
                             </select>
-                            <button class="btn btn-outline-secondary" type="button" id="toggleSortOrder">
-                                <i class="fas fa-sort-amount-down"></i>
+                            <button class="sort-order-btn" type="button" id="toggleSortOrder" title="Ordre de tri">
+                                <i class="fa fa-sort-amount-down"></i>
                             </button>
                         </div>
                         <input type="hidden" id="filterSortOrder" value="desc">
                     </div>
+
+                    <!-- Disponibilité -->
+                    <div class="filter-group filter-group-switch">
+                        <label class="switch-label">
+                            <span class="switch-wrapper">
+                                <input type="checkbox" id="filterDisponible">
+                                <span class="switch-slider"></span>
+                            </span>
+                            <span class="switch-text">
+                                <i class="fa fa-check-circle"></i>Disponible uniquement
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
-                <!-- Boutons d'action -->
+                <!-- Bouton d'action -->
                 <div class="filters-footer">
-                    <button type="button" id="applyFilters" class="btn btn-primary w-100">
-                        <i class="fas fa-check me-2"></i>Appliquer les filtres
+                    <button type="button" id="applyFilters" class="apply-filters-btn">
+                        <i class="fa fa-check"></i>Appliquer les filtres
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Indicateur de chargement -->
-    <div id="searchLoader" class="search-loader" style="display: none;">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Chargement...</span>
-        </div>
-        <p class="mt-2">Recherche en cours...</p>
-    </div>
-
-    <!-- Résultats de recherche -->
-    <div id="searchResults" class="search-results mt-4" style="display: none;">
-        <!-- Les résultats seront injectés ici via AJAX -->
-    </div>
-
-    <!-- Message quand aucun résultat -->
-    <div id="noResults" class="no-results text-center py-5" style="display: none;">
-        <i class="fas fa-search fa-4x text-muted mb-3"></i>
-        <h4>Aucun résultat trouvé</h4>
-        <p class="text-muted">Essayez de modifier vos critères de recherche</p>
-        <button type="button" id="resetSearchBtn" class="btn btn-primary">
-            <i class="fas fa-redo me-2"></i>Réinitialiser la recherche
-        </button>
-    </div>
-
-    <!-- Statistiques de recherche -->
-    <div id="searchStats" class="search-stats mt-3" style="display: none;">
-        <div class="alert alert-info d-flex align-items-center">
-            <i class="fas fa-info-circle me-2"></i>
-            <span id="statsText"></span>
-        </div>
-    </div>
-
-    <!-- Pagination -->
-    <div id="searchPagination" class="d-flex justify-content-center mt-4" style="display: none;">
-        <!-- La pagination sera injectée ici -->
-    </div>
 </div>
 
 <style>
+/* ============================================
+   CATALOGUE SEARCH - Styles harmonisés
+   ============================================ */
+
 .catalogue-search-container {
     position: relative;
 }
 
 .search-bar-wrapper {
     position: relative;
-    margin-bottom: 2rem;
 }
 
+/* Barre de recherche principale */
 .search-bar {
-    background: white;
-    border-radius: 15px;
-    padding: 1.5rem;
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     align-items: center;
     flex-wrap: wrap;
 }
 
 .search-input-group {
     flex: 1;
-    min-width: 300px;
+    min-width: 250px;
     position: relative;
 }
 
@@ -182,97 +145,163 @@
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #6c757d;
-    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
 }
 
 .search-input {
     width: 100%;
-    padding: 0.75rem 3rem 0.75rem 3rem;
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+    padding: 0.85rem 2.5rem 0.85rem 2.75rem;
+    border: 2px solid #e8e8e8;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    background: white;
+    color: var(--text-dark);
+    transition: var(--transition);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+    font-size: 0.9rem;
 }
 
 .search-input:focus {
     outline: none;
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(30,122,47,0.1);
+}
+
+.search-input.searching {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cstyle%3E.spinner%7Banimation:rotate 1s linear infinite;transform-origin:center%7D@keyframes rotate%7Bfrom%7Btransform:rotate(0)%7Dto%7Btransform:rotate(360deg)%7D%7D%3C/style%3E%3Ccircle class='spinner' cx='12' cy='12' r='8' fill='none' stroke='%231e7a2f' stroke-width='2' stroke-dasharray='40 20'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 2.5rem center;
+    background-size: 20px;
 }
 
 .clear-search-btn {
     position: absolute;
-    right: 1rem;
+    right: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: #6c757d;
-    font-size: 1.2rem;
+    color: var(--text-muted);
+    font-size: 1rem;
     cursor: pointer;
     padding: 0.25rem;
-    transition: color 0.3s;
+    transition: var(--transition);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .clear-search-btn:hover {
     color: #dc3545;
+    background: rgba(220,53,69,0.1);
 }
 
+/* Bouton Filtres */
 .filter-toggle-btn {
-    padding: 0.75rem 1.5rem;
-    background: #f8f9fa;
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
+    padding: 0.85rem 1.25rem;
+    background: var(--bg-light);
+    border: 2px solid #e8e8e8;
+    border-radius: var(--radius-md);
     font-weight: 500;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dark);
+}
+
+.filter-toggle-btn i {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.filter-toggle-btn:hover {
+    background: rgba(30,122,47,0.05);
+    border-color: var(--primary-green);
+}
+
+.filter-toggle-btn:hover i {
+    color: var(--primary-green);
+}
+
+.filter-toggle-btn.active {
+    background: var(--primary-green);
+    color: white;
+    border-color: var(--primary-green);
+}
+
+.filter-toggle-btn.active i {
+    color: white;
+}
+
+.filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: var(--accent-orange);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 10px;
+}
+
+.filter-toggle-btn.active .filter-count {
+    background: white;
+    color: var(--primary-green);
+}
+
+/* Bouton Rechercher */
+.search-btn {
+    padding: 0.85rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.filter-toggle-btn:hover {
-    background: #e9ecef;
-    border-color: #0d6efd;
-}
-
-.filter-toggle-btn.active {
-    background: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
-}
-
-.search-btn {
-    padding: 0.75rem 2rem;
-    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-}
-
 .search-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
+    box-shadow: 0 6px 20px rgba(30,122,47,0.3);
 }
 
+.search-btn:active {
+    transform: translateY(0);
+}
+
+/* Panel de filtres */
 .filters-panel {
     background: white;
-    border-radius: 15px;
+    border-radius: var(--radius-md);
     margin-top: 1rem;
     overflow: hidden;
+    box-shadow: var(--shadow-soft);
     animation: slideDown 0.3s ease;
+    border: 1px solid #e8e8e8;
 }
 
 @keyframes slideDown {
     from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-10px);
     }
     to {
         opacity: 1;
@@ -281,63 +310,250 @@
 }
 
 .filters-header {
-    padding: 1.5rem;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--bg-light) 0%, #f0f0f0 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #dee2e6;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.filters-header h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filters-header h5 i {
+    color: var(--primary-green);
+}
+
+.reset-filters-btn {
+    padding: 0.4rem 0.75rem;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.reset-filters-btn:hover {
+    background: #f8f8f8;
+    color: var(--text-dark);
+    border-color: #ccc;
 }
 
 .filters-body {
-    padding: 2rem;
+    padding: 1.25rem;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .filter-label {
-    display: block;
-    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
     font-weight: 500;
-    color: #495057;
+    color: var(--text-dark);
 }
 
-.filters-footer {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 2px solid #e9ecef;
+.filter-label i {
+    color: var(--primary-green);
+    font-size: 0.8rem;
 }
 
-.search-loader {
-    text-align: center;
-    padding: 3rem;
-    color: #6c757d;
+.filter-select,
+.filter-input {
+    padding: 0.65rem 0.85rem;
+    border: 2px solid #e8e8e8;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    background: white;
+    transition: var(--transition);
+    width: 100%;
 }
 
-.search-results {
-    min-height: 0;
+.filter-select:focus,
+.filter-input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(30,122,47,0.1);
 }
 
-.search-results:not([style*="display: none"]) {
-    min-height: 200px;
+.price-input-wrapper {
+    position: relative;
 }
 
-.no-results {
-    animation: fadeIn 0.5s ease;
+.price-input-wrapper .filter-input {
+    padding-right: 3.5rem;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.filter-count {
+.price-suffix {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Groupe tri */
+.sort-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sort-group .filter-select {
+    flex: 1;
+}
+
+.sort-order-btn {
+    padding: 0.65rem 0.85rem;
+    border: 2px solid #e8e8e8;
+    border-radius: var(--radius-sm);
+    background: white;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.sort-order-btn:hover {
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+    background: rgba(30,122,47,0.05);
+}
+
+/* Switch personnalisé */
+.filter-group-switch {
+    justify-content: center;
+    padding-top: 0.5rem;
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+}
+
+.switch-wrapper {
+    position: relative;
+    width: 44px;
+    height: 24px;
+}
+
+.switch-wrapper input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.switch-wrapper input:checked + .switch-slider {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-dark) 100%);
+}
+
+.switch-wrapper input:checked + .switch-slider:before {
+    transform: translateX(20px);
+}
+
+.switch-text {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-dark);
+}
+
+.switch-text i {
+    color: var(--primary-green);
+    font-size: 0.85rem;
+}
+
+/* Footer filtres */
+.filters-footer {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #e8e8e8;
+}
+
+.apply-filters-btn {
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.apply-filters-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(30,122,47,0.3);
+}
+
+.apply-filters-btn:active {
+    transform: translateY(0);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
     .search-bar {
         flex-direction: column;
+        gap: 0.5rem;
     }
 
     .search-input-group {
@@ -349,6 +565,35 @@
     .search-btn {
         width: 100%;
         justify-content: center;
+    }
+
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-group-switch {
+        padding-top: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-input {
+        padding: 0.75rem 2.25rem 0.75rem 2.5rem;
+        font-size: 0.9rem;
+    }
+
+    .filter-toggle-btn,
+    .search-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .filters-body {
+        padding: 1rem;
+    }
+
+    .filters-header {
+        padding: 0.85rem 1rem;
     }
 }
 </style>

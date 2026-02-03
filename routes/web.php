@@ -72,6 +72,8 @@ Route::post('formation/{formation}/module/{module}/contenu/{contenu}/update-vide
 
 // Route pour le visualiseur PDF sécurisé (page dédiée)
 Route::get('formation/{formation}/module/{module}/pdf/{contenu}', [\App\Http\Controllers\PdfViewerController::class, 'show'])->middleware('auth')->name('pdf.viewer.show');
+// Route pour servir le PDF de formation avec token sécurisé
+Route::get('formation/{formation}/module/{module}/serve-pdf/{contenu}', [\App\Http\Controllers\PdfViewerController::class, 'servePdf'])->middleware('auth')->name('pdf.viewer.serve');
 
 // Routes pour Catalogue
 Route::get('catalogue/decouvrir', [CatalogueController::class, 'decouvrir'])->name('catalogue.decouvrir');
@@ -94,15 +96,17 @@ Route::middleware('auth')->group(function () {
 Route::get('secure-pdf/view/{id}', [SecurePdfController::class, 'view'])->name('secure-pdf.view');
 Route::get('secure-pdf/serve/{id}', [SecurePdfController::class, 'serve'])->name('secure-pdf.serve');
 
-// Routes pour les paiements
+// Routes pour les callbacks de paiement (SANS AUTH - appelées par services externes)
+Route::match(['get', 'post'], 'paiement/kkiapay/callback', [PaiementController::class, 'kkiapayCallback'])->name('paiement.kkiapay.callback');
+Route::get('paiement/paypal/callback', [PaiementController::class, 'paypalCallback'])->name('paiement.paypal.callback');
+Route::match(['get', 'post'], 'paiement/catalogue/kkiapay/callback', [PaiementController::class, 'catalogueKkiapayCallback'])->name('paiement.catalogue.kkiapay.callback');
+Route::get('paiement/catalogue/paypal/callback', [PaiementController::class, 'cataloguePaypalCallback'])->name('paiement.catalogue.paypal.callback');
+
+// Routes pour les paiements (AVEC AUTH)
 Route::middleware('auth')->group(function () {
     // Paiements pour formations
     Route::get('paiement/kkiapay/{inscription}', [PaiementController::class, 'kkiapay'])->name('paiement.kkiapay');
-    Route::match(['get', 'post'], 'paiement/kkiapay/callback', [PaiementController::class, 'kkiapayCallback'])->name('paiement.kkiapay.callback');
-
     Route::get('paiement/paypal/{inscription}', [PaiementController::class, 'paypal'])->name('paiement.paypal');
-    Route::get('paiement/paypal/callback', [PaiementController::class, 'paypalCallback'])->name('paiement.paypal.callback');
-
     Route::get('paiement/annuler/{inscription}', [PaiementController::class, 'annuler'])->name('paiement.annuler');
 
     // Routes pour les paiements TEST/SIMULATION
@@ -114,10 +118,7 @@ Route::middleware('auth')->group(function () {
 
     // Paiements pour commandes (catalogue)
     Route::get('paiement/catalogue/kkiapay/{commande}', [PaiementController::class, 'catalogueKkiapay'])->name('paiement.catalogue.kkiapay');
-    Route::match(['get', 'post'], 'paiement/catalogue/kkiapay/callback', [PaiementController::class, 'catalogueKkiapayCallback'])->name('paiement.catalogue.kkiapay.callback');
-
     Route::get('paiement/catalogue/paypal/{commande}', [PaiementController::class, 'cataloguePaypal'])->name('paiement.catalogue.paypal');
-    Route::get('paiement/catalogue/paypal/callback', [PaiementController::class, 'cataloguePaypalCallback'])->name('paiement.catalogue.paypal.callback');
 });
 
 // Routes resource pour chaque page principale
@@ -143,6 +144,7 @@ Route::delete('/panier/supprimer/{id}', [PanierController::class, 'supprimer'])-
 Route::post('/panier/payer', [PanierController::class, 'payer'])->name('panier.payer');
 Route::get('/paiement', [PanierController::class, 'showPaiement'])->name('paiement.show');
 Route::post('/panier/traiter-paiement', [PanierController::class, 'traiterPaiement'])->name('panier.traiter-paiement');
+Route::get('/panier/count', [PanierController::class, 'count'])->name('panier.count');
 // Route pour payement Cash on Delivery (autorise aussi les invités)
 Route::post('/commande/cod', [CommandeController::class, 'storeCod'])->name('commande.cod');
 Route::get('/commandes/{commande}', [CommandeController::class, 'show'])->name('commandes.show');
@@ -162,6 +164,7 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::get('/dashboard/users', [AdminDashboardController::class, 'getUsers'])->name('dashboard.users');
     Route::get('/dashboard/sales', [AdminDashboardController::class, 'getSales'])->name('dashboard.sales');
     Route::get('/dashboard/emprunts', [AdminDashboardController::class, 'getEmprunts'])->name('dashboard.emprunts');
+    Route::get('/search', [AdminDashboardController::class, 'search'])->name('search');
     Route::post('users/{user}/toggle-block', [UserController::class, 'toggleBlock'])->name('users.toggle-block');
     Route::resource('users', UserController::class);
     Route::resource('events', EventAdminController::class);
@@ -184,14 +187,14 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::put('quiz-questions/{question}', [QuizQuestionController::class, 'update'])->name('quiz-questions.update');
     Route::delete('quiz-questions/{question}', [QuizQuestionController::class, 'destroy'])->name('quiz-questions.destroy');
     Route::post('quizzes/{quiz}/questions/reorder', [QuizQuestionController::class, 'reorder'])->name('quizzes.questions.reorder');
-    // Certifications
-    Route::resource('certifications', CertificationAdminController::class);
-    Route::post('certifications/{inscription}/generate', [CertificationAdminController::class, 'generate'])->name('certifications.generate');
-    Route::post('certifications/generate-manual', [CertificationAdminController::class, 'generateManual'])->name('certifications.generate-manual');
+    // Certifications (génération manuelle uniquement)
+    Route::get('certifications', [CertificationAdminController::class, 'index'])->name('certifications.index');
+    Route::post('certifications/generate', [CertificationAdminController::class, 'generate'])->name('certifications.generate');
     Route::get('certifications/{certificat}/download', [CertificationAdminController::class, 'download'])->name('certifications.download');
+    Route::post('certifications/{certificat}/regenerate', [CertificationAdminController::class, 'regenerate'])->name('certifications.regenerate');
     Route::post('certifications/{certificat}/send-email', [CertificationAdminController::class, 'sendEmail'])->name('certifications.send-email');
-    Route::post('certifications/{certificat}/send-email-custom', [CertificationAdminController::class, 'sendEmailCustom'])->name('certifications.send-email-custom');
     Route::patch('certifications/{certificat}/change-status', [CertificationAdminController::class, 'changeStatus'])->name('certifications.change-status');
+    Route::delete('certifications/{certificat}', [CertificationAdminController::class, 'destroy'])->name('certifications.destroy');
     Route::post('certifications/clear-cache', [CertificationAdminController::class, 'clearCache'])->name('certifications.clear-cache');
 
     Route::resource('catalogue', CatalogueAdminController::class);
@@ -212,10 +215,8 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::post('emprunts/{emprunt}/rejeter', [EmpruntController::class, 'rejeterDemande'])->name('emprunts.rejeter');
     Route::post('emprunts/{emprunt}/renew-access', [EmpruntController::class, 'renewAccess'])->name('emprunts.renew-access');
 
-    // Gestion des utilisateurs
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-    Route::post('users/{user}/toggle-block', [\App\Http\Controllers\Admin\UserController::class, 'toggleBlock'])->name('users.toggle-block');
-    Route::post('users/{user}/change-role', [\App\Http\Controllers\Admin\UserController::class, 'changeRole'])->name('users.change-role');
+    // Route pour changer le rôle d'un utilisateur
+    Route::post('users/{user}/change-role', [UserController::class, 'changeRole'])->name('users.change-role');
     Route::resource('formations', AdminFormationController::class);
     Route::resource('modules', \App\Http\Controllers\Admin\ModuleController::class);
     Route::resource('modules.contenus', \App\Http\Controllers\Admin\ModuleContenuController::class)->shallow();
@@ -224,6 +225,18 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::get('commandes/{commande}', [\App\Http\Controllers\Admin\CommandeController::class, 'show'])->name('commandes.show');
     Route::patch('commandes/{commande}/status', [\App\Http\Controllers\Admin\CommandeController::class, 'updateStatus'])->name('commandes.updateStatus');
     Route::post('commandes/user/{user}/bulk-status', [\App\Http\Controllers\Admin\CommandeController::class, 'bulkUpdateStatus'])->name('commandes.bulkStatus');
+
+    // Admin: Sécurité PDF - Gestion des blocages
+    Route::get('security', [\App\Http\Controllers\Admin\SecurityAdminController::class, 'index'])->name('security.index');
+    Route::post('security/unblock/{user}', [\App\Http\Controllers\Admin\SecurityAdminController::class, 'unblockUser'])->name('security.unblock');
+    Route::post('security/block/{user}', [\App\Http\Controllers\Admin\SecurityAdminController::class, 'blockUser'])->name('security.block');
+    Route::post('security/reset-attempts/{user}', [\App\Http\Controllers\Admin\SecurityAdminController::class, 'resetAttempts'])->name('security.reset-attempts');
+    Route::get('security/user/{user}', [\App\Http\Controllers\Admin\SecurityAdminController::class, 'userDetails'])->name('security.user-details');
+
+    // Admin: Gestion des Administrateurs & RBAC
+    Route::resource('admins', \App\Http\Controllers\Admin\AdminManagementController::class);
+    Route::post('admins/{admin}/change-status', [\App\Http\Controllers\Admin\AdminManagementController::class, 'changeStatus'])->name('admins.change-status');
+    Route::get('admins/roles/{role}/permissions', [\App\Http\Controllers\Admin\AdminManagementController::class, 'getRolePermissions'])->name('admins.roles.permissions');
 });
 
 
@@ -240,7 +253,9 @@ Route::middleware('auth')->group(function () {
     Route::post('account/profil/update', [App\Http\Controllers\AccountController::class, 'updateProfile'])->name('account.profil.update');
     Route::get('account/commandes', [App\Http\Controllers\CommandeController::class, 'mesCommandes'])->name('account.commandes');
     Route::get('account/bibliotheque', [App\Http\Controllers\AccountController::class, 'bibliotheque'])->name('account.bibliotheque');
+    Route::get('account/formations', [App\Http\Controllers\AccountController::class, 'formations'])->name('account.formations');
     Route::get('bibliotheque/lire/{catalogue}', [BibliothequeController::class, 'lire'])->name('bibliotheque.lire');
+    Route::get('bibliotheque/serve-pdf/{catalogue}', [BibliothequeController::class, 'servePdf'])->name('bibliotheque.serve-pdf');
 
     // Routes pour les quiz (front-end)
     Route::get('quiz/{quiz}', [FrontQuizController::class, 'show'])->name('quiz.show');
@@ -257,6 +272,14 @@ Route::prefix('api/catalogue')->group(function () {
     Route::get('/search', [CatalogueSearchController::class, 'search'])->name('api.catalogue.search');
     Route::get('/categories', [CatalogueSearchController::class, 'getCategories'])->name('api.catalogue.categories');
     Route::get('/price-stats', [CatalogueSearchController::class, 'getPriceStats'])->name('api.catalogue.price-stats');
+});
+
+// API Routes pour la sécurité (logging des tentatives de capture)
+Route::prefix('api/security')->group(function () {
+    Route::post('/log-attempt', [\App\Http\Controllers\SecurityLogController::class, 'logAttempt'])->name('api.security.log-attempt');
+    Route::get('/check-status', [\App\Http\Controllers\SecurityLogController::class, 'checkStatus'])->name('api.security.check-status');
+    Route::get('/stats', [\App\Http\Controllers\SecurityLogController::class, 'getStats'])->name('api.security.stats');
+    Route::post('/unblock-user', [\App\Http\Controllers\SecurityLogController::class, 'unblockUser'])->name('api.security.unblock-user');
 });
 
 require __DIR__.'/auth.php';

@@ -25,8 +25,8 @@ class FormationController extends Controller
             'description' => 'nullable|string',
             'objectifs' => 'nullable|string',
             'prix' => 'nullable|numeric|min:0',
+            'est_gratuit' => 'nullable|in:0,1',
             'duree' => 'nullable|string',
-            'niveau' => 'nullable|in:debutant,intermediaire,avance',
             'categorie' => 'nullable|string',
             'prerequis' => 'nullable|string',
             'note_minimale_certification' => 'nullable|integer|min:0|max:100',
@@ -43,6 +43,12 @@ class FormationController extends Controller
 
         // Gérer le champ active (checkbox)
         $validated['active'] = $request->has('active') ? 1 : 0;
+
+        // Gérer formation gratuite
+        $validated['est_gratuit'] = $request->input('est_gratuit') == '1';
+        if ($validated['est_gratuit']) {
+            $validated['prix'] = 0;
+        }
 
         Formation::create($validated);
         return redirect()->route('admin.formations.index')->with('success', 'Formation créée avec succès.');
@@ -66,8 +72,8 @@ class FormationController extends Controller
             'description' => 'nullable|string',
             'objectifs' => 'nullable|string',
             'prix' => 'nullable|numeric|min:0',
+            'est_gratuit' => 'nullable|in:0,1',
             'duree' => 'nullable|string',
-            'niveau' => 'nullable|in:debutant,intermediaire,avance',
             'categorie' => 'nullable|string',
             'prerequis' => 'nullable|string',
             'note_minimale_certification' => 'nullable|integer|min:0|max:100',
@@ -84,6 +90,12 @@ class FormationController extends Controller
 
         // Gérer le champ active (checkbox)
         $validated['active'] = $request->has('active') ? 1 : 0;
+
+        // Gérer formation gratuite
+        $validated['est_gratuit'] = $request->input('est_gratuit') == '1';
+        if ($validated['est_gratuit']) {
+            $validated['prix'] = 0;
+        }
 
         $formation->update($validated);
         return redirect()->route('admin.formations.index')->with('success', 'Formation modifiée avec succès.');

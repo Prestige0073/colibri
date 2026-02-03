@@ -12,11 +12,11 @@
                     <h1 class="h3 mb-0">
                         <i class="fas fa-award me-2 text-warning"></i>Certifications
                     </h1>
-                    <p class="text-muted mb-0">Liste des admis et génération des certificats</p>
+                    <p class="text-muted mb-0">Génération manuelle des certificats de formation</p>
                 </div>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manualGenerateModal">
-                        <i class="fas fa-plus me-2"></i>Générer manuellement
+                        <i class="fas fa-plus me-2"></i>Générer un certificat
                     </button>
                     <button type="button" class="btn btn-warning" onclick="viderCaches()">
                         <i class="fas fa-sync-alt me-2"></i>Vider les caches
@@ -31,33 +31,13 @@
 
     <!-- Statistiques rapides -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #198754 !important;">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1 small">Formations terminées</p>
-                            <h3 class="mb-0 fw-bold">{{ $inscriptions->where('progression', 100)->count() }}</h3>
-                        </div>
-                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
-                            <i class="fas fa-check-circle fa-2x text-success"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107 !important;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <p class="text-muted mb-1 small">Certificats générés</p>
                             <h3 class="mb-0 fw-bold">{{ $certificats->count() }}</h3>
-                            <small class="text-muted">
-                                <i class="fas fa-robot me-1"></i>{{ $certificats->whereNull('nom_manuel')->count() }} auto /
-                                <i class="fas fa-pencil-alt me-1"></i>{{ $certificats->whereNotNull('nom_manuel')->count() }} manuels
-                            </small>
                         </div>
                         <div class="bg-warning bg-opacity-10 rounded-circle p-3">
                             <i class="fas fa-file-pdf fa-2x text-warning"></i>
@@ -67,7 +47,7 @@
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0dcaf0 !important;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -83,16 +63,16 @@
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #dc3545 !important;">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #198754 !important;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-muted mb-1 small">En attente</p>
-                            <h3 class="mb-0 fw-bold">{{ $inscriptions->where('progression', 100)->count() - $certificats->count() }}</h3>
+                            <p class="text-muted mb-1 small">Validés</p>
+                            <h3 class="mb-0 fw-bold">{{ $certificats->where('statut', 'valide')->count() }}</h3>
                         </div>
-                        <div class="bg-danger bg-opacity-10 rounded-circle p-3">
-                            <i class="fas fa-clock fa-2x text-danger"></i>
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
                         </div>
                     </div>
                 </div>
@@ -140,6 +120,7 @@
                 <div class="text-center py-4">
                     <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
                     <p class="text-muted mb-0">Aucun certificat généré pour le moment.</p>
+                    <p class="text-muted">Cliquez sur "Générer un certificat" pour commencer.</p>
                 </div>
             @else
                 <div class="table-responsive">
@@ -151,7 +132,6 @@
                                 <th>Formation</th>
                                 <th>Note</th>
                                 <th>Date de délivrance</th>
-                                <th>Type</th>
                                 <th>Statut</th>
                                 <th width="150">Actions</th>
                             </tr>
@@ -165,31 +145,18 @@
                                         </span>
                                     </td>
                                     <td>
-                                        @if($cert->nom_manuel)
-                                            <div class="d-flex align-items-center">
-                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
-                                                     style="width: 35px; height: 35px; font-size: 14px;">
-                                                    {{ strtoupper(substr($cert->nom_manuel, 0, 2)) }}
-                                                </div>
-                                                <div>
-                                                    <strong>{{ $cert->nom_manuel }}</strong>
-                                                    <br><small class="text-muted"><i class="fas fa-pencil-alt me-1"></i>Saisie manuelle</small>
-                                                </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                                 style="width: 35px; height: 35px; font-size: 14px;">
+                                                {{ strtoupper(substr($cert->nom_manuel ?? 'NA', 0, 2)) }}
                                             </div>
-                                        @else
-                                            <div class="d-flex align-items-center">
-                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
-                                                     style="width: 35px; height: 35px; font-size: 14px;">
-                                                    {{ $cert->user ? strtoupper(substr($cert->user->name, 0, 2)) : 'NA' }}
-                                                </div>
-                                                <div>
-                                                    <strong>{{ $cert->user->name ?? 'N/A' }}</strong>
-                                                    @if($cert->user)
-                                                        <br><small class="text-muted"><i class="fas fa-envelope me-1"></i>{{ $cert->user->email }}</small>
-                                                    @endif
-                                                </div>
+                                            <div>
+                                                <strong>{{ $cert->nom_manuel ?? 'N/A' }}</strong>
+                                                @if($cert->email_manuel)
+                                                    <br><small class="text-muted"><i class="fas fa-envelope me-1"></i>{{ $cert->email_manuel }}</small>
+                                                @endif
                                             </div>
-                                        @endif
+                                        </div>
                                     </td>
                                     <td>{{ $cert->formation->titre ?? 'N/A' }}</td>
                                     <td>
@@ -198,30 +165,27 @@
                                     <td>
                                         <small class="text-muted">
                                             <i class="fas fa-calendar me-1"></i>
-                                            {{ $cert->date_delivrance->format('d/m/Y') }}
+                                            {{ $cert->date_delivrance ? $cert->date_delivrance->format('d/m/Y') : '-' }}
                                         </small>
                                     </td>
                                     <td>
-                                        @if($cert->nom_manuel)
-                                            <span class="badge bg-warning text-dark">
-                                                <i class="fas fa-pencil-alt me-1"></i>Manuel
-                                            </span>
-                                        @else
-                                            <span class="badge bg-info">
-                                                <i class="fas fa-robot me-1"></i>Automatique
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($cert->envoye_email)
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-paper-plane me-1"></i>Envoyé
-                                            </span>
-                                        @else
-                                            <span class="badge bg-secondary">
-                                                <i class="fas fa-clock me-1"></i>Non envoyé
-                                            </span>
-                                        @endif
+                                        @php
+                                            $statutColors = [
+                                                'genere' => 'bg-info',
+                                                'envoye' => 'bg-success',
+                                                'valide' => 'bg-primary',
+                                                'annule' => 'bg-danger'
+                                            ];
+                                            $statutLabels = [
+                                                'genere' => 'Généré',
+                                                'envoye' => 'Envoyé',
+                                                'valide' => 'Validé',
+                                                'annule' => 'Annulé'
+                                            ];
+                                        @endphp
+                                        <span class="badge {{ $statutColors[$cert->statut] ?? 'bg-secondary' }}">
+                                            {{ $statutLabels[$cert->statut] ?? $cert->statut }}
+                                        </span>
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
@@ -234,12 +198,14 @@
                                             </button>
 
                                             <!-- Bouton Envoyer par email -->
-                                            <button type="button"
-                                                    class="btn btn-sm btn-info"
-                                                    onclick="showSendEmailModal({{ $cert->id }}, '{{ $cert->nom_manuel ?? ($cert->user->name ?? '') }}', '{{ $cert->user->email ?? '' }}')"
-                                                    title="Envoyer par email">
-                                                <i class="fas fa-paper-plane"></i>
-                                            </button>
+                                            @if($cert->email_manuel)
+                                                <button type="button"
+                                                        class="btn btn-sm btn-info"
+                                                        onclick="showSendEmailModal({{ $cert->id }}, '{{ $cert->nom_manuel }}', '{{ $cert->email_manuel }}')"
+                                                        title="Envoyer par email">
+                                                    <i class="fas fa-paper-plane"></i>
+                                                </button>
+                                            @endif
 
                                             <!-- Bouton Changer le statut -->
                                             <button type="button"
@@ -252,7 +218,7 @@
                                             <!-- Bouton Supprimer -->
                                             <button type="button"
                                                     class="btn btn-sm btn-danger"
-                                                    onclick="confirmDelete({{ $cert->id }}, '{{ $cert->numero_certificat }}', '{{ $cert->nom_manuel ?? ($cert->user->name ?? 'N/A') }}')"
+                                                    onclick="confirmDelete({{ $cert->id }}, '{{ $cert->numero_certificat }}', '{{ $cert->nom_manuel ?? 'N/A' }}')"
                                                     title="Supprimer le certificat">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -266,206 +232,6 @@
             @endif
         </div>
     </div>
-
-    <!-- Liste des candidats admis -->
-    @if($inscriptions->isEmpty())
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center py-5">
-                <i class="fas fa-award fa-4x text-muted mb-3"></i>
-                <h5 class="text-muted">Aucune formation terminée</h5>
-                <p class="text-muted mb-0">Les apprenants ayant terminé leurs formations apparaîtront ici.</p>
-            </div>
-        </div>
-    @else
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0">
-                    <i class="fas fa-graduation-cap me-2 text-primary"></i>
-                    Liste des admis aux formations
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th width="80">#</th>
-                                <th>Apprenant</th>
-                                <th>Email</th>
-                                <th>Formation</th>
-                                <th>Progression</th>
-                                <th>Note</th>
-                                <th>Date fin</th>
-                                <th>Certificat</th>
-                                <th width="200">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($inscriptions as $inscription)
-                                @php
-                                    $certificat = $inscription->certificat;
-                                @endphp
-                                <tr class="{{ $inscription->progression == 100 && !$certificat ? 'table-warning' : '' }}">
-                                    <td>
-                                        <span class="badge bg-light text-dark border">
-                                            {{ $loop->iteration }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
-                                                 style="width: 35px; height: 35px; font-size: 14px;">
-                                                {{ strtoupper(substr($inscription->user->name, 0, 2)) }}
-                                            </div>
-                                            <strong>{{ $inscription->user->name }}</strong>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">
-                                            <i class="fas fa-envelope me-1"></i>{{ $inscription->user->email }}
-                                        </small>
-                                    </td>
-                                    <td>{{ $inscription->formation->titre ?? 'N/A' }}</td>
-                                    <td>
-                                        <div class="progress" style="height: 25px;">
-                                            <div class="progress-bar {{ $inscription->progression == 100 ? 'bg-success' : 'bg-info' }}"
-                                                 role="progressbar"
-                                                 style="width: {{ $inscription->progression }}%">
-                                                {{ $inscription->progression }}%
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        @if($certificat)
-                                            <span class="badge bg-success">{{ $certificat->note_obtenue }}/100</span>
-                                        @else
-                                            <span class="badge bg-secondary">-</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">
-                                            <i class="fas fa-calendar me-1"></i>
-                                            {{ $inscription->date_fin ? $inscription->date_fin->format('d/m/Y') : 'En cours' }}
-                                        </small>
-                                    </td>
-                                    <td>
-                                        @if($certificat)
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-check-circle me-1"></i>Généré
-                                            </span>
-                                            @if($certificat->envoye_email)
-                                                <br><small class="text-muted">
-                                                    <i class="fas fa-paper-plane me-1"></i>Envoyé
-                                                </small>
-                                            @endif
-                                        @else
-                                            <span class="badge bg-warning">
-                                                <i class="fas fa-clock me-1"></i>En attente
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            @if(!$certificat && $inscription->progression == 100)
-                                                <button type="button"
-                                                        class="btn btn-sm btn-success"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#generateModal{{ $inscription->id }}"
-                                                        title="Générer le certificat">
-                                                    <i class="fas fa-file-pdf"></i>
-                                                </button>
-                                            @endif
-
-                                            @if($certificat)
-                                                <a href="{{ route('admin.certifications.download', $certificat->id) }}"
-                                                   class="btn btn-sm btn-primary"
-                                                   title="Télécharger le PDF">
-                                                    <i class="fas fa-download"></i>
-                                                </a>
-
-                                                @if(!$certificat->envoye_email)
-                                                    <form action="{{ route('admin.certifications.send-email', $certificat->id) }}"
-                                                          method="POST"
-                                                          class="d-inline">
-                                                        @csrf
-                                                        <button type="submit"
-                                                                class="btn btn-sm btn-info"
-                                                                title="Envoyer par email">
-                                                            <i class="fas fa-paper-plane"></i>
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Modal de génération de certificat -->
-                                @if(!$certificat && $inscription->progression == 100)
-                                    <div class="modal fade" id="generateModal{{ $inscription->id }}" tabindex="-1" aria-labelledby="generateModalLabel{{ $inscription->id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header bg-success text-white">
-                                                    <h5 class="modal-title" id="generateModalLabel{{ $inscription->id }}">
-                                                        <i class="fas fa-award me-2"></i>Générer un certificat
-                                                    </h5>
-                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <form action="{{ route('admin.certifications.generate', $inscription->id) }}" method="POST">
-                                                    @csrf
-                                                    <div class="modal-body">
-                                                        <div class="alert alert-info">
-                                                            <i class="fas fa-info-circle me-2"></i>
-                                                            Un certificat sera généré pour <strong>{{ $inscription->user->name }}</strong>
-                                                            ayant complété la formation <strong>{{ $inscription->formation->titre ?? 'N/A' }}</strong>.
-                                                        </div>
-
-                                                        <div class="mb-3">
-                                                            <label for="note{{ $inscription->id }}" class="form-label">
-                                                                Note obtenue <span class="text-danger">*</span>
-                                                            </label>
-                                                            <input type="number"
-                                                                   class="form-control"
-                                                                   id="note{{ $inscription->id }}"
-                                                                   name="note_obtenue"
-                                                                   min="0"
-                                                                   max="100"
-                                                                   value="80"
-                                                                   required>
-                                                            <small class="text-muted">Note sur 100</small>
-                                                        </div>
-
-                                                        <div class="form-check">
-                                                            <input class="form-check-input"
-                                                                   type="checkbox"
-                                                                   name="send_email"
-                                                                   id="sendEmail{{ $inscription->id }}"
-                                                                   checked>
-                                                            <label class="form-check-label" for="sendEmail{{ $inscription->id }}">
-                                                                Envoyer automatiquement par email
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                            <i class="fas fa-times me-2"></i>Annuler
-                                                        </button>
-                                                        <button type="submit" class="btn btn-success">
-                                                            <i class="fas fa-file-pdf me-2"></i>Générer le certificat
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    @endif
 
     <!-- Modal de confirmation de téléchargement -->
     <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
@@ -544,76 +310,13 @@
         </div>
     </div>
 
-    <!-- Modal d'envoi par email amélioré -->
-    <div class="modal fade" id="sendEmailModalNew" tabindex="-1" aria-labelledby="sendEmailModalNewLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title" id="sendEmailModalNewLabel">
-                        <i class="fas fa-paper-plane me-2"></i>Envoyer le certificat par email
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="sendEmailFormNew" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Envoi du certificat par email
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Destinataire</label>
-                            <p class="mb-0"><strong id="emailRecipientNameNew"></strong></p>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="recipient_email" class="form-label">
-                                Email <span class="text-danger">*</span>
-                            </label>
-                            <input type="email"
-                                   class="form-control"
-                                   id="recipient_email"
-                                   name="recipient_email"
-                                   placeholder="email@example.com"
-                                   required>
-                            <small class="text-muted">Modifiez l'email si nécessaire</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="email_message" class="form-label">Message personnalisé (optionnel)</label>
-                            <textarea class="form-control"
-                                      id="email_message"
-                                      name="message"
-                                      rows="3"
-                                      placeholder="Ajouter un message personnalisé..."></textarea>
-                        </div>
-
-                        <p class="text-muted mb-0">
-                            <i class="fas fa-file-pdf me-1"></i>
-                            Le certificat sera envoyé en pièce jointe au format PDF.
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-2"></i>Annuler
-                        </button>
-                        <button type="submit" class="btn btn-info">
-                            <i class="fas fa-paper-plane me-2"></i>Envoyer
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de confirmation d'envoi par email -->
+    <!-- Modal d'envoi par email -->
     <div class="modal fade" id="sendEmailModal" tabindex="-1" aria-labelledby="sendEmailModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title" id="sendEmailModalLabel">
-                        <i class="fas fa-paper-plane me-2"></i>Confirmer l'envoi par email
+                        <i class="fas fa-paper-plane me-2"></i>Envoyer le certificat par email
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -688,135 +391,189 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="manualGenerateModalLabel">
-                        <i class="fas fa-file-pdf me-2"></i>Générer un certificat manuellement
+                        <i class="fas fa-file-pdf me-2"></i>Générer un certificat
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('admin.certifications.generate-manual') }}" method="POST">
+                <form action="{{ route('admin.certifications.generate') }}" method="POST" enctype="multipart/form-data" id="generateForm">
                     @csrf
                     <div class="modal-body">
-                        @if($errors->any())
-                            <div class="alert alert-danger">
-                                <strong>Erreurs:</strong>
-                                <ul class="mb-0">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            Remplissez les informations ci-dessous pour générer un certificat personnalisé.
+                            Remplissez les informations ci-dessous pour générer un certificat.
                         </div>
+
+                        <!-- Informations de l'apprenant -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                            <i class="fas fa-user-graduate me-2"></i>Informations de l'apprenant
+                        </h6>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">
-                                    Apprenant <span class="text-danger">*</span>
+                                <label for="nom_apprenant" class="form-label">
+                                    Nom complet <span class="text-danger">*</span>
                                 </label>
-                                <div class="mb-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="apprenant_type" id="apprenantExistant" value="existant" checked onchange="toggleApprenantInput()">
-                                        <label class="form-check-label" for="apprenantExistant">
-                                            Apprenant existant
-                                        </label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="apprenant_type" id="apprenantManuel" value="manuel" onchange="toggleApprenantInput()">
-                                        <label class="form-check-label" for="apprenantManuel">
-                                            Saisir manuellement
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <select class="form-select" id="user_id" name="user_id">
-                                    <option value="">Sélectionner un apprenant</option>
-                                    @php
-                                        $users = \App\Models\User::where('role', 'user')->orderBy('name')->get();
-                                    @endphp
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
-                                    @endforeach
-                                </select>
-
                                 <input type="text"
-                                       class="form-control mt-2"
-                                       id="nom_manuel"
-                                       name="nom_manuel"
-                                       placeholder="Nom complet de l'apprenant"
-                                       style="display: none;">
-
-                                <input type="email"
-                                       class="form-control mt-2"
-                                       id="email_manuel"
-                                       name="email_manuel"
-                                       placeholder="Email de l'apprenant"
-                                       style="display: none;">
+                                       class="form-control"
+                                       id="nom_apprenant"
+                                       name="nom_apprenant"
+                                       placeholder="Ex: Jean DUPONT"
+                                       value="{{ old('nom_apprenant') }}"
+                                       required>
                             </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email_apprenant" class="form-label">
+                                    Email <small class="text-muted">(optionnel)</small>
+                                </label>
+                                <input type="email"
+                                       class="form-control"
+                                       id="email_apprenant"
+                                       name="email_apprenant"
+                                       placeholder="email@exemple.com"
+                                       value="{{ old('email_apprenant') }}">
+                            </div>
+                        </div>
 
+                        <!-- Formation et Note -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 mt-3">
+                            <i class="fas fa-book me-2"></i>Formation et Résultat
+                        </h6>
+
+                        <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="formation_id" class="form-label">
                                     Formation <span class="text-danger">*</span>
                                 </label>
                                 <select class="form-select" id="formation_id" name="formation_id" required>
                                     <option value="">Sélectionner une formation</option>
-                                    @php
-                                        $formations = \App\Models\Formation::orderBy('titre')->get();
-                                    @endphp
                                     @foreach($formations as $formation)
-                                        <option value="{{ $formation->id }}">{{ $formation->titre }}</option>
+                                        <option value="{{ $formation->id }}" {{ old('formation_id') == $formation->id ? 'selected' : '' }}>
+                                            {{ $formation->titre }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="note_obtenue" class="form-label">
+                                    Note obtenue <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="number"
+                                           class="form-control"
+                                           id="note_obtenue"
+                                           name="note_obtenue"
+                                           min="0"
+                                           max="100"
+                                           value="{{ old('note_obtenue', 80) }}"
+                                           required>
+                                    <span class="input-group-text">/100</span>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Délivrance -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 mt-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>Lieu et Date de délivrance
+                        </h6>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="note_obtenue_manual" class="form-label">
-                                    Note obtenue <span class="text-danger">*</span>
+                                <label for="lieu_delivrance" class="form-label">
+                                    Lieu <span class="text-danger">*</span>
                                 </label>
-                                <input type="number"
+                                <input type="text"
                                        class="form-control"
-                                       id="note_obtenue_manual"
-                                       name="note_obtenue"
-                                       min="0"
-                                       max="100"
-                                       value="80"
+                                       id="lieu_delivrance"
+                                       name="lieu_delivrance"
+                                       value="{{ old('lieu_delivrance', 'Cotonou') }}"
                                        required>
-                                <small class="text-muted">Note sur 100</small>
                             </div>
-
                             <div class="col-md-6 mb-3">
                                 <label for="date_delivrance" class="form-label">
-                                    Date de délivrance <span class="text-danger">*</span>
+                                    Date <span class="text-danger">*</span>
                                 </label>
                                 <input type="date"
                                        class="form-control"
                                        id="date_delivrance"
                                        name="date_delivrance"
-                                       value="{{ now()->format('Y-m-d') }}"
+                                       value="{{ old('date_delivrance', now()->format('Y-m-d')) }}"
                                        required>
                             </div>
                         </div>
 
+                        <!-- Signataire -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 mt-3">
+                            <i class="fas fa-signature me-2"></i>Signataire
+                        </h6>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="signataire_nom" class="form-label">
+                                    Nom du signataire <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="signataire_nom"
+                                       name="signataire_nom"
+                                       value="{{ old('signataire_nom', 'SEGNIGBINDE A. Camille') }}"
+                                       required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="signataire_titre" class="form-label">
+                                    Titre/Fonction <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="signataire_titre"
+                                       name="signataire_titre"
+                                       value="{{ old('signataire_titre', 'Directeur Exécutif') }}"
+                                       required>
+                            </div>
+                        </div>
+
+                        <!-- Fichiers à importer (Cachet et Signature) -->
+                        <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 mt-3">
+                            <i class="fas fa-upload me-2"></i>Cachet et Signature
+                        </h6>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cachet" class="form-label">
+                                    Cachet officiel <span class="text-danger">*</span>
+                                </label>
+                                <input type="file"
+                                       class="form-control"
+                                       id="cachet"
+                                       name="cachet"
+                                       accept="image/png,image/jpeg,image/jpg"
+                                       required>
+                                <small class="text-muted">Format: PNG, JPG, JPEG (max 2 Mo) - Fond transparent recommandé</small>
+                                <div class="mt-2" id="cachetPreview"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="signature" class="form-label">
+                                    Signature <small class="text-muted">(optionnel)</small>
+                                </label>
+                                <input type="file"
+                                       class="form-control"
+                                       id="signature"
+                                       name="signature"
+                                       accept="image/png,image/jpeg,image/jpg">
+                                <small class="text-muted">Format: PNG, JPG, JPEG (max 2 Mo) - Fond transparent recommandé</small>
+                                <div class="mt-2" id="signaturePreview"></div>
+                            </div>
+                        </div>
+
+                        <!-- Options -->
                         <div class="form-check mb-3">
                             <input class="form-check-input"
                                    type="checkbox"
                                    name="send_email"
                                    id="sendEmailManual"
-                                   value="1"
-                                   checked>
+                                   value="1">
                             <label class="form-check-label" for="sendEmailManual">
-                                Envoyer automatiquement par email
+                                <i class="fas fa-envelope me-1"></i>Envoyer automatiquement par email
                             </label>
-                        </div>
-
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Note :</strong> Si l'apprenant n'a pas d'inscription active pour cette formation,
-                            une inscription sera créée automatiquement avec une progression de 100%.
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -855,32 +612,6 @@
 
 @push('scripts')
 <script>
-    function toggleApprenantInput() {
-        const type = document.querySelector('input[name="apprenant_type"]:checked').value;
-        const userSelect = document.getElementById('user_id');
-        const nomManuel = document.getElementById('nom_manuel');
-        const emailManuel = document.getElementById('email_manuel');
-
-        if (type === 'existant') {
-            userSelect.style.display = 'block';
-            userSelect.required = true;
-            nomManuel.style.display = 'none';
-            nomManuel.required = false;
-            nomManuel.value = '';
-            emailManuel.style.display = 'none';
-            emailManuel.required = false;
-            emailManuel.value = '';
-        } else {
-            userSelect.style.display = 'none';
-            userSelect.required = false;
-            userSelect.value = '';
-            nomManuel.style.display = 'block';
-            nomManuel.required = true;
-            emailManuel.style.display = 'block';
-            emailManuel.required = true;
-        }
-    }
-
     // Fonction pour confirmer le téléchargement
     function confirmDownload(certId, certNumber) {
         document.getElementById('downloadCertNumber').textContent = certNumber;
@@ -900,20 +631,10 @@
         statusModal.show();
     }
 
-    // Fonction pour afficher le modal d'envoi par email amélioré
+    // Fonction pour afficher le modal d'envoi par email
     function showSendEmailModal(certId, studentName, studentEmail) {
-        document.getElementById('emailRecipientNameNew').textContent = studentName || 'Non spécifié';
-        document.getElementById('recipient_email').value = studentEmail || '';
-        document.getElementById('sendEmailFormNew').action = '/admin/certifications/' + certId + '/send-email-custom';
-
-        var emailModal = new bootstrap.Modal(document.getElementById('sendEmailModalNew'));
-        emailModal.show();
-    }
-
-    // Fonction pour confirmer l'envoi par email (ancien modal)
-    function confirmSendEmail(certId, userName, userEmail) {
-        document.getElementById('emailRecipientName').textContent = userName;
-        document.getElementById('emailRecipientEmail').textContent = userEmail;
+        document.getElementById('emailRecipientName').textContent = studentName || 'Non spécifié';
+        document.getElementById('emailRecipientEmail').textContent = studentEmail || 'Non spécifié';
         document.getElementById('sendEmailForm').action = '/admin/certifications/' + certId + '/send-email';
 
         var emailModal = new bootstrap.Modal(document.getElementById('sendEmailModal'));
@@ -958,34 +679,52 @@
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 
-    // Intercepter la soumission des formulaires de génération de certificat
+    // Preview des fichiers uploadés et soumission du formulaire
     document.addEventListener('DOMContentLoaded', function() {
-        // Formulaire de génération manuelle
-        const manualForm = document.querySelector('#manualGenerateModal form');
-        if (manualForm) {
-            manualForm.addEventListener('submit', function(e) {
-                // Vérifier que le formulaire est valide avant d'afficher le loading
+        // Preview des fichiers
+        const fileInputs = [
+            { input: 'cachet', preview: 'cachetPreview' },
+            { input: 'signature', preview: 'signaturePreview' }
+        ];
+
+        fileInputs.forEach(function(item) {
+            const input = document.getElementById(item.input);
+            const preview = document.getElementById(item.preview);
+
+            if (input && preview) {
+                input.addEventListener('change', function(e) {
+                    preview.innerHTML = '';
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.style.maxHeight = '60px';
+                            img.style.maxWidth = '100px';
+                            img.classList.add('border', 'rounded', 'p-1');
+                            preview.appendChild(img);
+                        };
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+            }
+        });
+
+        // Formulaire de génération
+        const generateForm = document.getElementById('generateForm');
+        if (generateForm) {
+            generateForm.addEventListener('submit', function(e) {
                 if (this.checkValidity()) {
                     showLoading();
                 }
             });
         }
-
-        // Tous les formulaires de génération automatique
-        const generateForms = document.querySelectorAll('form[action*="generate"]');
-        generateForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                if (this.checkValidity()) {
-                    showLoading();
-                }
-            });
-        });
     });
 
     // Rouvrir le modal s'il y a des erreurs de validation
     @if($errors->any())
         document.addEventListener('DOMContentLoaded', function() {
-            hideLoading(); // Masquer le loading en cas d'erreur
+            hideLoading();
             var modal = new bootstrap.Modal(document.getElementById('manualGenerateModal'));
             modal.show();
         });
@@ -1015,16 +754,6 @@
     .btn-group .btn:last-child {
         border-top-right-radius: 0.25rem;
         border-bottom-right-radius: 0.25rem;
-    }
-
-    .progress {
-        border-radius: 0.5rem;
-        box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-    }
-
-    .progress-bar {
-        font-size: 0.75rem;
-        font-weight: 600;
     }
 
     /* Loading Overlay Styles */

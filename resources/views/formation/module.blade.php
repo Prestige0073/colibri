@@ -4,309 +4,808 @@
 
 @push('styles')
 <style>
-    .module-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem 0;
-        margin-bottom: 2rem;
+    /* Layout principal */
+    .learning-container {
+        display: flex;
+        min-height: calc(100vh - 80px);
     }
-    .contenu-card {
-        border-left: 4px solid #667eea;
-        transition: all 0.3s;
-    }
-    .contenu-card:hover {
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
-    }
-    .contenu-type-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.75rem;
-    }
-    .video-container {
-        position: relative;
-        padding-bottom: 56.25%;
-        height: 0;
-        overflow: hidden;
-        border-radius: 8px;
-    }
-    .video-container iframe,
-    .video-container video {
-        position: absolute;
+
+    /* Sidebar de navigation */
+    .learning-sidebar {
+        width: 280px;
+        background: #fff;
+        border-right: 1px solid #e9ecef;
+        position: sticky;
         top: 0;
-        left: 0;
+        height: 100vh;
+        overflow-y: auto;
+        flex-shrink: 0;
+        z-index: 100;
+    }
+
+    .learning-sidebar.collapsed {
+        width: 0;
+        overflow: hidden;
+    }
+
+    .sidebar-header {
+        background: linear-gradient(135deg, #1e7a2f 0%, #0b5e34 100%);
+        color: white;
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .sidebar-progress {
+        padding: 0.75rem 1rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .progress-ring-container {
+        width: 50px;
+        height: 50px;
+        position: relative;
+    }
+
+    .progress-ring {
         width: 100%;
         height: 100%;
-        border: 0;
+    }
+
+    .progress-ring-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .module-nav {
+        padding: 0.5rem 0;
+    }
+
+    .module-nav-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+        font-size: 0.85rem;
+    }
+
+    .module-nav-item:hover {
+        background: #f8f9fa;
+    }
+
+    .module-nav-item.active {
+        background: linear-gradient(90deg, rgba(30, 122, 47, 0.1) 0%, transparent 100%);
+        border-left-color: #1e7a2f;
+    }
+
+    .module-nav-item.completed {
+        opacity: 0.8;
+    }
+
+    .module-nav-item.locked {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .nav-item-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+        font-size: 0.65rem;
+    }
+
+    .nav-item-icon.video { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+    .nav-item-icon.pdf { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+    .nav-item-icon.texte { background: rgba(0, 123, 255, 0.1); color: #007bff; }
+    .nav-item-icon.quiz { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    .nav-item-icon.completed { background: #28a745; color: white; }
+    .nav-item-icon.locked { background: #e9ecef; color: #6c757d; }
+
+    .nav-item-content {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .nav-item-title {
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 0.15rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .nav-item-meta {
+        font-size: 0.65rem;
+        color: #6c757d;
+    }
+
+    /* Contenu principal */
+    .learning-content {
+        flex-grow: 1;
+        padding: 1.5rem;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .toggle-sidebar-btn {
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1000;
+        background: #1e7a2f;
+        color: white;
+        border: none;
+        padding: 0.75rem 0.4rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .toggle-sidebar-btn:hover {
+        background: #0b5e34;
+    }
+
+    /* Module header */
+    .content-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .content-header h1 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    /* Contenu cards */
+    .contenu-card {
+        border-radius: 0.75rem;
+        border: none;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .contenu-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .contenu-card.locked-content {
+        opacity: 0.6;
+        filter: grayscale(50%);
+    }
+
+    .contenu-card-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .contenu-type-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .contenu-type-icon.video { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; }
+    .contenu-type-icon.pdf { background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); color: white; }
+    .contenu-type-icon.texte { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; }
+    .contenu-type-icon.quiz { background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: #333; }
+
+    .contenu-card-body {
+        padding: 1rem;
+    }
+
+    /* Video player */
+    .video-player-container {
+        background: #000;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        margin-bottom: 0.75rem;
+    }
+
+    .video-player-container video,
+    .video-player-container iframe {
+        width: 100%;
+        aspect-ratio: 16/9;
+        border: none;
+    }
+
+    .video-progress-bar {
+        height: 5px;
+        background: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 0.75rem;
+    }
+
+    .video-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #1e7a2f 0%, #0b5e34 100%);
+        transition: width 0.3s ease;
+    }
+
+    /* Completion button */
+    .completion-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+        border: 2px dashed #e9ecef;
+    }
+
+    .completion-section.ready {
+        border-color: #28a745;
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, #fff 100%);
+    }
+
+    .btn-complete {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-complete:hover:not(:disabled) {
+        background: #1e7a2f;
+    }
+
+    .btn-complete:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+
+    /* Quiz section */
+    .quiz-section {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, #fff 100%);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 2px solid #ffc107;
+    }
+
+    /* Modules navigation at bottom */
+    .modules-nav-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 0.75rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .nav-module-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+    }
+
+    .nav-module-btn.prev {
+        background: #e9ecef;
+        color: #333;
+    }
+
+    .nav-module-btn.next {
+        background: linear-gradient(135deg, #1e7a2f 0%, #0b5e34 100%);
+        color: white;
+    }
+
+    .nav-module-btn:hover {
+        opacity: 0.9;
+    }
+
+    /* Success animation */
+    .success-checkmark {
+        animation: checkmark-bounce 0.5s ease;
+    }
+
+    @keyframes checkmark-bounce {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 991px) {
+        .learning-sidebar {
+            position: fixed;
+            left: -280px;
+            transition: left 0.3s ease;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.15);
+            width: 280px;
+        }
+
+        .learning-sidebar.show {
+            left: 0;
+        }
+
+        .learning-content {
+            padding: 0.75rem;
+        }
+
+        .toggle-sidebar-btn {
+            display: block;
+        }
+
+        .content-header h1 {
+            font-size: 1rem;
+        }
+
+        .contenu-card-header {
+            padding: 0.75rem;
+        }
+
+        .contenu-card-header h5 {
+            font-size: 0.9rem;
+        }
+
+        .contenu-card-body {
+            padding: 0.75rem;
+        }
+
+        .completion-section {
+            padding: 0.75rem;
+        }
+
+        .btn-complete {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .modules-nav-footer {
+            padding: 0.75rem;
+        }
+
+        .nav-module-btn {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .quiz-section {
+            padding: 0.75rem;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .toggle-sidebar-btn {
+            display: none;
+        }
     }
 </style>
 @endpush
 
 @section('content')
-<!-- En-tête du module -->
-<div class="module-header">
-    <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb text-white-50 mb-3">
-                <li class="breadcrumb-item"><a href="{{ route('index') }}" class="text-white">Accueil</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('formation.show', $formation) }}" class="text-white">{{ $formation->titre }}</a></li>
-                <li class="breadcrumb-item active text-white" aria-current="page">{{ $module->titre }}</li>
-            </ol>
-        </nav>
-        <h1 class="mb-2">{{ $module->titre }}</h1>
-        @if($module->description)
-            <p class="lead mb-0">{{ $module->description }}</p>
-        @endif
-        <div class="mt-3">
-            <span class="badge bg-light text-dark me-2">
-                <i class="fas fa-clock me-1"></i>{{ $module->duree ?? 'Durée non définie' }}
-            </span>
-            <span class="badge bg-light text-dark">
-                <i class="fas fa-list me-1"></i>{{ $module->contenus->count() }} contenu(s)
-            </span>
+@php
+    // Calculer la progression du module
+    $totalContenus = $module->contenus->count();
+    $completedContenus = $userProgressions->where('completed', true)->count();
+    $moduleProgress = $totalContenus > 0 ? round(($completedContenus / $totalContenus) * 100) : 0;
+
+    // Calculer la progression globale de la formation
+    $totalFormationContenus = 0;
+    $completedFormationContenus = 0;
+    foreach ($formation->modules as $m) {
+        $totalFormationContenus += $m->contenus->count();
+        if ($m->id === $module->id) {
+            $completedFormationContenus += $completedContenus;
+        } else {
+            $completedFormationContenus += \App\Models\UserModuleProgression::where('user_id', Auth::id())
+                ->where('module_id', $m->id)
+                ->where('completed', true)
+                ->count();
+        }
+    }
+    $formationProgress = $totalFormationContenus > 0 ? round(($completedFormationContenus / $totalFormationContenus) * 100) : 0;
+@endphp
+
+<div class="learning-container">
+    <!-- Toggle sidebar button (mobile) -->
+    <button class="toggle-sidebar-btn" id="toggleSidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="learning-sidebar" id="learningSidebar">
+        <!-- Header -->
+        <div class="sidebar-header">
+            <a href="{{ route('formation.show', $formation) }}" class="text-decoration-none d-flex align-items-center mb-2" style="color: #fff;">
+                <i class="fas fa-arrow-left me-2"></i>
+                <span class="small">Retour à la formation</span>
+            </a>
+            <h5 class="mb-0 fw-bold text-white">{{ Str::limit($formation->titre, 30) }}</h5>
         </div>
-    </div>
-</div>
 
-<div class="container py-4">
-    <div class="row">
-        <!-- Contenus du module -->
-        <div class="col-lg-8">
-            @if($module->contenus->isEmpty())
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Aucun contenu n'a encore été ajouté à ce module.
+        <!-- Progression globale -->
+        <div class="sidebar-progress">
+            <div class="d-flex align-items-center gap-3">
+                <div class="progress-ring-container">
+                    <svg class="progress-ring" viewBox="0 0 36 36">
+                        <path class="progress-ring-bg"
+                              stroke="#e9ecef"
+                              stroke-width="3.5"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        <path class="progress-ring-circle"
+                              stroke="{{ $formationProgress >= 100 ? '#28a745' : '#1e7a2f' }}"
+                              stroke-width="3.5"
+                              stroke-linecap="round"
+                              fill="none"
+                              stroke-dasharray="{{ $formationProgress }}, 100"
+                              style="transform: rotate(-90deg); transform-origin: center;"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    </svg>
+                    <span class="progress-ring-text">{{ $formationProgress }}%</span>
                 </div>
-            @else
-                @foreach($module->contenus as $index => $contenu)
-                    @php
-                        // Vérifier si le contenu est complété
-                        $isCompleted = $userProgressions->has($contenu->id) && $userProgressions[$contenu->id]->completed;
+                <div>
+                    <div class="fw-bold">Progression globale</div>
+                    <div class="small text-muted">{{ $completedFormationContenus }}/{{ $totalFormationContenus }} contenus</div>
+                </div>
+            </div>
+        </div>
 
-                        // Vérifier si le contenu est déverrouillé
-                        $isUnlocked = false;
-                        if ($index === 0) {
-                            // Le premier contenu est toujours déverrouillé
-                            $isUnlocked = true;
-                        } else {
-                            // Vérifier si le contenu précédent est complété
-                            $previousContenu = $module->contenus[$index - 1];
-                            $isUnlocked = $userProgressions->has($previousContenu->id) && $userProgressions[$previousContenu->id]->completed;
-                        }
-                    @endphp
+        <!-- Navigation des modules -->
+        <div class="module-nav">
+            @foreach($allModules as $navModuleIndex => $navModule)
+                @php
+                    $isCurrentModule = $navModule->id === $module->id;
 
-                    <div class="card contenu-card shadow-sm mb-4 @if(!$isUnlocked) locked-content @endif" id="contenu-{{ $contenu->id }}">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <span class="badge contenu-type-badge
-                                        @if($contenu->type === 'video') bg-danger
-                                        @elseif($contenu->type === 'texte') bg-primary
-                                        @elseif($contenu->type === 'pdf') bg-success
-                                        @elseif($contenu->type === 'quiz') bg-warning text-dark
-                                        @else bg-secondary
-                                        @endif me-2">
-                                        <i class="fas
-                                            @if($contenu->type === 'video') fa-video
-                                            @elseif($contenu->type === 'texte') fa-file-alt
-                                            @elseif($contenu->type === 'pdf') fa-file-pdf
-                                            @elseif($contenu->type === 'quiz') fa-question-circle
-                                            @else fa-file
-                                            @endif me-1"></i>
-                                        {{ ucfirst($contenu->type) }}
-                                    </span>
-                                    @if($contenu->duree)
-                                        <span class="badge bg-light text-dark">{{ $contenu->duree }}</span>
-                                    @endif
-                                    @if($isCompleted)
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-check-circle me-1"></i>Complété
-                                        </span>
-                                    @endif
-                                    @if(!$isUnlocked)
-                                        <span class="badge bg-secondary">
-                                            <i class="fas fa-lock me-1"></i>Verrouillé
-                                        </span>
+                    // Calculer la progression du module
+                    $navModuleContenus = $navModule->contenus->count();
+                    $navModuleCompleted = 0;
+                    if ($isCurrentModule) {
+                        $navModuleCompleted = $completedContenus;
+                    } else {
+                        $navModuleCompleted = \App\Models\UserModuleProgression::where('user_id', Auth::id())
+                            ->where('module_id', $navModule->id)
+                            ->where('completed', true)
+                            ->count();
+                    }
+                    $navModuleProgress = $navModuleContenus > 0 ? round(($navModuleCompleted / $navModuleContenus) * 100) : 0;
+
+                    // Vérifier si le module est accessible
+                    $isAccessible = $navModuleIndex === 0 || $navModuleIndex <= $moduleIndex;
+                @endphp
+
+                <div class="module-nav-section mb-3">
+                    <div class="px-3 py-2 d-flex align-items-center justify-content-between bg-light">
+                        <span class="fw-bold small text-uppercase text-muted">Module {{ $navModuleIndex + 1 }}</span>
+                        @if($navModuleProgress >= 100)
+                            <span class="badge bg-success">Terminé</span>
+                        @elseif($navModuleProgress > 0)
+                            <span class="badge bg-primary">{{ $navModuleProgress }}%</span>
+                        @endif
+                    </div>
+
+                    @if($isCurrentModule)
+                        @foreach($navModule->contenus as $navIndex => $navContenu)
+                            @php
+                                $navIsCompleted = $userProgressions->has($navContenu->id) && $userProgressions[$navContenu->id]->completed;
+                                $navIsUnlocked = $navIndex === 0 || ($userProgressions->has($navModule->contenus[$navIndex - 1]->id) && $userProgressions[$navModule->contenus[$navIndex - 1]->id]->completed);
+                            @endphp
+                            <a href="#contenu-{{ $navContenu->id }}"
+                               class="module-nav-item text-decoration-none {{ $navIsCompleted ? 'completed' : '' }} {{ !$navIsUnlocked ? 'locked' : '' }}"
+                               data-contenu-id="{{ $navContenu->id }}">
+                                <div class="nav-item-icon {{ $navIsCompleted ? 'completed' : ($navIsUnlocked ? $navContenu->type : 'locked') }}">
+                                    @if($navIsCompleted)
+                                        <i class="fas fa-check"></i>
+                                    @elseif(!$navIsUnlocked)
+                                        <i class="fas fa-lock"></i>
+                                    @elseif($navContenu->type === 'video')
+                                        <i class="fas fa-play"></i>
+                                    @elseif($navContenu->type === 'pdf')
+                                        <i class="fas fa-file-pdf"></i>
+                                    @elseif($navContenu->type === 'texte')
+                                        <i class="fas fa-file-alt"></i>
+                                    @else
+                                        <i class="fas fa-file"></i>
                                     @endif
                                 </div>
-                                <span class="text-muted">#{{ $index + 1 }}</span>
-                            </div>
-
-                            <h4 class="mb-3">{{ $contenu->titre }}</h4>
-
-                            @if($contenu->description)
-                                <p class="text-muted mb-3">{{ $contenu->description }}</p>
-                            @endif
-
-                            @if(!$isUnlocked)
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-lock me-2"></i>
-                                    Ce contenu sera déverrouillé après avoir complété le contenu précédent.
-                                </div>
-                            @else
-
-                            <!-- Affichage selon le type de contenu -->
-                            @if($contenu->type === 'video')
-                                @if($contenu->fichier)
-                                    <div class="video-section mb-4">
-                                        <!-- Lecteur vidéo intégré -->
-                                        <div class="video-player-wrapper" style="background: #000; border-radius: 8px; overflow: hidden;">
-                                            @if(str_contains($contenu->fichier, 'youtube.com') || str_contains($contenu->fichier, 'youtu.be'))
-                                                <iframe id="videoPlayer{{ $contenu->id }}"
-                                                        src="{{ $contenu->fichier }}?enablejsapi=1"
-                                                        allowfullscreen
-                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                        style="width: 100%; height: 500px; border: 0;">
-                                                </iframe>
-                                            @else
-                                                <video id="videoPlayer{{ $contenu->id }}"
-                                                       controls
-                                                       controlsList="nodownload"
-                                                       style="width: 100%; height: auto; background: #000;"
-                                                       oncontextmenu="return false;">
-                                                    <source src="{{ asset($contenu->fichier) }}" type="video/mp4">
-                                                    Votre navigateur ne supporte pas la lecture de vidéos.
-                                                </video>
-                                            @endif
-                                        </div>
-
-                                        <!-- Barre de progression personnalisée -->
-                                        <div class="mt-3">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="text-muted">Progression de visionnage</span>
-                                                <span class="badge bg-primary" id="watchProgress{{ $contenu->id }}">
-                                                    {{ $userProgressions->has($contenu->id) ? number_format($userProgressions[$contenu->id]->video_watch_percentage, 1) : '0.0' }}%
-                                                </span>
-                                            </div>
-                                            <div class="progress" style="height: 8px;">
-                                                <div class="progress-bar" role="progressbar"
-                                                     id="watchProgressBar{{ $contenu->id }}"
-                                                     style="width: {{ $userProgressions->has($contenu->id) ? $userProgressions[$contenu->id]->video_watch_percentage : 0 }}%"
-                                                     aria-valuenow="{{ $userProgressions->has($contenu->id) ? $userProgressions[$contenu->id]->video_watch_percentage : 0 }}"
-                                                     aria-valuemin="0"
-                                                     aria-valuemax="100">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Système de transcription -->
-                                        @if($contenu->transcription)
-                                            <div class="transcription-section mt-4">
-                                                <div class="card">
-                                                    <div class="card-header bg-light">
-                                                        <h6 class="mb-0">
-                                                            <i class="fas fa-closed-captioning me-2"></i>Transcription de la vidéo
-                                                        </h6>
-                                                    </div>
-                                                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
-                                                        <div class="transcription-content">
-                                                            {!! nl2br(e($contenu->transcription)) !!}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                <div class="nav-item-content">
+                                    <div class="nav-item-title text-dark">{{ $navContenu->titre }}</div>
+                                    <div class="nav-item-meta">
+                                        {{ ucfirst($navContenu->type) }}
+                                        @if($navContenu->duree)
+                                            - {{ $navContenu->duree }}
                                         @endif
                                     </div>
-
-                                    <script>
-                                        (function() {
-                                            const video = document.getElementById('videoPlayer{{ $contenu->id }}');
-                                            const contenuId = {{ $contenu->id }};
-                                            let updateInterval;
-
-                                            if (video && video.tagName === 'VIDEO') {
-                                                // Pour les vidéos locales
-                                                video.addEventListener('timeupdate', function() {
-                                                    const percentage = (video.currentTime / video.duration) * 100;
-                                                    updateVideoProgress{{ $contenu->id }}(percentage);
-                                                });
-
-                                                // Protection contre le téléchargement
-                                                video.addEventListener('contextmenu', function(e) {
-                                                    e.preventDefault();
-                                                    alert('⛔ Le téléchargement de cette vidéo est désactivé.');
-                                                    return false;
-                                                });
-
-                                                video.style.userSelect = 'none';
-                                                video.style.webkitUserSelect = 'none';
-
-                                                video.addEventListener('dragstart', function(e) {
-                                                    e.preventDefault();
-                                                    return false;
-                                                });
-                                            }
-
-                                            function updateVideoProgress{{ $contenu->id }}(percentage) {
-                                                // Mettre à jour l'affichage
-                                                const progressBar = document.getElementById('watchProgressBar{{ $contenu->id }}');
-                                                const progressBadge = document.getElementById('watchProgress{{ $contenu->id }}');
-
-                                                if (progressBar && progressBadge) {
-                                                    progressBar.style.width = percentage + '%';
-                                                    progressBar.setAttribute('aria-valuenow', percentage);
-                                                    progressBadge.textContent = percentage.toFixed(1) + '%';
-                                                }
-
-                                                // Envoyer au serveur toutes les 5 secondes
-                                                clearTimeout(updateInterval);
-                                                updateInterval = setTimeout(() => {
-                                                    fetch(`/formation/{{ $formation->id }}/module/{{ $module->id }}/contenu/${contenuId}/update-video-progress`, {
-                                                        method: 'POST',
-                                                        headers: {
-                                                            'Content-Type': 'application/json',
-                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                                            'Accept': 'application/json'
-                                                        },
-                                                        body: JSON.stringify({ percentage: percentage })
-                                                    })
-                                                    .then(response => response.json())
-                                                    .then(data => {
-                                                        if (data.can_complete && percentage >= 95) {
-                                                            // Activer le bouton "Marquer comme complété"
-                                                            const completeBtn = document.querySelector(`.mark-completed-btn[data-contenu-id="${contenuId}"]`);
-                                                            if (completeBtn) {
-                                                                completeBtn.disabled = false;
-                                                                completeBtn.classList.remove('btn-secondary');
-                                                                completeBtn.classList.add('btn-success');
-                                                                completeBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Marquer comme complété';
-                                                            }
-                                                        }
-                                                    });
-                                                }, 5000);
-                                            }
-                                        })();
-                                    </script>
+                                </div>
+                            </a>
+                        @endforeach
+                    @else
+                        <a href="{{ $isAccessible ? route('formation.module.show', [$formation, $navModule]) : '#' }}"
+                           class="module-nav-item text-decoration-none {{ !$isAccessible ? 'locked' : '' }}">
+                            <div class="nav-item-icon {{ $navModuleProgress >= 100 ? 'completed' : (!$isAccessible ? 'locked' : 'texte') }}">
+                                @if($navModuleProgress >= 100)
+                                    <i class="fas fa-check"></i>
+                                @elseif(!$isAccessible)
+                                    <i class="fas fa-lock"></i>
+                                @else
+                                    <i class="fas fa-book"></i>
                                 @endif
+                            </div>
+                            <div class="nav-item-content">
+                                <div class="nav-item-title text-dark">{{ $navModule->titre }}</div>
+                                <div class="nav-item-meta">{{ $navModuleContenus }} contenus</div>
+                            </div>
+                        </a>
+                    @endif
+                </div>
+            @endforeach
 
-                            @elseif($contenu->type === 'texte')
-                                @if($contenu->contenu)
-                                    <div class="content-text border-start border-4 border-primary ps-3 py-2">
-                                        {!! nl2br(e($contenu->contenu)) !!}
+            <!-- Quiz section in sidebar -->
+            @if($module->quizzes->isNotEmpty())
+                <div class="module-nav-section mb-3">
+                    <div class="px-3 py-2 bg-warning bg-opacity-10">
+                        <span class="fw-bold small text-uppercase text-warning">Quiz du module</span>
+                    </div>
+                    @php
+                        $allContenusCompleted = $completedContenus >= $totalContenus;
+                    @endphp
+                    @foreach($module->quizzes as $quiz)
+                        <div class="module-nav-item {{ !$allContenusCompleted ? 'locked' : '' }}">
+                            <div class="nav-item-icon {{ $allContenusCompleted ? 'quiz' : 'locked' }}">
+                                <i class="fas fa-{{ $allContenusCompleted ? 'question' : 'lock' }}"></i>
+                            </div>
+                            <div class="nav-item-content">
+                                <div class="nav-item-title">{{ $quiz->titre }}</div>
+                                <div class="nav-item-meta">{{ $quiz->questions()->count() }} questions</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="learning-content">
+        <!-- Header du contenu -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-2">
+                            <li class="breadcrumb-item"><a href="{{ route('account.formations') }}">Mes formations</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('formation.show', $formation) }}">{{ Str::limit($formation->titre, 25) }}</a></li>
+                            <li class="breadcrumb-item active">{{ Str::limit($module->titre, 25) }}</li>
+                        </ol>
+                    </nav>
+                    <h1>{{ $module->titre }}</h1>
+                    @if($module->description)
+                        <p class="text-muted mb-0">{{ $module->description }}</p>
+                    @endif
+                </div>
+                <div class="text-end">
+                    <div class="mb-2">
+                        <span class="badge bg-primary me-1">Module {{ $moduleIndex + 1 }}/{{ $allModules->count() }}</span>
+                        <span class="badge bg-success">{{ $moduleProgress }}% terminé</span>
+                    </div>
+                    <div class="progress" style="width: 200px; height: 8px;">
+                        <div class="progress-bar bg-success" style="width: {{ $moduleProgress }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenus du module -->
+        @if($module->contenus->isEmpty())
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Aucun contenu n'a encore été ajouté à ce module.
+            </div>
+        @else
+            @foreach($module->contenus as $index => $contenu)
+                @php
+                    $isCompleted = $userProgressions->has($contenu->id) && $userProgressions[$contenu->id]->completed;
+                    $isUnlocked = $index === 0 || ($userProgressions->has($module->contenus[$index - 1]->id) && $userProgressions[$module->contenus[$index - 1]->id]->completed);
+                @endphp
+
+                <div class="card contenu-card @if(!$isUnlocked) locked-content @endif" id="contenu-{{ $contenu->id }}">
+                    <div class="contenu-card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="contenu-type-icon {{ $contenu->type }}">
+                                @if($contenu->type === 'video')
+                                    <i class="fas fa-play"></i>
+                                @elseif($contenu->type === 'pdf')
+                                    <i class="fas fa-file-pdf"></i>
+                                @elseif($contenu->type === 'texte')
+                                    <i class="fas fa-file-alt"></i>
+                                @else
+                                    <i class="fas fa-file"></i>
+                                @endif
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ $contenu->titre }}</h5>
+                                <div class="small text-muted">
+                                    {{ ucfirst($contenu->type) }}
+                                    @if($contenu->duree)
+                                        - {{ $contenu->duree }}
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge bg-light text-dark me-2">#{{ $index + 1 }}</span>
+                            @if($isCompleted)
+                                <span class="badge bg-success success-checkmark">
+                                    <i class="fas fa-check-circle me-1"></i>Terminé
+                                </span>
+                            @elseif(!$isUnlocked)
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-lock me-1"></i>Verrouillé
+                                </span>
+                            @else
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-play-circle me-1"></i>En cours
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="contenu-card-body">
+                        @if($contenu->description)
+                            <p class="text-muted mb-4">{{ $contenu->description }}</p>
+                        @endif
+
+                        @if(!$isUnlocked)
+                            <div class="alert alert-warning d-flex align-items-center">
+                                <i class="fas fa-lock fa-2x me-3"></i>
+                                <div>
+                                    <strong>Contenu verrouillé</strong><br>
+                                    <span class="small">Terminez le contenu précédent pour débloquer celui-ci.</span>
+                                </div>
+                            </div>
+                        @else
+                            <!-- Affichage selon le type de contenu -->
+                            @if($contenu->type === 'video' && $contenu->fichier)
+                                <div class="video-player-container mb-3">
+                                    @if(str_contains($contenu->fichier, 'youtube.com') || str_contains($contenu->fichier, 'youtu.be'))
+                                        <iframe id="videoPlayer{{ $contenu->id }}"
+                                                src="{{ $contenu->fichier }}?enablejsapi=1"
+                                                allowfullscreen
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                                        </iframe>
+                                    @else
+                                        <video id="videoPlayer{{ $contenu->id }}"
+                                               controls
+                                               controlsList="nodownload"
+                                               oncontextmenu="return false;">
+                                            <source src="{{ asset($contenu->fichier) }}" type="video/mp4">
+                                            Votre navigateur ne supporte pas la lecture de vidéos.
+                                        </video>
+                                    @endif
+                                </div>
+
+                                <!-- Barre de progression vidéo -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small text-muted">Progression de visionnage</span>
+                                    <span class="badge bg-primary" id="watchProgress{{ $contenu->id }}">
+                                        {{ $userProgressions->has($contenu->id) ? number_format($userProgressions[$contenu->id]->video_watch_percentage, 0) : '0' }}%
+                                    </span>
+                                </div>
+                                <div class="video-progress-bar">
+                                    <div class="video-progress-fill" id="watchProgressBar{{ $contenu->id }}"
+                                         style="width: {{ $userProgressions->has($contenu->id) ? $userProgressions[$contenu->id]->video_watch_percentage : 0 }}%">
                                     </div>
-                                @endif
+                                </div>
 
-                            @elseif($contenu->type === 'pdf')
-                                @if($contenu->fichier)
-                                    <!-- Aperçu PDF avec bouton View -->
-                                    <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded mb-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-file-pdf fa-3x text-danger me-3"></i>
-                                            <div>
-                                                <h6 class="mb-0">Document PDF Protégé</h6>
-                                                <small class="text-muted">Ouvre dans un visualiseur sécurisé en plein écran</small>
+                                @if($contenu->transcription)
+                                    <div class="mt-4">
+                                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#transcription{{ $contenu->id }}">
+                                            <i class="fas fa-closed-captioning me-2"></i>Voir la transcription
+                                        </button>
+                                        <div class="collapse mt-3" id="transcription{{ $contenu->id }}">
+                                            <div class="card card-body bg-light" style="max-height: 300px; overflow-y: auto;">
+                                                {!! nl2br(e($contenu->transcription)) !!}
                                             </div>
                                         </div>
-                                        <a href="{{ route('pdf.viewer.show', [$formation, $module, $contenu]) }}"
-                                           class="btn btn-danger">
-                                            <i class="fas fa-eye me-2"></i>Voir le PDF
-                                        </a>
                                     </div>
                                 @endif
 
-                            @elseif($contenu->type === 'quiz')
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-question-circle me-2"></i>
-                                    Un quiz est disponible pour ce contenu.
+                                <script>
+                                    (function() {
+                                        const video = document.getElementById('videoPlayer{{ $contenu->id }}');
+                                        const contenuId = {{ $contenu->id }};
+                                        let updateInterval;
+
+                                        if (video && video.tagName === 'VIDEO') {
+                                            video.addEventListener('timeupdate', function() {
+                                                const percentage = (video.currentTime / video.duration) * 100;
+                                                updateVideoProgress{{ $contenu->id }}(percentage);
+                                            });
+
+                                            video.addEventListener('contextmenu', e => e.preventDefault());
+                                        }
+
+                                        function updateVideoProgress{{ $contenu->id }}(percentage) {
+                                            const progressBar = document.getElementById('watchProgressBar{{ $contenu->id }}');
+                                            const progressBadge = document.getElementById('watchProgress{{ $contenu->id }}');
+
+                                            if (progressBar) progressBar.style.width = percentage + '%';
+                                            if (progressBadge) progressBadge.textContent = Math.round(percentage) + '%';
+
+                                            clearTimeout(updateInterval);
+                                            updateInterval = setTimeout(() => {
+                                                fetch(`/formation/{{ $formation->id }}/module/{{ $module->id }}/contenu/${contenuId}/update-video-progress`, {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                        'Accept': 'application/json'
+                                                    },
+                                                    body: JSON.stringify({ percentage: percentage })
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    if (data.can_complete && percentage >= 95) {
+                                                        const completeBtn = document.querySelector(`.mark-completed-btn[data-contenu-id="${contenuId}"]`);
+                                                        if (completeBtn) {
+                                                            completeBtn.disabled = false;
+                                                            completeBtn.classList.remove('btn-secondary');
+                                                            completeBtn.classList.add('btn-complete');
+                                                        }
+                                                    }
+                                                });
+                                            }, 5000);
+                                        }
+                                    })();
+                                </script>
+
+                            @elseif($contenu->type === 'texte' && $contenu->contenu)
+                                <div class="border-start border-4 border-primary ps-4 py-2 bg-light rounded">
+                                    {!! nl2br(e($contenu->contenu)) !!}
+                                </div>
+
+                            @elseif($contenu->type === 'pdf' && $contenu->fichier)
+                                <div class="d-flex align-items-center justify-content-between bg-light p-4 rounded">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file-pdf fa-3x text-danger me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Document PDF Protégé</h6>
+                                            <small class="text-muted">Ouvre dans un visualiseur sécurisé</small>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('pdf.viewer.show', [$formation, $module, $contenu]) }}"
+                                       class="btn btn-danger btn-lg rounded-2">
+                                        <i class="fas fa-eye me-2"></i>Voir le PDF
+                                    </a>
                                 </div>
 
                             @else
@@ -316,252 +815,193 @@
                                     </a>
                                 @endif
                                 @if($contenu->contenu)
-                                    <div class="mt-3">
-                                        {!! nl2br(e($contenu->contenu)) !!}
-                                    </div>
+                                    <div class="mt-3">{!! nl2br(e($contenu->contenu)) !!}</div>
                                 @endif
                             @endif
 
+                            <!-- Bouton de complétion -->
                             @if(!$isCompleted && $inscription)
                                 @php
                                     $canComplete = true;
-                                    $buttonClass = 'btn-success';
-                                    $buttonText = 'Marquer comme complété';
-
+                                    $watchPercentage = 0;
                                     if ($contenu->type === 'video') {
                                         $watchPercentage = $userProgressions->has($contenu->id) ? $userProgressions[$contenu->id]->video_watch_percentage : 0;
                                         $canComplete = $watchPercentage >= 95;
-
-                                        if (!$canComplete) {
-                                            $buttonClass = 'btn-secondary';
-                                            $buttonText = 'Regardez au moins 95% de la vidéo';
-                                        }
                                     }
                                 @endphp
-                                <div class="mt-3">
-                                    <button class="btn {{ $buttonClass }} mark-completed-btn"
-                                            data-contenu-id="{{ $contenu->id }}"
-                                            data-contenu-titre="{{ $contenu->titre }}"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#confirmCompleteModal"
-                                            {{ !$canComplete ? 'disabled' : '' }}>
-                                        <i class="fas fa-check-circle me-2"></i>{{ $buttonText }}
-                                    </button>
-                                    @if($contenu->type === 'video' && !$canComplete)
-                                        <small class="d-block text-muted mt-2">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Vous devez regarder au moins 95% de la vidéo pour continuer
-                                        </small>
-                                    @endif
-                                </div>
-                            @endif
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            @endif
 
-            <!-- Quizzes du module -->
-            @if($module->quizzes->isNotEmpty())
-                @php
-                    // Vérifier si tous les contenus du module sont complétés
-                    $allContenusCompleted = true;
-                    foreach($module->contenus as $contenu) {
-                        if (!$userProgressions->has($contenu->id) || !$userProgressions[$contenu->id]->completed) {
-                            $allContenusCompleted = false;
-                            break;
-                        }
-                    }
-                @endphp
-
-                <div class="card shadow-sm mb-4 @if(!$allContenusCompleted) locked-content @endif" style="border-left: 4px solid #ffc107;">
-                    <div class="card-header bg-warning bg-opacity-10">
-                        <h5 class="mb-0">
-                            <i class="fas fa-clipboard-check me-2"></i>Quiz du module
-                            @if(!$allContenusCompleted)
-                                <span class="badge bg-secondary float-end">
-                                    <i class="fas fa-lock me-1"></i>Verrouillé
-                                </span>
-                            @endif
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @if(!$allContenusCompleted)
-                            <div class="alert alert-warning">
-                                <i class="fas fa-lock me-2"></i>
-                                Vous devez compléter tous les contenus de ce module avant d'accéder aux quiz.
-                            </div>
-                        @endif
-
-                        @foreach($module->quizzes as $quiz)
-                            <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-                                <div>
-                                    <h6 class="mb-1">{{ $quiz->titre }}</h6>
-                                    @if($quiz->description)
-                                        <p class="text-muted mb-1 small">{{ $quiz->description }}</p>
-                                    @endif
-                                    <div>
-                                        <span class="badge bg-info text-dark me-1">{{ $quiz->questions()->count() }} questions</span>
-                                        <span class="badge bg-success me-1">{{ $quiz->total_points }} points</span>
-                                        @if($quiz->duree_minutes)
-                                            <span class="badge bg-secondary">{{ $quiz->duree_minutes }} min</span>
-                                        @endif
-                                    </div>
-                                </div>
-                                @if($allContenusCompleted)
-                                    @if($inscription && $inscription->paiement_valide)
-                                        <a href="{{ route('quiz.show', $quiz) }}" class="btn btn-warning">
-                                            <i class="fas fa-play me-2"></i>Commencer
-                                        </a>
-                                    @else
-                                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#paiementRequiredModal">
-                                            <i class="fas fa-play me-2"></i>Commencer
+                                <div class="completion-section {{ $canComplete ? 'ready' : '' }}">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                        <div>
+                                            @if($contenu->type === 'video' && !$canComplete)
+                                                <div class="d-flex align-items-center text-warning">
+                                                    <i class="fas fa-clock fa-2x me-3"></i>
+                                                    <div>
+                                                        <strong>Regardez la vidéo jusqu'à la fin</strong><br>
+                                                        <span class="small">Progression requise: 95% (actuellement {{ number_format($watchPercentage, 0) }}%)</span>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <div class="d-flex align-items-center text-success">
+                                                    <i class="fas fa-check-circle fa-2x me-3"></i>
+                                                    <div>
+                                                        <strong>Prêt à continuer?</strong><br>
+                                                        <span class="small">Marquez ce contenu comme terminé pour débloquer la suite</span>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <button class="btn btn-complete text-white mark-completed-btn"
+                                                data-contenu-id="{{ $contenu->id }}"
+                                                data-contenu-titre="{{ $contenu->titre }}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#confirmCompleteModal"
+                                                {{ !$canComplete ? 'disabled' : '' }}>
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            Marquer comme terminé
                                         </button>
-                                    @endif
-                                @else
-                                    <button class="btn btn-secondary" disabled>
-                                        <i class="fas fa-lock me-2"></i>Verrouillé
-                                    </button>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Informations de la formation -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-graduation-cap me-2"></i>Formation
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <h6>{{ $formation->titre }}</h6>
-                    @if($inscription)
-                        <div class="alert alert-success alert-sm mt-3 mb-0">
-                            <i class="fas fa-check-circle me-2"></i>
-                            <small>Vous êtes inscrit à cette formation</small>
-                        </div>
-                        @if($inscription->progression !== null)
-                            <div class="mt-3">
-                                <small class="text-muted d-block mb-1">Progression</small>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar bg-success" role="progressbar"
-                                         style="width: {{ $inscription->progression }}%;"
-                                         aria-valuenow="{{ $inscription->progression }}"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100">
-                                        {{ $inscription->progression }}%
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         @endif
-                    @else
-                        <div class="alert alert-warning alert-sm mt-3 mb-0">
-                            <small><i class="fas fa-exclamation-triangle me-2"></i>Inscrivez-vous pour accéder à tous les contenus</small>
-                        </div>
-                        <a href="{{ route('formation.show', $formation) }}" class="btn btn-primary btn-sm w-100 mt-2">
-                            S'inscrire maintenant
-                        </a>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Navigation entre modules -->
-            @if($formation->modules->count() > 1)
-                <div class="card shadow-sm">
-                    <div class="card-header bg-secondary text-white">
-                        <h6 class="mb-0">
-                            <i class="fas fa-list me-2"></i>Autres modules
-                        </h6>
                     </div>
-                    <div class="list-group list-group-flush">
-                        @foreach($formation->modules as $otherModule)
-                            <a href="{{ route('formation.module.show', [$formation, $otherModule]) }}"
-                               class="list-group-item list-group-item-action {{ $otherModule->id === $module->id ? 'active' : '' }}">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-0">{{ $otherModule->titre }}</h6>
-                                        <small class="text-muted">{{ $otherModule->duree }}</small>
-                                    </div>
-                                    @if($otherModule->id === $module->id)
-                                        <i class="fas fa-play-circle"></i>
+                </div>
+            @endforeach
+        @endif
+
+        <!-- Section Quiz -->
+        @if($module->quizzes->isNotEmpty())
+            @php
+                $allContenusCompleted = $completedContenus >= $totalContenus;
+            @endphp
+
+            <div class="quiz-section @if(!$allContenusCompleted) locked-content @endif">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="contenu-type-icon quiz me-3">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">Quiz du module</h4>
+                        @if(!$allContenusCompleted)
+                            <span class="text-muted small">Terminez tous les contenus pour accéder au quiz</span>
+                        @endif
+                    </div>
+                </div>
+
+                @if(!$allContenusCompleted)
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-lock me-2"></i>
+                        Terminez tous les contenus de ce module pour débloquer le quiz.
+                        <strong>({{ $completedContenus }}/{{ $totalContenus }} terminés)</strong>
+                    </div>
+                @else
+                    @foreach($module->quizzes as $quiz)
+                        <div class="d-flex justify-content-between align-items-center p-3 bg-white rounded mb-2">
+                            <div>
+                                <h6 class="mb-1">{{ $quiz->titre }}</h6>
+                                <div class="small text-muted">
+                                    <span class="me-3"><i class="fas fa-question-circle me-1"></i>{{ $quiz->questions()->count() }} questions</span>
+                                    <span class="me-3"><i class="fas fa-star me-1"></i>{{ $quiz->total_points }} points</span>
+                                    @if($quiz->duree_minutes)
+                                        <span><i class="fas fa-clock me-1"></i>{{ $quiz->duree_minutes }} min</span>
                                     @endif
                                 </div>
+                            </div>
+                            <a href="{{ route('quiz.show', $quiz) }}" class="btn btn-warning rounded-2">
+                                <i class="fas fa-play me-2"></i>Commencer le quiz
                             </a>
-                        @endforeach
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+        @endif
+
+        <!-- Navigation entre modules -->
+        <div class="modules-nav-footer">
+            @if($moduleIndex > 0)
+                <a href="{{ route('formation.module.show', [$formation, $allModules[$moduleIndex - 1]]) }}" class="nav-module-btn prev">
+                    <i class="fas fa-arrow-left"></i>
+                    <div>
+                        <span class="small text-muted d-block">Module précédent</span>
+                        <span class="fw-bold">{{ Str::limit($allModules[$moduleIndex - 1]->titre, 20) }}</span>
                     </div>
-                </div>
+                </a>
+            @else
+                <div></div>
+            @endif
+
+            @if($moduleIndex < $allModules->count() - 1)
+                @php
+                    $nextModuleAccessible = $moduleProgress >= 100;
+                @endphp
+                @if($nextModuleAccessible)
+                    <a href="{{ route('formation.module.show', [$formation, $allModules[$moduleIndex + 1]]) }}" class="nav-module-btn next">
+                        <div class="text-end">
+                            <span class="small opacity-75 d-block">Module suivant</span>
+                            <span class="fw-bold">{{ Str::limit($allModules[$moduleIndex + 1]->titre, 20) }}</span>
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                @else
+                    <button class="nav-module-btn next opacity-50" disabled title="Terminez ce module pour continuer">
+                        <div class="text-end">
+                            <span class="small opacity-75 d-block">Module suivant</span>
+                            <span class="fw-bold">{{ Str::limit($allModules[$moduleIndex + 1]->titre, 20) }}</span>
+                        </div>
+                        <i class="fas fa-lock"></i>
+                    </button>
+                @endif
+            @else
+                <a href="{{ route('formation.show', $formation) }}" class="nav-module-btn next">
+                    <div class="text-end">
+                        <span class="small opacity-75 d-block">Terminé!</span>
+                        <span class="fw-bold">Retour à la formation</span>
+                    </div>
+                    <i class="fas fa-flag-checkered"></i>
+                </a>
             @endif
         </div>
-    </div>
+    </main>
 </div>
 
-<!-- Modal de confirmation pour marquer comme complété -->
-<div class="modal fade" id="confirmCompleteModal" tabindex="-1" aria-labelledby="confirmCompleteModalLabel" aria-hidden="true">
+<!-- Modal de confirmation -->
+<div class="modal fade" id="confirmCompleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="confirmCompleteModalLabel">
-                    <i class="fas fa-check-circle me-2"></i>Confirmer la complétion
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white border-0">
+                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Confirmer la complétion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="text-center py-3">
-                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                    <h5 class="mb-3">Marquer comme complété</h5>
-                    <p class="text-muted mb-2">
-                        Êtes-vous sûr d'avoir terminé ce contenu ?
-                    </p>
-                    <p class="mb-0">
-                        <strong id="modal-contenu-titre"></strong>
-                    </p>
-                </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-trophy fa-4x text-warning mb-3"></i>
+                <h5 class="mb-2">Excellent travail!</h5>
+                <p class="text-muted mb-0" id="modal-contenu-titre"></p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Annuler
-                </button>
-                <button type="button" class="btn btn-success rounded-pill" id="confirmCompleteBtn">
-                    <i class="fas fa-check-circle me-2"></i>Oui, j'ai terminé
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-secondary rounded-2 px-4" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success rounded-2 px-4" id="confirmCompleteBtn">
+                    <i class="fas fa-check me-2"></i>Confirmer
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal pour informer que le paiement est requis -->
-<div class="modal fade" id="paiementRequiredModal" tabindex="-1" aria-labelledby="paiementRequiredModalLabel" aria-hidden="true">
+<!-- Modal paiement requis -->
+<div class="modal fade" id="paiementRequiredModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="paiementRequiredModalLabel">
-                    <i class="fas fa-lock me-2"></i>Paiement requis
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><i class="fas fa-lock me-2"></i>Paiement requis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="text-center py-3">
-                    <i class="fas fa-credit-card fa-4x text-warning mb-3"></i>
-                    <h5 class="mb-3">Inscription et paiement requis</h5>
-                    <p class="text-muted mb-4">
-                        Pour accéder aux quiz et à l'ensemble du contenu de cette formation, vous devez d'abord finaliser votre inscription et effectuer le paiement.
-                    </p>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <small><strong>Formation:</strong> {{ $formation->titre }}</small>
-                    </div>
-                </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-credit-card fa-4x text-warning mb-3"></i>
+                <h5 class="mb-2">Finalisez votre inscription</h5>
+                <p class="text-muted">Pour accéder à ce contenu, vous devez finaliser le paiement de votre inscription.</p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Fermer
-                </button>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                 <a href="{{ route('formation.show', $formation) }}" class="btn btn-warning">
                     <i class="fas fa-shopping-cart me-2"></i>Procéder au paiement
                 </a>
@@ -569,104 +1009,101 @@
         </div>
     </div>
 </div>
-
-@push('styles')
-<style>
-    .locked-content {
-        opacity: 0.6;
-        position: relative;
-    }
-
-    .locked-content::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(128, 128, 128, 0.1);
-        z-index: 1;
-        pointer-events: none;
-    }
-</style>
-@endpush
+@endsection
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Gestion du modal de confirmation "Marquer comme complété"
-        const confirmCompleteModal = document.getElementById('confirmCompleteModal');
-        const confirmCompleteBtn = document.getElementById('confirmCompleteBtn');
-        const modalTitre = document.getElementById('modal-contenu-titre');
-        let currentContenuId = null;
-        let currentButton = null;
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle sidebar mobile
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('learningSidebar');
 
-        // Quand le modal s'ouvre, récupérer l'ID du contenu et le titre
-        if (confirmCompleteModal) {
-            confirmCompleteModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                currentButton = button;
-                currentContenuId = button.getAttribute('data-contenu-id');
-                const contenuTitre = button.getAttribute('data-contenu-titre');
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('show');
+        });
 
-                modalTitre.textContent = contenuTitre;
-            });
-        }
+        // Fermer le sidebar en cliquant à l'extérieur
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth < 992 && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+    }
 
-        // Quand l'utilisateur confirme
-        if (confirmCompleteBtn) {
-            confirmCompleteBtn.addEventListener('click', function() {
-                if (!currentContenuId || !currentButton) return;
-
-                // Désactiver le bouton de confirmation
-                confirmCompleteBtn.disabled = true;
-                confirmCompleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>En cours...';
-
-                // Envoyer la requête AJAX
-                fetch(`/formation/{{ $formation->id }}/module/{{ $module->id }}/contenu/${currentContenuId}/complete`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Fermer le modal
-                        const modal = bootstrap.Modal.getInstance(confirmCompleteModal);
-                        modal.hide();
-
-                        // Recharger la page pour afficher les changements
-                        location.reload();
-                    } else {
-                        // Réactiver le bouton et afficher l'erreur
-                        confirmCompleteBtn.disabled = false;
-                        confirmCompleteBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Oui, j\'ai terminé';
-                        alert(data.error || 'Une erreur est survenue');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    confirmCompleteBtn.disabled = false;
-                    confirmCompleteBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Oui, j\'ai terminé';
-                    alert('Une erreur est survenue lors de la sauvegarde');
-                });
-            });
-        }
-
-        // Réinitialiser le bouton quand le modal se ferme
-        if (confirmCompleteModal) {
-            confirmCompleteModal.addEventListener('hidden.bs.modal', function() {
-                confirmCompleteBtn.disabled = false;
-                confirmCompleteBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Oui, j\'ai terminé';
-                currentContenuId = null;
-                currentButton = null;
-            });
-        }
+    // Scroll smooth vers les contenus
+    document.querySelectorAll('.module-nav-item[data-contenu-id]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const contenuId = this.dataset.contenuId;
+            const element = document.getElementById('contenu-' + contenuId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (window.innerWidth < 992) {
+                    sidebar.classList.remove('show');
+                }
+            }
+        });
     });
+
+    // Gestion du modal de confirmation
+    const confirmCompleteModal = document.getElementById('confirmCompleteModal');
+    const confirmCompleteBtn = document.getElementById('confirmCompleteBtn');
+    const modalTitre = document.getElementById('modal-contenu-titre');
+    let currentContenuId = null;
+
+    if (confirmCompleteModal) {
+        confirmCompleteModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            currentContenuId = button.getAttribute('data-contenu-id');
+            const contenuTitre = button.getAttribute('data-contenu-titre');
+            modalTitre.textContent = 'Vous avez terminé: ' + contenuTitre;
+        });
+    }
+
+    if (confirmCompleteBtn) {
+        confirmCompleteBtn.addEventListener('click', function() {
+            if (!currentContenuId) return;
+
+            confirmCompleteBtn.disabled = true;
+            confirmCompleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>En cours...';
+
+            fetch(`/formation/{{ $formation->id }}/module/{{ $module->id }}/contenu/${currentContenuId}/complete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const modal = bootstrap.Modal.getInstance(confirmCompleteModal);
+                    modal.hide();
+                    location.reload();
+                } else {
+                    confirmCompleteBtn.disabled = false;
+                    confirmCompleteBtn.innerHTML = '<i class="fas fa-check me-2"></i>Confirmer';
+                    alert(data.error || 'Une erreur est survenue');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                confirmCompleteBtn.disabled = false;
+                confirmCompleteBtn.innerHTML = '<i class="fas fa-check me-2"></i>Confirmer';
+                alert('Une erreur est survenue');
+            });
+        });
+    }
+
+    if (confirmCompleteModal) {
+        confirmCompleteModal.addEventListener('hidden.bs.modal', function() {
+            confirmCompleteBtn.disabled = false;
+            confirmCompleteBtn.innerHTML = '<i class="fas fa-check me-2"></i>Confirmer';
+            currentContenuId = null;
+        });
+    }
+});
 </script>
 @endpush
-
-@endsection

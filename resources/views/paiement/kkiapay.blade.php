@@ -175,7 +175,31 @@
     // Écouter l'échec du paiement
     addKkiapayListener('failed', function(response) {
         console.error('Paiement échoué:', response);
-        alert('Le paiement a échoué. Veuillez réessayer.');
+
+        // Traduire les messages d'erreur KKiaPay
+        let errorMessage = 'Le paiement a échoué. Veuillez réessayer.';
+
+        if (response && response.reason) {
+            const reason = response.reason.message || response.reason;
+
+            if (reason.includes('invalid_number') || reason === 'invalid_number_') {
+                errorMessage = 'Le numéro de téléphone saisi est invalide. Veuillez vérifier le format (ex: 229 XX XX XX XX pour le Bénin).';
+            } else if (reason.includes('insufficient_funds') || reason.includes('insufficient')) {
+                errorMessage = 'Solde insuffisant sur votre compte. Veuillez recharger et réessayer.';
+            } else if (reason.includes('timeout') || reason.includes('expired')) {
+                errorMessage = 'La transaction a expiré. Veuillez réessayer.';
+            } else if (reason.includes('cancelled') || reason.includes('canceled')) {
+                errorMessage = 'La transaction a été annulée.';
+            } else if (reason.includes('network') || reason.includes('connection')) {
+                errorMessage = 'Erreur de connexion. Vérifiez votre connexion internet et réessayez.';
+            } else if (reason.includes('refused') || reason.includes('rejected')) {
+                errorMessage = 'La transaction a été refusée par votre opérateur. Contactez votre service client.';
+            } else {
+                errorMessage = 'Erreur de paiement: ' + reason + '. Veuillez réessayer.';
+            }
+        }
+
+        alert(errorMessage);
     });
 
     // Écouter la fermeture du widget

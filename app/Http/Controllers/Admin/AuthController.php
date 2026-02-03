@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use App\Models\Admin;
 
 class AuthController extends Controller
 {
@@ -27,16 +27,34 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // Ajouter la condition que l'utilisateur doit être admin
-        $credentials['role'] = 'admin';
+        // Vérifier si l'admin existe
+        $admin = Admin::where('email', $credentials['email'])->first();
 
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
+        if (!$admin) {
+            return back()->withErrors([
+                'email' => 'Aucun compte administrateur trouvé avec cet email.',
+            ])->withInput($request->only('email'));
+        }
+
+        // Vérifier si le compte est actif
+        if ($admin->status !== 'active') {
+            return back()->withErrors([
+                'email' => 'Votre compte a été désactivé. Contactez le super administrateur.',
+            ])->withInput($request->only('email'));
+        }
+
+        // Tentative de connexion avec le guard admin
+        if (Auth::guard('admin')->attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
+
+            // Mettre à jour la date de dernière connexion
+            $admin->update(['last_login_at' => now()]);
+
             return redirect()->intended(route('admin.dashboard'));
         }
 
         return back()->withErrors([
-            'email' => 'Identifiants invalides ou accès non autorisé.',
+            'email' => 'Identifiants invalides.',
         ])->withInput($request->only('email'));
     }
 
@@ -45,7 +63,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('admin.login')->with('success', 'Déconnexion réussie.');
@@ -81,20 +99,21 @@ class AuthController extends Controller
         // Validation des données
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:admins,email',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Créer l'utilisateur admin
-        $user = User::create([
+        // Créer l'administrateur
+        $admin = Admin::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'admin',
+            'password' => $validated['password'], // Le mutateur dans le modèle s'occupe du hash
+            'is_super_admin' => true, // Premier admin créé via token = super admin
+            'status' => 'active',
         ]);
 
         // Connecter automatiquement le nouvel admin
-        Auth::login($user);
+        Auth::guard('admin')->login($admin);
 
         return redirect()->route('admin.dashboard')->with('success', 'Compte administrateur créé avec succès !');
     }
