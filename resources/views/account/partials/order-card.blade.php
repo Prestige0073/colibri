@@ -285,6 +285,7 @@
         padding: 1.25rem 1.5rem;
         display: flex;
         gap: 1.5rem;
+        text-align: left;
     }
 
     .order-items {
@@ -355,6 +356,8 @@
     .order-items-more {
         display: flex;
         align-items: center;
+        justify-content: flex-start;
+        text-align: left;
         gap: 0.5rem;
         color: var(--orders-text-muted, #636e72);
         font-size: 0.85rem;
