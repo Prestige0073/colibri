@@ -195,7 +195,7 @@
                                 </select>
                             </div>
 
-                            <div id="pdf_field" class="admin-form-group">
+                            <div id="pdf_field" class="admin-form-group" style="display:none;">
                                 <label class="admin-form-label">
                                     <i class="fas fa-file-pdf text-danger"></i>Fichier PDF
                                 </label>
@@ -1016,8 +1016,9 @@ function toggleContentFields() {
         audioField.style.display = '';
         document.getElementById('pdf').value = '';
     } else {
-        pdfField.style.display = '';
+        pdfField.style.display = 'none';
         audioField.style.display = 'none';
+        document.getElementById('pdf').value = '';
     }
 }
 

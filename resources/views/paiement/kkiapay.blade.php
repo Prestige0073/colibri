@@ -42,9 +42,6 @@
                     <div class="card-header text-white text-center py-4" style="background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);">
                         <img src="https://media.licdn.com/dms/image/v2/C5616AQGhqUtJMAG_Vg/profile-displaybackgroundimage-shrink_200_800/profile-displaybackgroundimage-shrink_200_800/0/1589537591763?e=2147483647&v=beta&t=eeZe2YGnp8gEnVySBHgSJ0WmFlQdidG-x2iKRM8i0a8" alt="KKiaPay" style="max-height: 60px; border-radius: 8px;" class="mb-2">
                         <h4 class="mb-1">Paiement sécurisé</h4>
-                        @if(config('services.kkiapay.sandbox'))
-                            <p class="mb-0 small opacity-75">Mode Sandbox (Test)</p>
-                        @endif
                     </div>
                     <div class="card-body p-4">
                         <div class="alert alert-info border-0 mb-4">

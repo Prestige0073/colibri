@@ -103,7 +103,7 @@ class Commande extends Model
      */
     public function isOnlinePayment()
     {
-        return in_array($this->payment_method, ['kkiapay', 'paypal', 'test']);
+        return in_array($this->payment_method, ['kkiapay', 'paypal']);
     }
 
     /**

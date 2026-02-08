@@ -109,13 +109,6 @@ Route::middleware('auth')->group(function () {
     Route::get('paiement/paypal/{inscription}', [PaiementController::class, 'paypal'])->name('paiement.paypal');
     Route::get('paiement/annuler/{inscription}', [PaiementController::class, 'annuler'])->name('paiement.annuler');
 
-    // Routes pour les paiements TEST/SIMULATION
-    Route::get('paiement/test/formation/{inscription}', [PaiementController::class, 'testFormation'])->name('paiement.test.formation');
-    Route::post('paiement/test/formation/{inscription}/validate', [PaiementController::class, 'testFormationValidate'])->name('paiement.test.formation.validate');
-
-    Route::get('paiement/test/catalogue/{commande}', [PaiementController::class, 'testCatalogue'])->name('paiement.test.catalogue');
-    Route::post('paiement/test/catalogue/{commande}/validate', [PaiementController::class, 'testCatalogueValidate'])->name('paiement.test.catalogue.validate');
-
     // Paiements pour commandes (catalogue)
     Route::get('paiement/catalogue/kkiapay/{commande}', [PaiementController::class, 'catalogueKkiapay'])->name('paiement.catalogue.kkiapay');
     Route::get('paiement/catalogue/paypal/{commande}', [PaiementController::class, 'cataloguePaypal'])->name('paiement.catalogue.paypal');

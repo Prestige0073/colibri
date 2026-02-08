@@ -194,7 +194,7 @@ class PanierController extends Controller
     public function traiterPaiement(Request $request)
     {
         $request->validate([
-            'payment_method' => 'required|in:kkiapay,paypal,livraison,test',
+            'payment_method' => 'required|in:kkiapay,paypal,livraison',
         ]);
 
         $user = Auth::user();
@@ -319,8 +319,6 @@ class PanierController extends Controller
 
         // Rediriger vers le gestionnaire de paiement approprié
         switch ($paymentMethod) {
-            case 'test':
-                return redirect()->route('paiement.test.catalogue', ['commande' => $commande->id]);
             case 'kkiapay':
                 return redirect()->route('paiement.catalogue.kkiapay', ['commande' => $commande->id]);
             case 'paypal':

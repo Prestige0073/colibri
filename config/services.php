@@ -39,7 +39,13 @@ return [
         'public_key' => env('KKIAPAY_PUBLIC_KEY'),
         'private_key' => env('KKIAPAY_PRIVATE_KEY'),
         'secret' => env('KKIAPAY_SECRET'),
-        'sandbox' => env('KKIAPAY_SANDBOX', true),
+        'sandbox' => env('KKIAPAY_SANDBOX', false),
+    ],
+
+    'paypal' => [
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'client_secret' => env('PAYPAL_CLIENT_SECRET'),
+        'sandbox' => env('PAYPAL_SANDBOX', true),
     ],
 
 ];

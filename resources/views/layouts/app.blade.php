@@ -226,11 +226,9 @@
                                         class="dropdown-item{{ request()->routeIs('account.bibliotheque') ? ' active' : '' }}"><i
                                             class="fa fa-book-reader me-1"></i> Ma bibliothèque</a>
                                     <div class="dropdown-divider"></div>
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item"><i
-                                            class="fa fa-sign-out-alt me-1"></i> Déconnexion</button>
-                                    </form>
+                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#navLogoutModal">
+                                        <i class="fa fa-sign-out-alt me-1"></i> Déconnexion
+                                    </button>
                                 @endauth
                                 @guest
                                     <a href="{{ route('login') }}"
@@ -289,6 +287,30 @@
     <!-- Alertes d'accès expiré pour les utilisateurs -->
     @include('partials.expired-access-alert')
 
+    <!-- Toasts de session (messages flash) -->
+    <div class="toast-container-custom">
+        @if(session('success'))
+            <div class="toast show align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+                </div>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="toast show align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+                </div>
+            </div>
+        @endif
+    </div>
+
     <!-- Contenu de la page -->
     @yield('content')
 
@@ -330,29 +352,6 @@
                     <h6 class="text-light">09h00 - 12h00</h6>
                     <p class="mb-1">Dimanche</p>
                     <h6 class="text-light">Fermé</h6>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h4 class="text-light mb-4">Galerie</h4>
-                    <div class="row g-2">
-                        <div class="col-4">
-                            <img class="img-fluid w-100" src="{{ asset('img/gallery-1.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid w-100" src="{{ asset('img/gallery-2.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid w-100" src="{{ asset('img/gallery-3.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid w-100" src="{{ asset('img/gallery-4.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid w-100" src="{{ asset('img/gallery-5.jpg') }}" alt="">
-                        </div>
-                        <div class="col-4">
-                            <img class="img-fluid w-100" src="{{ asset('img/gallery-6.jpg') }}" alt="">
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="copyright pt-5">
@@ -575,6 +574,32 @@
             }
         });
     </script>
+    @auth
+    <!-- Modal de confirmation de déconnexion -->
+    <div class="modal fade" id="navLogoutModal" tabindex="-1" aria-labelledby="navLogoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="navLogoutModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Voulez-vous vraiment vous déconnecter ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-2" data-bs-dismiss="modal">Annuler</button>
+                    <form method="POST" action="{{ route('logout') }}" id="navLogoutForm">
+                        @csrf
+                        <button type="submit" class="btn btn-danger rounded-2">
+                            <i class="fa fa-sign-out-alt me-1"></i> Se déconnecter
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endauth
+
     @stack('scripts')
 </body>
 

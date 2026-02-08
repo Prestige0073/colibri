@@ -224,14 +224,6 @@
                             </div>
                         </div>
 
-                        <div class="next-steps">
-                            <h4><i class="fa fa-info-circle"></i> Prochaines étapes</h4>
-                            <ul>
-                                <li><i class="fa fa-envelope"></i> Email de confirmation envoyé</li>
-                                <li><i class="fa fa-box"></i> Préparation de votre commande</li>
-                                <li><i class="fa fa-truck"></i> Livraison sous 2-5 jours</li>
-                            </ul>
-                        </div>
                     </div>
 
                     <div class="success-modal-footer">
@@ -748,12 +740,12 @@
         border-bottom: 1px dashed var(--orders-border);
     }
 
-    .order-number {
+    .summary-header .order-number {
         font-weight: 700;
         color: var(--orders-primary);
     }
 
-    .order-date {
+    .summary-header .order-date {
         color: var(--orders-text-muted);
         font-size: 0.85rem;
     }
@@ -769,7 +761,7 @@
         padding: 0.5rem 0;
     }
 
-    .item-info {
+    .summary-item .item-info {
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -777,17 +769,17 @@
         font-size: 0.9rem;
     }
 
-    .item-info i {
+    .summary-item .item-info i {
         color: var(--orders-text-muted);
     }
 
-    .item-details {
+    .summary-item .item-details {
         display: flex;
         align-items: center;
         gap: 0.75rem;
     }
 
-    .item-qty {
+    .summary-item .item-qty {
         background: var(--orders-primary-light);
         color: var(--orders-primary);
         padding: 0.15rem 0.5rem;
@@ -796,7 +788,7 @@
         font-weight: 600;
     }
 
-    .item-price {
+    .summary-item .item-price {
         font-weight: 600;
         color: var(--orders-text);
     }

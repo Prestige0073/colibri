@@ -281,7 +281,6 @@
         flex-shrink: 0;
     }
 
-    .payment-icon.test { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
     .payment-icon.kkiapay { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     .payment-icon.kkiapay-logo { background: #4361ee; border-radius: var(--radius-sm); }
     .payment-icon.paypal { background: linear-gradient(135deg, #0070ba 0%, #1546a0 100%); }
@@ -291,8 +290,6 @@
         font-size: 1.25rem;
         color: white;
     }
-
-    .payment-icon.test i { color: #e17055; }
 
     .payment-icon img {
         max-width: 36px;
@@ -342,7 +339,6 @@
     .payment-badge.visa { background: #1a1f71; color: white; }
     .payment-badge.world { background: #00457c; color: white; }
     .payment-badge.cod { background: var(--primary-green); color: white; }
-    .payment-badge.test { background: #fdcb6e; color: #333; }
 
 
     /* ============================================
@@ -1525,21 +1521,6 @@
                                     </div>
                                 </label>
 
-                                <!-- Mode Test -->
-                                <label class="payment-method" data-method="test">
-                                    <input type="radio" name="payment_option" value="test">
-                                    <div class="payment-radio"></div>
-                                    <div class="payment-icon test">
-                                        <i class="fas fa-flask"></i>
-                                    </div>
-                                    <div class="payment-details">
-                                        <div class="payment-name">Mode Test</div>
-                                        <div class="payment-desc">Paiement simulé (développement)</div>
-                                        <div class="payment-badges">
-                                            <span class="payment-badge test">Simulation</span>
-                                        </div>
-                                    </div>
-                                </label>
                             </div>
 
                             <!-- Formulaire de livraison -->
@@ -1745,13 +1726,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     btnText.textContent = 'Payer avec Kkiapay';
                 } else if (selectedMethod === 'paypal') {
                     btnText.textContent = 'Payer avec PayPal';
-                } else if (selectedMethod === 'test') {
-                    btnText.textContent = 'Paiement test';
                 }
             }
 
             // Activer le bouton
             submitBtn.disabled = false;
+
+            // Scroll fluide vers la section appropriee
+            setTimeout(function() {
+                if (selectedMethod === 'livraison' && deliveryForm) {
+                    deliveryForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300);
         });
     });
 

@@ -48,22 +48,6 @@
                             <input type="hidden" name="inscription_id" value="{{ $inscription->id }}">
 
                             <div class="row g-3 justify-content-center">
-                                <!-- Mode Test -->
-                                <div class="col-md-4">
-                                    <input type="radio" class="btn-check" name="payment_method" id="test" value="test" required>
-                                    <label class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4" for="test">
-                                        <div class="mb-3">
-                                            <i class="fa fa-flask fa-4x text-warning"></i>
-                                        </div>
-                                        <h5 class="mb-2">Mode Test</h5>
-                                        <small class="text-muted text-center">Paiement fictif pour tester</small>
-                                        <div class="mt-2">
-                                            <span class="badge bg-warning text-dark">SIMULATION</span>
-                                            <span class="badge bg-info">GRATUIT</span>
-                                        </div>
-                                    </label>
-                                </div>
-
                                 <!-- Kkiapay -->
                                 <div class="col-md-4">
                                     <input type="radio" class="btn-check" name="payment_method" id="kkiapay" value="kkiapay" required>
