@@ -313,7 +313,7 @@ class PaiementController extends Controller
         $commande->update([
             'paiement_valide' => true,
             'reference_paiement' => $transactionId,
-            'statut' => \App\Models\Commande::STATUT_CONFIRMED,
+            'statut' => \App\Models\Commande::STATUT_PAID,
         ]);
 
         Log::info('Callback KKiaPay Catalogue: Paiement validé avec succès', [
@@ -412,7 +412,7 @@ class PaiementController extends Controller
         $commande->update([
             'paiement_valide' => true,
             'reference_paiement' => $transactionId,
-            'statut' => \App\Models\Commande::STATUT_CONFIRMED,
+            'statut' => \App\Models\Commande::STATUT_PAID,
             'payment_method' => 'paypal',
         ]);
 
@@ -631,7 +631,7 @@ class PaiementController extends Controller
         $commande->update([
             'paiement_valide' => true,
             'reference_paiement' => $reference,
-            'statut' => \App\Models\Commande::STATUT_CONFIRMED,
+            'statut' => \App\Models\Commande::STATUT_PAID,
             'payment_method' => 'test',
         ]);
 

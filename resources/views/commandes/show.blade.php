@@ -7,63 +7,76 @@
         // Configuration des statuts
         $rawStatus = strtolower($commande->statut ?? 'pending');
         $statusLabel = $commande->statut_label ?? ucfirst($rawStatus);
+        $isOnlinePayment = $commande->isOnlinePayment();
+        $isCOD = $commande->isCOD();
 
         $statusConfig = [
-            'pending' => [
-                'icon' => 'fa-hourglass-start',
-                'color' => '#95a5a6',
-                'bg' => 'linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)',
-                'bgLight' => '#ecf0f1',
-                'label' => 'En attente de paiement',
-                'step' => 1
-            ],
-            'confirmed' => [
+            // ACHAT EN LIGNE - Terminé
+            'paid' => [
                 'icon' => 'fa-check-circle',
                 'color' => '#27ae60',
                 'bg' => 'linear-gradient(135deg, #27ae60 0%, #1e8449 100%)',
                 'bgLight' => '#d4edda',
-                'label' => 'Paiement confirmé',
-                'step' => 2
+                'label' => 'Payé',
+                'step' => 1
             ],
-            'en_preparation' => [
-                'icon' => 'fa-box-open',
+            // COMMANDE COD - Cycle
+            'pending' => [
+                'icon' => 'fa-clock',
                 'color' => '#f39c12',
                 'bg' => 'linear-gradient(135deg, #f39c12 0%, #d68910 100%)',
                 'bgLight' => '#fff8e6',
-                'label' => 'En préparation',
-                'step' => 3
+                'label' => 'En attente',
+                'step' => 1
             ],
-            'en_livraison' => [
-                'icon' => 'fa-truck',
+            'en_preparation' => [
+                'icon' => 'fa-box-open',
                 'color' => '#3498db',
                 'bg' => 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
                 'bgLight' => '#e3f2fd',
-                'label' => 'En cours de livraison',
-                'step' => 4
+                'label' => 'En préparation',
+                'step' => 2
+            ],
+            'en_livraison' => [
+                'icon' => 'fa-truck',
+                'color' => '#9b59b6',
+                'bg' => 'linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)',
+                'bgLight' => '#f3e5f5',
+                'label' => 'En livraison',
+                'step' => 3
             ],
             'livre' => [
                 'icon' => 'fa-check-double',
                 'color' => '#1e8449',
                 'bg' => 'linear-gradient(135deg, #1e8449 0%, #145a32 100%)',
                 'bgLight' => '#d5f4e6',
-                'label' => 'Commande livrée',
-                'step' => 5
+                'label' => 'Livré',
+                'step' => 4
             ],
             'livree' => [
                 'icon' => 'fa-check-double',
                 'color' => '#1e8449',
                 'bg' => 'linear-gradient(135deg, #1e8449 0%, #145a32 100%)',
                 'bgLight' => '#d5f4e6',
-                'label' => 'Commande livrée',
-                'step' => 5
+                'label' => 'Livré',
+                'step' => 4
             ],
             'annule' => [
                 'icon' => 'fa-times-circle',
                 'color' => '#e74c3c',
                 'bg' => 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
                 'bgLight' => '#fadbd8',
-                'label' => 'Commande annulée',
+                'label' => 'Annulé',
                 'step' => 0
+            ],
+            // Rétrocompatibilité
+            'confirmed' => [
+                'icon' => 'fa-check-circle',
+                'color' => '#27ae60',
+                'bg' => 'linear-gradient(135deg, #27ae60 0%, #1e8449 100%)',
+                'bgLight' => '#d4edda',
+                'label' => 'Payé',
+                'step' => 1
             ],
         ];
 
@@ -129,64 +142,120 @@
                     <!-- Timeline de suivi -->
                     <div class="order-section order-tracking">
                         <div class="section-header">
-                            <h2><i class="fa fa-route"></i> Suivi de votre commande</h2>
+                            @if($isOnlinePayment)
+                                <h2><i class="fa fa-shopping-bag"></i> Détail de votre achat</h2>
+                            @else
+                                <h2><i class="fa fa-route"></i> Suivi de votre commande</h2>
+                            @endif
                         </div>
 
-                        <div class="tracking-timeline">
-                            <div class="timeline-step {{ $currentStep >= 1 ? 'completed' : '' }} {{ $currentStep == 1 ? 'active' : '' }}">
-                                <div class="step-indicator">
-                                    <div class="step-icon">
-                                        <i class="fa fa-clipboard-check"></i>
+                        @if($isOnlinePayment)
+                            {{-- ACHAT EN LIGNE: Pas de timeline, juste le statut --}}
+                            <div class="online-payment-status">
+                                <div class="payment-success-box" style="background: {{ $config['bgLight'] }}; border-left: 4px solid {{ $config['color'] }}; padding: 1.5rem; border-radius: 0.75rem;">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <div style="width: 50px; height: 50px; background: {{ $config['bg'] }}; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fa {{ $config['icon'] }}" style="color: white; font-size: 1.25rem;"></i>
+                                        </div>
+                                        <div>
+                                            <h4 style="margin: 0 0 0.25rem; font-size: 1.1rem; color: {{ $config['color'] }};">
+                                                @if($rawStatus === 'paid' || $rawStatus === 'confirmed')
+                                                    Achat terminé
+                                                @elseif($rawStatus === 'annule')
+                                                    Achat annulé
+                                                @else
+                                                    {{ $config['label'] }}
+                                                @endif
+                                            </h4>
+                                            <p style="margin: 0; color: #636e72; font-size: 0.9rem;">
+                                                @if($rawStatus === 'paid' || $rawStatus === 'confirmed')
+                                                    Paiement reçu le {{ $commande->updated_at->format('d/m/Y à H:i') }}. Vos documents sont disponibles dans votre bibliothèque.
+                                                @elseif($rawStatus === 'annule')
+                                                    Cette commande a été annulée.
+                                                @else
+                                                    Paiement en cours de traitement.
+                                                @endif
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div class="step-line"></div>
-                                </div>
-                                <div class="step-content">
-                                    <h4>Commande reçue</h4>
-                                    <p>Votre commande a été enregistrée</p>
-                                    @if($currentStep >= 1)
-                                        <span class="step-date">{{ $commande->created_at->format('d/m/Y H:i') }}</span>
+                                    @if(($rawStatus === 'paid' || $rawStatus === 'confirmed') && $commande->reference_paiement)
+                                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                                            <span style="font-size: 0.8rem; color: #636e72;">
+                                                <i class="fa fa-receipt"></i> Réf: {{ $commande->reference_paiement }}
+                                            </span>
+                                            <span style="font-size: 0.8rem; color: #636e72;">
+                                                <i class="fa fa-credit-card"></i> {{ strtoupper($commande->payment_method ?? 'En ligne') }}
+                                            </span>
+                                        </div>
                                     @endif
                                 </div>
-                            </div>
 
-                            <div class="timeline-step {{ $currentStep >= 2 ? 'completed' : '' }} {{ $currentStep == 2 ? 'active' : '' }}">
-                                <div class="step-indicator">
-                                    <div class="step-icon">
-                                        <i class="fa fa-box"></i>
+                                @if($rawStatus === 'paid' || $rawStatus === 'confirmed')
+                                    <div style="margin-top: 1rem; text-align: center;">
+                                        <a href="{{ route('account.bibliotheque') }}" class="btn btn-success btn-sm" style="border-radius: 2rem; padding: 0.5rem 1.5rem;">
+                                            <i class="fa fa-book-open"></i> Accéder à ma bibliothèque
+                                        </a>
                                     </div>
-                                    <div class="step-line"></div>
-                                </div>
-                                <div class="step-content">
-                                    <h4>Préparation</h4>
-                                    <p>Nous préparons vos livres</p>
-                                </div>
+                                @endif
                             </div>
-
-                            <div class="timeline-step {{ $currentStep >= 3 ? 'completed' : '' }} {{ $currentStep == 3 ? 'active' : '' }}">
-                                <div class="step-indicator">
-                                    <div class="step-icon">
-                                        <i class="fa fa-truck"></i>
+                        @else
+                            {{-- COMMANDE COD: Timeline de livraison --}}
+                            <div class="tracking-timeline">
+                                <div class="timeline-step {{ $currentStep >= 1 ? 'completed' : '' }} {{ $currentStep == 1 ? 'active' : '' }}">
+                                    <div class="step-indicator">
+                                        <div class="step-icon">
+                                            <i class="fa fa-clipboard-check"></i>
+                                        </div>
+                                        <div class="step-line"></div>
                                     </div>
-                                    <div class="step-line"></div>
-                                </div>
-                                <div class="step-content">
-                                    <h4>En livraison</h4>
-                                    <p>Votre commande est en route</p>
-                                </div>
-                            </div>
-
-                            <div class="timeline-step {{ $currentStep >= 4 ? 'completed' : '' }} {{ $currentStep == 4 ? 'active' : '' }}">
-                                <div class="step-indicator">
-                                    <div class="step-icon">
-                                        <i class="fa fa-home"></i>
+                                    <div class="step-content">
+                                        <h4>Commande reçue</h4>
+                                        <p>En attente de traitement</p>
+                                        @if($currentStep >= 1)
+                                            <span class="step-date">{{ $commande->created_at->format('d/m/Y H:i') }}</span>
+                                        @endif
                                     </div>
                                 </div>
-                                <div class="step-content">
-                                    <h4>Livrée</h4>
-                                    <p>Commande remise avec succès</p>
+
+                                <div class="timeline-step {{ $currentStep >= 2 ? 'completed' : '' }} {{ $currentStep == 2 ? 'active' : '' }}">
+                                    <div class="step-indicator">
+                                        <div class="step-icon">
+                                            <i class="fa fa-box"></i>
+                                        </div>
+                                        <div class="step-line"></div>
+                                    </div>
+                                    <div class="step-content">
+                                        <h4>En préparation</h4>
+                                        <p>Nous préparons vos livres</p>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-step {{ $currentStep >= 3 ? 'completed' : '' }} {{ $currentStep == 3 ? 'active' : '' }}">
+                                    <div class="step-indicator">
+                                        <div class="step-icon">
+                                            <i class="fa fa-truck"></i>
+                                        </div>
+                                        <div class="step-line"></div>
+                                    </div>
+                                    <div class="step-content">
+                                        <h4>En livraison</h4>
+                                        <p>Votre commande est en route</p>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-step {{ $currentStep >= 4 ? 'completed' : '' }} {{ $currentStep == 4 ? 'active' : '' }}">
+                                    <div class="step-indicator">
+                                        <div class="step-icon">
+                                            <i class="fa fa-home"></i>
+                                        </div>
+                                    </div>
+                                    <div class="step-content">
+                                        <h4>Livré</h4>
+                                        <p>Paiement à la réception</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
 
                     <!-- Articles commandés -->

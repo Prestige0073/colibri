@@ -9,13 +9,27 @@ class Commande extends Model
     use HasFactory;
 
     /**
-     * Statuts valides pour une commande
+     * ═══════════════════════════════════════════════════════
+     * ACHAT EN LIGNE (KKiaPay, PayPal, etc.) - Paiement immédiat
+     * L'utilisateur a déjà payé → achat terminé, documents accessibles
+     * ═══════════════════════════════════════════════════════
      */
-    const STATUT_PENDING = 'pending';           // En attente de paiement
-    const STATUT_CONFIRMED = 'confirmed';       // Commande confirmée (payée)
+    const STATUT_PAID = 'paid';                 // Achat payé et terminé
+
+    /**
+     * ═══════════════════════════════════════════════════════
+     * COMMANDE À LA LIVRAISON (COD) - Cycle de livraison
+     * L'utilisateur n'a pas encore payé → livraison puis encaissement
+     * ═══════════════════════════════════════════════════════
+     */
+    const STATUT_PENDING = 'pending';           // En attente (commande reçue)
     const STATUT_EN_PREPARATION = 'en_preparation'; // En préparation
     const STATUT_EN_LIVRAISON = 'en_livraison'; // En cours de livraison
-    const STATUT_LIVRE = 'livre';               // Livré
+    const STATUT_LIVRE = 'livre';               // Livré et payé à réception
+
+    /**
+     * COMMUN
+     */
     const STATUT_ANNULE = 'annule';             // Annulé
 
     protected $fillable = [
@@ -44,8 +58,8 @@ class Commande extends Model
     public function getStatutLabelAttribute()
     {
         $map = [
-            self::STATUT_PENDING => 'En attente de paiement',
-            self::STATUT_CONFIRMED => 'Commande confirmée',
+            self::STATUT_PAID => 'Payé',
+            self::STATUT_PENDING => 'En attente',
             self::STATUT_EN_PREPARATION => 'En préparation',
             self::STATUT_EN_LIVRAISON => 'En livraison',
             self::STATUT_LIVRE => 'Livré',
@@ -64,10 +78,10 @@ class Commande extends Model
     public function getStatutBadgeClassAttribute()
     {
         $map = [
-            self::STATUT_PENDING => 'bg-secondary',
-            self::STATUT_CONFIRMED => 'bg-success',
-            self::STATUT_EN_PREPARATION => 'bg-warning text-dark',
-            self::STATUT_EN_LIVRAISON => 'bg-info',
+            self::STATUT_PAID => 'bg-success',
+            self::STATUT_PENDING => 'bg-warning text-dark',
+            self::STATUT_EN_PREPARATION => 'bg-info',
+            self::STATUT_EN_LIVRAISON => 'bg-primary',
             self::STATUT_LIVRE => 'bg-success',
             self::STATUT_ANNULE => 'bg-danger',
         ];
@@ -82,5 +96,21 @@ class Commande extends Model
     public function isPaid()
     {
         return $this->paiement_valide === true;
+    }
+
+    /**
+     * Vérifie si c'est un achat en ligne (déjà payé)
+     */
+    public function isOnlinePayment()
+    {
+        return in_array($this->payment_method, ['kkiapay', 'paypal', 'test']);
+    }
+
+    /**
+     * Vérifie si c'est une commande à la livraison (COD)
+     */
+    public function isCOD()
+    {
+        return $this->payment_method === 'livraison' || $this->payment_method === null;
     }
 }

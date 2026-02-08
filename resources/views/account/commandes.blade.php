@@ -7,14 +7,16 @@
         $paidCommandeId = session('paid_commande_id') ?? request('payment_success');
         $paidCommande = $paidCommandeId ? $commandes->firstWhere('id', (int)$paidCommandeId) : null;
 
-        // Séparer les commandes
-        $delivered = $commandes->filter(fn($c) => in_array(strtolower($c->statut ?? ''), ['livre', 'livree']));
-        $active = $commandes->filter(fn($c) => !in_array(strtolower($c->statut ?? ''), ['livre', 'livree']));
+        // Séparer: Achats payés en ligne vs Commandes à la livraison
+        $achats = $commandes->filter(fn($c) => $c->isOnlinePayment() && $c->paiement_valide);
+        $commandesCOD = $commandes->filter(fn($c) => $c->isCOD());
+        $delivered = $commandesCOD->filter(fn($c) => in_array(strtolower($c->statut ?? ''), ['livre', 'livree']));
+        $activeCOD = $commandesCOD->filter(fn($c) => !in_array(strtolower($c->statut ?? ''), ['livre', 'livree', 'annule']));
 
         // Statistiques
         $totalCommandes = $commandes->count();
         $totalDepense = $commandes->where('paiement_valide', true)->sum('total');
-        $commandesEnCours = $active->count();
+        $commandesEnCours = $activeCOD->count();
     @endphp
 
     <div class="orders-page">
@@ -112,62 +114,62 @@
                 @else
                     <!-- Navigation onglets -->
                     <div class="orders-tabs">
-                        <button class="orders-tab active" data-tab="active">
-                            <i class="fa fa-clock"></i>
-                            <span>En cours</span>
-                            @if($active->count() > 0)
-                                <span class="tab-badge">{{ $active->count() }}</span>
+                        <button class="orders-tab active" data-tab="achats">
+                            <i class="fa fa-shopping-bag"></i>
+                            <span>Mes achats</span>
+                            @if($achats->count() > 0)
+                                <span class="tab-badge tab-badge-success">{{ $achats->count() }}</span>
                             @endif
                         </button>
-                        <button class="orders-tab" data-tab="delivered">
-                            <i class="fa fa-check-circle"></i>
-                            <span>Livrées</span>
-                            @if($delivered->count() > 0)
-                                <span class="tab-badge tab-badge-success">{{ $delivered->count() }}</span>
+                        <button class="orders-tab" data-tab="commandes">
+                            <i class="fa fa-truck"></i>
+                            <span>Commandes</span>
+                            @if($commandesCOD->count() > 0)
+                                <span class="tab-badge">{{ $commandesCOD->count() }}</span>
                             @endif
                         </button>
                         <button class="orders-tab" data-tab="all">
                             <i class="fa fa-list"></i>
-                            <span>Toutes</span>
+                            <span>Tout</span>
                         </button>
                     </div>
 
-                    <!-- Liste des commandes en cours -->
-                    <div class="orders-tab-content active" id="tab-active">
-                        @if($active->isEmpty())
+                    <!-- Onglet: Achats payés en ligne -->
+                    <div class="orders-tab-content active" id="tab-achats">
+                        @if($achats->isEmpty())
                             <div class="tab-empty">
-                                <i class="fa fa-check-double"></i>
-                                <p>Toutes vos commandes ont été livrées !</p>
+                                <i class="fa fa-shopping-bag"></i>
+                                <p>Aucun achat en ligne pour le moment</p>
                             </div>
                         @else
                             <div class="orders-list">
-                                @foreach ($active as $c)
+                                @foreach ($achats->sortByDesc('created_at') as $c)
                                     @include('account.partials.order-card', ['order' => $c, 'isRecentlyPaid' => $paidCommandeId && $c->id == $paidCommandeId])
                                 @endforeach
                             </div>
                         @endif
                     </div>
 
-                    <!-- Liste des commandes livrées -->
-                    <div class="orders-tab-content" id="tab-delivered">
-                        @if($delivered->isEmpty())
+                    <!-- Onglet: Commandes à la livraison (COD) -->
+                    <div class="orders-tab-content" id="tab-commandes">
+                        @if($commandesCOD->isEmpty())
                             <div class="tab-empty">
                                 <i class="fa fa-truck"></i>
-                                <p>Aucune commande livrée pour le moment</p>
+                                <p>Aucune commande à la livraison</p>
                             </div>
                         @else
                             <div class="orders-list">
-                                @foreach ($delivered as $c)
+                                @foreach ($commandesCOD->sortByDesc('created_at') as $c)
                                     @include('account.partials.order-card', ['order' => $c, 'isRecentlyPaid' => false])
                                 @endforeach
                             </div>
                         @endif
                     </div>
 
-                    <!-- Toutes les commandes -->
+                    <!-- Onglet: Toutes -->
                     <div class="orders-tab-content" id="tab-all">
                         <div class="orders-list">
-                            @foreach ($commandes as $c)
+                            @foreach ($commandes->sortByDesc('created_at') as $c)
                                 @include('account.partials.order-card', ['order' => $c, 'isRecentlyPaid' => $paidCommandeId && $c->id == $paidCommandeId])
                             @endforeach
                         </div>

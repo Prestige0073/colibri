@@ -5,12 +5,13 @@
 
 @section('content')
 @php
-    $totalPending = $users->sum(fn($u) => $u->commandes_active->where('statut', 'pending')->count());
-    $totalConfirmed = $users->sum(fn($u) => $u->commandes_active->where('statut', 'confirmed')->count());
-    $totalEnPreparation = $users->sum(fn($u) => $u->commandes_active->where('statut', 'en_preparation')->count());
-    $totalEnLivraison = $users->sum(fn($u) => $u->commandes_active->where('statut', 'en_livraison')->count());
-    $totalLivre = $users->sum(fn($u) => $u->commandes_archives->count());
-    $totalRevenue = $users->sum(fn($u) => $u->commandes_active->sum('total') + $u->commandes_archives->sum('total'));
+    $allCommandes = $users->flatMap(fn($u) => $u->commandes_active->merge($u->commandes_archives ?? collect()));
+    $totalPaid = $allCommandes->where('statut', 'paid')->count() + $allCommandes->where('statut', 'confirmed')->count();
+    $totalPending = $allCommandes->where('statut', 'pending')->count();
+    $totalEnPreparation = $allCommandes->where('statut', 'en_preparation')->count();
+    $totalEnLivraison = $allCommandes->where('statut', 'en_livraison')->count();
+    $totalLivre = $allCommandes->whereIn('statut', ['livre', 'livree'])->count();
+    $totalRevenue = $allCommandes->where('paiement_valide', true)->sum('total');
 @endphp
 
 <!-- Page Header -->
@@ -33,27 +34,27 @@
 
 <!-- Stats Cards -->
 <div class="admin-stats-row">
-    <div class="admin-stat-card admin-stat-secondary">
-        <div class="admin-stat-icon">
-            <i class="fas fa-hourglass-start"></i>
-        </div>
-        <div class="admin-stat-content">
-            <span class="admin-stat-value">{{ $totalPending }}</span>
-            <span class="admin-stat-label">En attente</span>
-        </div>
-    </div>
-
     <div class="admin-stat-card admin-stat-success">
         <div class="admin-stat-icon">
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="admin-stat-content">
-            <span class="admin-stat-value">{{ $totalConfirmed }}</span>
-            <span class="admin-stat-label">Confirmées</span>
+            <span class="admin-stat-value">{{ $totalPaid }}</span>
+            <span class="admin-stat-label">Achats payés</span>
         </div>
     </div>
 
     <div class="admin-stat-card admin-stat-warning">
+        <div class="admin-stat-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="admin-stat-content">
+            <span class="admin-stat-value">{{ $totalPending }}</span>
+            <span class="admin-stat-label">COD en attente</span>
+        </div>
+    </div>
+
+    <div class="admin-stat-card admin-stat-info">
         <div class="admin-stat-icon">
             <i class="fas fa-box-open"></i>
         </div>
@@ -63,7 +64,7 @@
         </div>
     </div>
 
-    <div class="admin-stat-card admin-stat-info">
+    <div class="admin-stat-card admin-stat-primary">
         <div class="admin-stat-icon">
             <i class="fas fa-truck"></i>
         </div>
@@ -105,12 +106,18 @@
                     </label>
                     <select name="statut" class="admin-select">
                         <option value="">Tous les statuts</option>
-                        <option value="pending" {{ request('statut') === 'pending' ? 'selected' : '' }}>En attente de paiement</option>
-                        <option value="confirmed" {{ request('statut') === 'confirmed' ? 'selected' : '' }}>Confirmé</option>
-                        <option value="en_preparation" {{ request('statut') === 'en_preparation' ? 'selected' : '' }}>En préparation</option>
-                        <option value="en_livraison" {{ request('statut') === 'en_livraison' ? 'selected' : '' }}>En livraison</option>
-                        <option value="livre" {{ request('statut') === 'livre' ? 'selected' : '' }}>Livré</option>
-                        <option value="annule" {{ request('statut') === 'annule' ? 'selected' : '' }}>Annulé</option>
+                        <optgroup label="Achats en ligne">
+                            <option value="paid" {{ request('statut') === 'paid' ? 'selected' : '' }}>Payé</option>
+                        </optgroup>
+                        <optgroup label="Commandes livraison">
+                            <option value="pending" {{ request('statut') === 'pending' ? 'selected' : '' }}>En attente</option>
+                            <option value="en_preparation" {{ request('statut') === 'en_preparation' ? 'selected' : '' }}>En préparation</option>
+                            <option value="en_livraison" {{ request('statut') === 'en_livraison' ? 'selected' : '' }}>En livraison</option>
+                            <option value="livre" {{ request('statut') === 'livre' ? 'selected' : '' }}>Livré</option>
+                        </optgroup>
+                        <optgroup label="Autre">
+                            <option value="annule" {{ request('statut') === 'annule' ? 'selected' : '' }}>Annulé</option>
+                        </optgroup>
                     </select>
                 </div>
 
@@ -232,17 +239,8 @@
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li class="dropdown-header">Actions massives</li>
+                                <li class="dropdown-header">Actions massives (commandes COD)</li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form method="POST" action="{{ route('admin.commandes.bulkStatus', $user->id) }}">
-                                        @csrf
-                                        <input type="hidden" name="statut" value="confirmed">
-                                        <button type="submit" class="dropdown-item">
-                                            <i class="fas fa-check-circle text-success me-2"></i>Confirmer les paiements
-                                        </button>
-                                    </form>
-                                </li>
                                 <li>
                                     <form method="POST" action="{{ route('admin.commandes.bulkStatus', $user->id) }}">
                                         @csrf
@@ -297,10 +295,11 @@
                                 @foreach($user->commandes_active as $c)
                                     @php
                                         $statusConfig = match($c->statut) {
-                                            'pending' => ['class' => 'secondary', 'icon' => 'fa-hourglass-start', 'label' => 'En attente de paiement'],
-                                            'confirmed' => ['class' => 'success', 'icon' => 'fa-check-circle', 'label' => 'Confirmé'],
-                                            'en_preparation' => ['class' => 'warning', 'icon' => 'fa-box-open', 'label' => 'En préparation'],
-                                            'en_livraison' => ['class' => 'info', 'icon' => 'fa-truck', 'label' => 'En livraison'],
+                                            'paid' => ['class' => 'success', 'icon' => 'fa-check-circle', 'label' => 'Payé'],
+                                            'confirmed' => ['class' => 'success', 'icon' => 'fa-check-circle', 'label' => 'Payé'],
+                                            'pending' => ['class' => 'warning', 'icon' => 'fa-clock', 'label' => 'En attente'],
+                                            'en_preparation' => ['class' => 'info', 'icon' => 'fa-box-open', 'label' => 'En préparation'],
+                                            'en_livraison' => ['class' => 'primary', 'icon' => 'fa-truck', 'label' => 'En livraison'],
                                             'livre', 'livree' => ['class' => 'success', 'icon' => 'fa-check-double', 'label' => 'Livré'],
                                             'annule' => ['class' => 'danger', 'icon' => 'fa-times-circle', 'label' => 'Annulé'],
                                             default => ['class' => 'secondary', 'icon' => 'fa-info-circle', 'label' => $c->statut_label ?? $c->statut]

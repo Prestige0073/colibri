@@ -1,19 +1,27 @@
 @php
-    // Déterminer le statut et les styles
     $rawStatus = strtolower($order->statut ?? 'pending');
     $statusLabel = $order->statut_label ?? ucfirst($rawStatus);
+    $isOnline = $order->isOnlinePayment();
+    $isCOD = $order->isCOD();
 
-    // Configuration des statuts
     $statusConfig = [
+        // Achat en ligne
+        'paid' => [
+            'class' => 'status-paid',
+            'icon' => 'fa-check-circle',
+            'color' => '#27ae60',
+            'bg' => '#d4edda'
+        ],
+        // Commande COD
         'pending' => [
             'class' => 'status-pending',
             'icon' => 'fa-clock',
             'color' => '#f39c12',
             'bg' => '#fff8e6'
         ],
-        'confirmed' => [
-            'class' => 'status-confirmed',
-            'icon' => 'fa-check',
+        'en_preparation' => [
+            'class' => 'status-preparation',
+            'icon' => 'fa-box-open',
             'color' => '#3498db',
             'bg' => '#e3f2fd'
         ],
@@ -25,15 +33,28 @@
         ],
         'livre' => [
             'class' => 'status-delivered',
-            'icon' => 'fa-check-circle',
-            'color' => '#27ae60',
-            'bg' => '#e8f5e9'
+            'icon' => 'fa-check-double',
+            'color' => '#1e8449',
+            'bg' => '#d5f4e6'
         ],
         'livree' => [
             'class' => 'status-delivered',
+            'icon' => 'fa-check-double',
+            'color' => '#1e8449',
+            'bg' => '#d5f4e6'
+        ],
+        'annule' => [
+            'class' => 'status-cancelled',
+            'icon' => 'fa-times-circle',
+            'color' => '#e74c3c',
+            'bg' => '#fadbd8'
+        ],
+        // Rétrocompatibilité
+        'confirmed' => [
+            'class' => 'status-paid',
             'icon' => 'fa-check-circle',
             'color' => '#27ae60',
-            'bg' => '#e8f5e9'
+            'bg' => '#d4edda'
         ],
     ];
 
@@ -51,8 +72,13 @@
     <div class="order-card-header">
         <div class="order-info">
             <div class="order-number">
-                <i class="fa fa-receipt"></i>
-                Commande #{{ $order->id }}
+                @if($isOnline)
+                    <i class="fa fa-shopping-bag"></i>
+                    Achat #{{ $order->id }}
+                @else
+                    <i class="fa fa-truck"></i>
+                    Commande #{{ $order->id }}
+                @endif
             </div>
             <div class="order-date">
                 <i class="fa fa-calendar-alt"></i>
@@ -111,6 +137,13 @@
     </div>
 
     <div class="order-card-footer">
+        @if($isOnline && $order->paiement_valide)
+            <a href="{{ route('account.bibliotheque') }}" class="order-btn order-btn-library">
+                <i class="fa fa-book-open"></i>
+                <span>Ma bibliothèque</span>
+            </a>
+        @endif
+
         <a href="{{ route('commandes.show', $order->id) }}" class="order-btn order-btn-primary">
             <i class="fa fa-eye"></i>
             <span>Voir détails</span>
@@ -412,6 +445,17 @@
         color: white;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(30, 122, 47, 0.3);
+    }
+
+    .order-btn-library {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+    }
+
+    .order-btn-library:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
     }
 
     .order-quick-actions {

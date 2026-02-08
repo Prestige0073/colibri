@@ -239,15 +239,17 @@ class PanierController extends Controller
                     ];
                 }
 
-                // Créer la commande COD
+                // Créer la commande COD (paiement à la livraison)
                 $commande = \App\Models\Commande::create([
                     'user_id' => $user->id,
                     'nom' => $user->name,
                     'telephone' => $user->phone ?? '',
                     'adresse' => $user->address ?? '',
                     'total' => $total,
-                    'statut' => 'pending',
-                    'idempotency_key' => uniqid('cod_', true), // Clé unique pour éviter les doublons
+                    'statut' => \App\Models\Commande::STATUT_PENDING,
+                    'payment_method' => 'livraison',
+                    'paiement_valide' => false,
+                    'idempotency_key' => uniqid('cod_', true),
                 ]);
 
                 // Créer les items de la commande
