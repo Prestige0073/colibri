@@ -219,6 +219,18 @@
                                     <a href="{{ route('account.profil') }}"
                                         class="dropdown-item{{ request()->routeIs('account.profil') ? ' active' : '' }}"><i
                                             class="fa fa-user me-1"></i> Profil utilisateur</a>
+                                    <a href="{{ route('account.commandes') }}"
+                                        class="dropdown-item{{ request()->routeIs('account.commandes') ? ' active' : '' }}"><i
+                                            class="fa fa-shopping-bag me-1"></i> Mes commandes</a>
+                                    <a href="{{ route('account.bibliotheque') }}"
+                                        class="dropdown-item{{ request()->routeIs('account.bibliotheque') ? ' active' : '' }}"><i
+                                            class="fa fa-book-reader me-1"></i> Ma bibliothèque</a>
+                                    <div class="dropdown-divider"></div>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item"><i
+                                            class="fa fa-sign-out-alt me-1"></i> Déconnexion</button>
+                                    </form>
                                 @endauth
                                 @guest
                                     <a href="{{ route('login') }}"
