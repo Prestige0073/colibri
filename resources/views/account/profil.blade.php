@@ -477,7 +477,7 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
-                <form method="POST" action="{{ route('account.profil.update') }}">
+                <form method="POST" action="{{ route('account.profil.update') }}" id="profilForm">
                     @csrf
                     <div class="modal-body" style="padding: 1.5rem;">
                         <div class="mb-3">
@@ -505,15 +505,17 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="phone" class="form-label fw-semibold">
+                            <label class="form-label fw-semibold">
                                 <i class="fa fa-phone-alt text-success me-1"></i>Téléphone
                             </label>
-                            <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                                   id="phone" name="phone" value="{{ old('phone', Auth::user()->phone) }}"
-                                   placeholder="Ex: +237 6XX XX XX XX"
-                                   style="border-radius: 10px; padding: 0.7rem 1rem;">
+                            @php
+                                $currentPhone = old('phone', Auth::user()->phone) ?? '';
+                                $profilPhoneParts = preg_match('/^(\+\d{1,4})\s*(.*)$/', $currentPhone, $m) ? [$m[1], $m[2]] : ['+229', $currentPhone];
+                            @endphp
+                            <div id="phone-container-profil" style="position: relative;"></div>
+                            <input type="hidden" name="phone" id="phone_full_profil">
                             @error('phone')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -1710,6 +1712,19 @@
 
             updateCountdowns();
             setInterval(updateCountdowns, 1000);
+
         });
+    </script>
+    <script src="{{ asset('js/phone-code-selector.js') }}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        PhoneCodeSelector.init({
+            container: '#phone-container-profil',
+            hiddenInput: '#phone_full_profil',
+            defaultCode: @json($profilPhoneParts[0]),
+            defaultNumber: @json($profilPhoneParts[1]),
+            formId: 'profilForm'
+        });
+    });
     </script>
 @endpush

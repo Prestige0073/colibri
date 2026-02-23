@@ -201,6 +201,13 @@
                         </a>
                     </li>
                     @endif
+
+                    <li class="sidebar-menu-item">
+                        <a href="{{ route('admin.donations.index') }}" class="sidebar-menu-link {{ request()->routeIs('admin.donations.*') ? 'active' : '' }}">
+                            <i class="fas fa-hand-holding-heart"></i>
+                            <span>Dons</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
             @endif
@@ -210,6 +217,13 @@
             <div class="sidebar-section">
                 <p class="sidebar-section-title">Gestion</p>
                 <ul class="sidebar-menu">
+                    <li class="sidebar-menu-item">
+                        <a href="{{ route('admin.banners.index') }}" class="sidebar-menu-link {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
+                            <i class="fas fa-images"></i>
+                            <span>Bannières</span>
+                        </a>
+                    </li>
+
                     @if(App\Services\PermissionService::canAccessModule('team'))
                     <li class="sidebar-menu-item">
                         <a href="{{ route('admin.team.index') }}" class="sidebar-menu-link {{ request()->routeIs('admin.team.*') ? 'active' : '' }}">

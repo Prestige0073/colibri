@@ -241,9 +241,19 @@
                             </div>
 
                         </div>
-                        <a href="{{ route('contact.index') }}"
-                            class="nav-item nav-link{{ request()->routeIs('contact.*') ? ' active' : '' }}"><i
-                                class="fa fa-envelope me-1"></i> Contact</a>
+                        <div class="nav-item dropdown">
+                            <a href="#"
+                                class="nav-link dropdown-toggle{{ request()->routeIs('contact.*') || request()->routeIs('donation.*') ? ' active' : '' }}"
+                                data-bs-toggle="dropdown"><i class="fa fa-envelope me-1"></i> Contact</a>
+                            <div class="dropdown-menu bg-light m-0">
+                                <a href="{{ route('contact.index') }}"
+                                    class="dropdown-item{{ request()->routeIs('contact.*') ? ' active' : '' }}"><i
+                                        class="fa fa-paper-plane me-1"></i> Nous écrire</a>
+                                <a href="{{ route('donation.index') }}"
+                                    class="dropdown-item{{ request()->routeIs('donation.*') ? ' active' : '' }}"><i
+                                        class="fa fa-hand-holding-heart me-1"></i> Faire un don</a>
+                            </div>
+                        </div>
                     </div>
                     <!-- Panier responsive : affiché une seule fois, badge toujours visible -->
                     <div class="ms-auto align-items-center d-flex">
@@ -323,9 +333,9 @@
                     <h4 class="text-light mb-4">Notre bureau</h4>
                     <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i> Abomey-Calavi – Cocotomey Tannou –
                         C/SB . Ms Vignon</p>
-                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+33 7 46 52 61 63</p>
-                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+229 01 66 54 78 08</p>
-                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>colibrilitteraire@gmail.com</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i><a href="tel:+33746526163" class="text-light text-decoration-none">+33 7 46 52 61 63</a></p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i><a href="tel:+22901665478008" class="text-light text-decoration-none">+229 01 66 54 78 08</a></p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i><a href="mailto:colibrilitteraire@gmail.com" class="text-light text-decoration-none">colibrilitteraire@gmail.com</a></p>
                     <div class="d-flex pt-3">
                         <a class="btn btn-square btn-success me-2" href="#"><i
                                 class="fab fa-x-twitter"></i></a>

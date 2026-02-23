@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Certificat;
 use App\Models\Formation;
+use App\Models\FormationInscription;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -29,7 +30,15 @@ class CertificationAdminController extends Controller
         // Récupérer tous les utilisateurs pour le formulaire
         $users = User::orderBy('name')->get();
 
-        return view('admin.certifications', compact('certificats', 'formations', 'users'));
+        // Demandes de certificat en attente (inscriptions terminées avec demande, sans certificat)
+        $demandesCertificat = FormationInscription::with(['user', 'formation'])
+            ->where('statut', 'termine')
+            ->where('certificat_demande', true)
+            ->whereDoesntHave('certificat')
+            ->orderBy('certificat_demande_at', 'desc')
+            ->get();
+
+        return view('admin.certifications', compact('certificats', 'formations', 'users', 'demandesCertificat'));
     }
 
     /**
@@ -38,6 +47,7 @@ class CertificationAdminController extends Controller
     public function generate(Request $request)
     {
         $request->validate([
+            'formation_inscription_id' => 'nullable|exists:formation_inscriptions,id',
             'nom_apprenant' => 'required|string|max:255',
             'email_apprenant' => 'nullable|email|max:255',
             'formation_id' => 'required|exists:formations,id',
@@ -63,6 +73,14 @@ class CertificationAdminController extends Controller
             'cachet.mimes' => 'Le cachet doit être au format PNG, JPG ou JPEG.',
         ]);
 
+        // Résoudre l'inscription et l'utilisateur si une demande est sélectionnée
+        $inscriptionId = $request->formation_inscription_id;
+        $userId = null;
+        if ($inscriptionId) {
+            $inscription = FormationInscription::with('user')->findOrFail($inscriptionId);
+            $userId = $inscription->user_id;
+        }
+
         // Générer le numéro de certificat unique
         $numeroCertificat = $this->generateNumeroCertificat();
 
@@ -75,6 +93,8 @@ class CertificationAdminController extends Controller
 
         // Créer le certificat (logo_path null = utiliser le logo par défaut)
         $certificat = Certificat::create([
+            'formation_inscription_id' => $inscriptionId,
+            'user_id' => $userId,
             'nom_manuel' => $request->nom_apprenant,
             'email_manuel' => $request->email_apprenant,
             'formation_id' => $request->formation_id,

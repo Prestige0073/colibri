@@ -37,10 +37,14 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Téléphone</label>
-                            <input type="tel" name="phone" class="form-control @error('phone') is-invalid @enderror"
-                                value="{{ old('phone') }}">
+                            @php
+                                $createPhone = old('phone', '') ?? '';
+                                $createPhoneParts = preg_match('/^(\+\d{1,4})\s*(.*)$/', $createPhone, $cm) ? [$cm[1], $cm[2]] : ['+229', old('phone_number', '')];
+                            @endphp
+                            <div id="phone-container-admin-create" style="position: relative;"></div>
+                            <input type="hidden" name="phone" id="phone_full_admin_create">
                             @error('phone')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -313,6 +317,19 @@
                 console.log('Role permissions:', data.permissions);
             });
     });
+
+</script>
+<script src="{{ asset('js/phone-code-selector.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    PhoneCodeSelector.init({
+        container: '#phone-container-admin-create',
+        hiddenInput: '#phone_full_admin_create',
+        defaultCode: @json($createPhoneParts[0]),
+        defaultNumber: @json($createPhoneParts[1]),
+        formId: 'adminForm'
+    });
+});
 </script>
 @endpush
 @endsection

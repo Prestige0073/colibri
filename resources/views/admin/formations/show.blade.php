@@ -57,14 +57,14 @@
                         <div class="col-md-3">
                             <div class="mb-3">
                                 <h6 class="text-muted mb-1">Prix</h6>
-                                <span class="badge bg-success fs-6">{{ fcfa($formation->prix) }}</span>
+                                <span class="badge bg-success fs-6">{{ $formation->est_gratuit || $formation->prix == 0 ? 'Gratuit' : fcfa($formation->prix) }}</span>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="mb-3">
                                 <h6 class="text-muted mb-1">Niveau</h6>
                                 <span class="badge bg-{{ $formation->niveau === 'debutant' ? 'info' : ($formation->niveau === 'intermediaire' ? 'warning' : 'danger') }} fs-6">
-                                    {{ ucfirst($formation->niveau) }}
+                                    {{ ['debutant' => 'Débutant', 'intermediaire' => 'Intermédiaire', 'avance' => 'Avancé'][$formation->niveau] ?? ucfirst($formation->niveau) }}
                                 </span>
                             </div>
                         </div>

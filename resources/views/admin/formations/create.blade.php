@@ -80,6 +80,20 @@
                         </div>
 
                         <div class="row">
+                            <!-- Niveau -->
+                            <div class="col-md-4 mb-3">
+                                <label for="niveau" class="form-label">Niveau</label>
+                                <select class="form-select @error('niveau') is-invalid @enderror" id="niveau" name="niveau">
+                                    <option value="">Choisir le niveau</option>
+                                    <option value="debutant" {{ old('niveau') === 'debutant' ? 'selected' : '' }}>Débutant</option>
+                                    <option value="intermediaire" {{ old('niveau') === 'intermediaire' ? 'selected' : '' }}>Intermédiaire</option>
+                                    <option value="avance" {{ old('niveau') === 'avance' ? 'selected' : '' }}>Avancé</option>
+                                </select>
+                                @error('niveau')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <!-- Catégorie -->
                             <div class="col-md-4 mb-3">
                                 <label for="categorie" class="form-label">Catégorie</label>

@@ -1036,6 +1036,40 @@
 @section('content')
 @php
     $totalQuestions = $questions->count();
+@endphp
+
+@if($totalQuestions === 0)
+    <div class="modal fade" id="noQuestionsModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border: none; border-radius: 16px; overflow: hidden;">
+                <div class="modal-header border-0" style="background: linear-gradient(135deg, #ff9800, #f57c00); padding: 1.5rem;">
+                    <h5 class="modal-title text-white">
+                        <i class="fa fa-exclamation-circle me-2"></i>Information
+                    </h5>
+                </div>
+                <div class="modal-body text-center py-4 px-4">
+                    <div style="font-size: 3.5rem; color: #ff9800; margin-bottom: 1rem;">
+                        <i class="fa fa-question-circle"></i>
+                    </div>
+                    <h4 class="mb-2">Aucune question disponible</h4>
+                    <p class="text-muted mb-0">Ce quiz ne contient pas encore de questions. Les résultats ne peuvent pas être affichés.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center pb-4">
+                    <a href="{{ route('formation.modules') }}" class="btn btn-success px-4" style="border-radius: 10px;">
+                        <i class="fa fa-arrow-left me-2"></i>Retour aux formations
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new bootstrap.Modal(document.getElementById('noQuestionsModal')).show();
+        });
+    </script>
+@else
+
+@php
     $correctCount = collect($questions)->filter(function($q) use ($userAnswers) {
         $selected = $userAnswers[$q->id] ?? null;
         return $q->isCorrectAnswer($selected);
@@ -1157,7 +1191,7 @@
         <div class="result-main">
             <!-- Correction Section -->
             <div class="correction-section-wrapper">
-                @if($quiz->afficher_reponses)
+                @if($quiz->afficher_reponses && $attempt->score >= 90)
                     <div class="correction-section">
                         <div class="correction-header">
                             <h2 class="correction-title">
@@ -1269,8 +1303,13 @@
                         <div class="no-correction-icon">
                             <i class="fa fa-lock"></i>
                         </div>
-                        <h3>Correction non disponible</h3>
-                        <p>La correction détaillée n'est pas disponible pour ce quiz. Contactez votre formateur pour plus d'informations.</p>
+                        @if($quiz->afficher_reponses && $attempt->score < 90)
+                            <h3>Correction verrouillée</h3>
+                            <p>La correction détaillée est disponible uniquement lorsque vous atteignez un score de 90% ou plus. Votre score actuel : <strong>{{ number_format($attempt->score, 0) }}%</strong>.</p>
+                        @else
+                            <h3>Correction non disponible</h3>
+                            <p>La correction détaillée n'est pas disponible pour ce quiz. Contactez votre formateur pour plus d'informations.</p>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -1317,7 +1356,7 @@
                                     <i class="fa fa-percentage"></i>
                                     Taux de réussite
                                 </span>
-                                <span class="detail-value">{{ number_format(($correctCount / $totalQuestions) * 100, 0) }}%</span>
+                                <span class="detail-value">{{ $totalQuestions > 0 ? number_format(($correctCount / $totalQuestions) * 100, 0) : 0 }}%</span>
                             </div>
                             <div class="detail-row">
                                 <span class="detail-label">
@@ -1421,4 +1460,5 @@
         </div>
     </div>
 </div>
+@endif
 @endsection

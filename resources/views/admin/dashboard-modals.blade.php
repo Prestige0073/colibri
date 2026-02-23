@@ -289,3 +289,145 @@
     </div>
 </div>
 @endif
+
+{{-- Modal Demandes de certificat --}}
+@if($demandesCertificat->isNotEmpty())
+<div class="modal fade" id="demandesCertificatModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-certificate me-2"></i>Demandes de certificat ({{ $demandesCertificat->count() }})
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Ces apprenants ont <strong>explicitement demande</strong> leur certificat. Veuillez les traiter en priorite.</span>
+                </div>
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Apprenant</th>
+                                <th>Formation</th>
+                                <th>Date de demande</th>
+                                <th>Date de fin</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($demandesCertificat as $insc)
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; background: linear-gradient(135deg, #f093fb, #f5576c); font-size: 0.75rem; font-weight: 600;">
+                                                {{ strtoupper(substr($insc->user->name ?? 'U', 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ $insc->user->name ?? 'N/A' }}</div>
+                                                <small class="text-muted">{{ $insc->user->email ?? '' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium">{{ $insc->formation->titre ?? 'N/A' }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="admin-badge" style="background: #fff3cd; color: #856404;">
+                                            {{ $insc->certificat_demande_at ? $insc->certificat_demande_at->format('d/m/Y a H:i') : 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $insc->date_fin ? $insc->date_fin->format('d/m/Y') : 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.certifications.index') }}" class="btn-admin btn-admin-sm btn-admin-primary">
+                                            <i class="fas fa-certificate me-1"></i>Generer
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ route('admin.certifications.index') }}" class="btn-admin btn-admin-primary">
+                    <i class="fas fa-certificate me-1"></i>Aller aux certifications
+                </a>
+                <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- Modal Formations Terminées (certificats à générer) --}}
+@if($formationsTerminesSansCertificat->isNotEmpty())
+<div class="modal fade" id="formationsTermineesModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-graduation-cap me-2"></i>Formations terminées - Certificats à générer ({{ $formationsTerminesSansCertificat->count() }})
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Ces apprenants ont terminé leur formation (tous les modules et quizzes complétés). Vous pouvez leur générer un certificat.</span>
+                </div>
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Apprenant</th>
+                                <th>Formation</th>
+                                <th>Progression</th>
+                                <th>Date de fin</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($formationsTerminesSansCertificat as $insc)
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6, #2563eb); font-size: 0.75rem; font-weight: 600;">
+                                                {{ strtoupper(substr($insc->user->name ?? 'U', 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ $insc->user->name ?? 'N/A' }}</div>
+                                                <small class="text-muted">{{ $insc->user->email ?? '' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium">{{ $insc->formation->titre ?? 'N/A' }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="admin-badge admin-badge-success">100%</span>
+                                    </td>
+                                    <td>{{ $insc->date_fin ? $insc->date_fin->format('d/m/Y à H:i') : 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.certifications.index') }}" class="btn-admin btn-admin-sm btn-admin-primary">
+                                            <i class="fas fa-certificate me-1"></i>Générer certificat
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ route('admin.certifications.index') }}" class="btn-admin btn-admin-primary">
+                    <i class="fas fa-certificate me-1"></i>Aller aux certifications
+                </a>
+                <button type="button" class="btn-admin btn-admin-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif

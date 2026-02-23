@@ -119,7 +119,7 @@
                     <p class="text-dark wow fadeIn" data-wow-delay="0.6s"><i
                             class="fa fa-check text-primary me-2"></i>Accompagnement des auteurs émergents</p>
                     <div class="d-flex mt-4 wow fadeIn" data-wow-delay="0.7s">
-                        <a class="btn btn-primary py-3 px-4 me-3" href="#">Faire un don</a>
+                        <a class="btn btn-primary py-3 px-4 me-3" href="{{ route('donation.index') }}">Faire un don</a>
                         <a class="btn btn-secondary py-3 px-4" href="#">Nous rejoindre</a>
                     </div>
                 </div>
@@ -140,7 +140,7 @@
                         <p class="fs-5 mb-4 wow fadeIn" data-wow-delay="0.5s">Grâce à votre soutien, nous favorisons
                             l'accès à la culture et encourageons la création littéraire partout en France.</p>
                         <div class="d-flex justify-content-center wow fadeIn" data-wow-delay="0.7s">
-                            <a class="btn btn-primary py-3 px-4 me-3" href="#">Faire un don</a>
+                            <a class="btn btn-primary py-3 px-4 me-3" href="{{ route('donation.index') }}">Faire un don</a>
                             <a class="btn btn-secondary py-3 px-4" href="#">Nous rejoindre</a>
                         </div>
                     </div>

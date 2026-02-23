@@ -398,17 +398,57 @@
                 <form action="{{ route('admin.certifications.generate') }}" method="POST" enctype="multipart/form-data" id="generateForm">
                     @csrf
                     <div class="modal-body">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Remplissez les informations ci-dessous pour générer un certificat.
-                        </div>
+                        @if($demandesCertificat->isNotEmpty())
+                            <div class="alert alert-warning">
+                                <i class="fas fa-bell me-2"></i>
+                                <strong>{{ $demandesCertificat->count() }} demande(s) en attente.</strong>
+                                Sélectionnez un apprenant ci-dessous pour remplir automatiquement le formulaire.
+                            </div>
+                        @else
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Aucune demande en attente. Vous pouvez générer un certificat manuellement.
+                            </div>
+                        @endif
 
-                        <!-- Informations de l'apprenant -->
+                        <!-- Sélection de l'apprenant -->
                         <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
-                            <i class="fas fa-user-graduate me-2"></i>Informations de l'apprenant
+                            <i class="fas fa-user-graduate me-2"></i>Apprenant
                         </h6>
 
-                        <div class="row">
+                        <input type="hidden" id="formation_inscription_id" name="formation_inscription_id" value="{{ old('formation_inscription_id') }}">
+
+                        <div class="mb-3">
+                            <label for="demande_select" class="form-label">
+                                Sélectionner un apprenant <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="demande_select" required>
+                                <option value="">-- Choisir un apprenant --</option>
+                                @if($demandesCertificat->isNotEmpty())
+                                    <optgroup label="Demandes en attente">
+                                        @foreach($demandesCertificat as $demande)
+                                            <option value="demande_{{ $demande->id }}"
+                                                    data-inscription-id="{{ $demande->id }}"
+                                                    data-user-name="{{ $demande->user->name }}"
+                                                    data-user-email="{{ $demande->user->email }}"
+                                                    data-formation-id="{{ $demande->formation_id }}"
+                                                    data-formation-titre="{{ $demande->formation->titre }}"
+                                                    data-progression="{{ $demande->progression }}"
+                                                    {{ old('formation_inscription_id') == $demande->id ? 'selected' : '' }}>
+                                                {{ $demande->user->name }} — {{ $demande->formation->titre }}
+                                                (demandé le {{ $demande->certificat_demande_at ? $demande->certificat_demande_at->format('d/m/Y') : '-' }})
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+                                <optgroup label="Saisie manuelle">
+                                    <option value="manuel">Entrer les informations manuellement</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- Info apprenant (auto-rempli ou manuel) -->
+                        <div class="row" id="apprenantInfoRow">
                             <div class="col-md-6 mb-3">
                                 <label for="nom_apprenant" class="form-label">
                                     Nom complet <span class="text-danger">*</span>
@@ -419,6 +459,7 @@
                                        name="nom_apprenant"
                                        placeholder="Ex: Jean DUPONT"
                                        value="{{ old('nom_apprenant') }}"
+                                       readonly
                                        required>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -430,7 +471,8 @@
                                        id="email_apprenant"
                                        name="email_apprenant"
                                        placeholder="email@exemple.com"
-                                       value="{{ old('email_apprenant') }}">
+                                       value="{{ old('email_apprenant') }}"
+                                       readonly>
                             </div>
                         </div>
 
@@ -679,8 +721,90 @@
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 
+    // Gestion du select apprenant (auto-remplissage du formulaire)
+    function handleDemandeSelect() {
+        const select = document.getElementById('demande_select');
+        const nomInput = document.getElementById('nom_apprenant');
+        const emailInput = document.getElementById('email_apprenant');
+        const formationSelect = document.getElementById('formation_id');
+        const noteInput = document.getElementById('note_obtenue');
+        const inscriptionInput = document.getElementById('formation_inscription_id');
+
+        if (!select) return;
+
+        select.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const value = this.value;
+
+            if (value === 'manuel') {
+                // Saisie manuelle: rendre les champs éditables et vider
+                nomInput.readOnly = false;
+                emailInput.readOnly = false;
+                formationSelect.disabled = false;
+                noteInput.readOnly = false;
+                nomInput.value = '';
+                emailInput.value = '';
+                formationSelect.value = '';
+                noteInput.value = '80';
+                inscriptionInput.value = '';
+            } else if (value.startsWith('demande_')) {
+                // Demande sélectionnée: auto-remplir et verrouiller
+                const userName = selectedOption.getAttribute('data-user-name');
+                const userEmail = selectedOption.getAttribute('data-user-email');
+                const formationId = selectedOption.getAttribute('data-formation-id');
+                const progression = selectedOption.getAttribute('data-progression');
+                const inscriptionId = selectedOption.getAttribute('data-inscription-id');
+
+                nomInput.value = userName;
+                nomInput.readOnly = true;
+                emailInput.value = userEmail;
+                emailInput.readOnly = true;
+                formationSelect.value = formationId;
+                formationSelect.disabled = true;
+                noteInput.value = progression || '80';
+                noteInput.readOnly = false;
+                inscriptionInput.value = inscriptionId;
+
+                // Réactiver le select formation en hidden pour l'envoi du formulaire
+                // On crée un input hidden pour envoyer formation_id même si le select est disabled
+                let hiddenFormation = document.getElementById('formation_id_hidden');
+                if (!hiddenFormation) {
+                    hiddenFormation = document.createElement('input');
+                    hiddenFormation.type = 'hidden';
+                    hiddenFormation.id = 'formation_id_hidden';
+                    hiddenFormation.name = 'formation_id';
+                    formationSelect.parentNode.appendChild(hiddenFormation);
+                }
+                hiddenFormation.value = formationId;
+            } else {
+                // Rien sélectionné: réinitialiser
+                nomInput.value = '';
+                nomInput.readOnly = true;
+                emailInput.value = '';
+                emailInput.readOnly = true;
+                formationSelect.value = '';
+                formationSelect.disabled = false;
+                noteInput.value = '80';
+                inscriptionInput.value = '';
+
+                // Supprimer le hidden formation_id s'il existe
+                const hiddenFormation = document.getElementById('formation_id_hidden');
+                if (hiddenFormation) hiddenFormation.remove();
+            }
+        });
+    }
+
     // Preview des fichiers uploadés et soumission du formulaire
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser le select apprenant
+        handleDemandeSelect();
+
+        // Si une demande était déjà sélectionnée (old values), déclencher le change
+        const demandeSelect = document.getElementById('demande_select');
+        if (demandeSelect && demandeSelect.value) {
+            demandeSelect.dispatchEvent(new Event('change'));
+        }
+
         // Preview des fichiers
         const fileInputs = [
             { input: 'cachet', preview: 'cachetPreview' },
@@ -710,10 +834,15 @@
             }
         });
 
-        // Formulaire de génération
+        // Formulaire de génération - réactiver les champs disabled avant envoi
         const generateForm = document.getElementById('generateForm');
         if (generateForm) {
             generateForm.addEventListener('submit', function(e) {
+                // Réactiver le select formation pour que sa valeur soit envoyée
+                const formationSelect = document.getElementById('formation_id');
+                if (formationSelect.disabled) {
+                    formationSelect.disabled = false;
+                }
                 if (this.checkValidity()) {
                     showLoading();
                 }

@@ -10,48 +10,51 @@
 
 @section('content')
     <!-- Carousel Start -->
+    @php
+        $banners = \App\Models\Banner::actif()->orderBy('ordre')->get();
+    @endphp
     <div class="container-fluid p-0 wow fadeIn" data-wow-delay="0.1s">
         <div class="owl-carousel header-carousel py-4">
-            <div class="container py-0">
-                <div class="row g-5 align-items-center">
-                    <div class="col-lg-6">
-                        <div class="carousel-text">
-                            <h1 class="display-4 text-uppercase mb-3">Rapprocher le livre africain du lecteur</h1>
-                            <div class="d-flex">
-                                <a class="btn btn-success py-3 px-4 me-3" href="{{ route('contact.index') }}">Faire un
-                                    don</a>
-                                <a class="btn btn-secondary py-3 px-4" href="{{ route('register') }}">Nous rejoindre</a>
+            @forelse($banners as $banner)
+                <div class="container py-0">
+                    <div class="row g-5 align-items-center">
+                        <div class="col-lg-6">
+                            <div class="carousel-text">
+                                <h1 class="display-4 text-uppercase mb-3">{{ $banner->titre }}</h1>
+                                <div class="d-flex mt-4">
+                                    <a class="btn btn-success py-3 px-4 me-3" href="{{ route('donation.index') }}">Faire un don</a>
+                                    <a class="btn btn-secondary py-3 px-4" href="{{ route('register') }}">Nous rejoindre</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="carousel-img">
+                                <img class="w-100" src="{{ asset($banner->image) }}" alt="{{ $banner->titre }}">
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6">
-                        <div class="carousel-img">
-                            <img class="w-100" src="{{ asset('img/carousel-1.jpg') }}" alt="Image">
-                        </div>
-                    </div>
                 </div>
-            </div>
-            <div class="container py-0">
-                <div class="row g-5 align-items-center">
-                    <div class="col-lg-6">
-                        <div class="carousel-text">
-                            <h1 class="display-4 text-uppercase mb-3">Contribuer à dynamiser le marché du livre africain
-                            </h1>
-                            <p class="fs-5 mb-5"></p>
-                            <div class="d-flex mt-4">
-                                <a class="btn btn-success py-3 px-4 me-3" href="{{ route('contact.index') }}">Faire un
-                                    don</a>
-                                <a class="btn btn-secondary py-3 px-4" href="{{ route('register') }}">Nous rejoindre</a>
+            @empty
+                {{-- Fallback si aucune bannière en base --}}
+                <div class="container py-0">
+                    <div class="row g-5 align-items-center">
+                        <div class="col-lg-6">
+                            <div class="carousel-text">
+                                <h1 class="display-4 text-uppercase mb-3">Rapprocher le livre africain du lecteur</h1>
+                                <div class="d-flex mt-4">
+                                    <a class="btn btn-success py-3 px-4 me-3" href="{{ route('donation.index') }}">Faire un don</a>
+                                    <a class="btn btn-secondary py-3 px-4" href="{{ route('register') }}">Nous rejoindre</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="carousel-img">
+                                <img class="w-100" src="{{ asset('img/carousel-1.jpg') }}" alt="Image">
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6">
-                        <div class="carousel-img">
-                            <img class="w-100" src="{{ asset('img/carousel-2.jpg') }}" alt="Image">
-                        </div>
-                    </div>
                 </div>
-            </div>
+            @endforelse
         </div>
     </div>
     <!-- Carousel End -->
@@ -135,7 +138,7 @@
                             <div class="h-100 bg-success p-4 text-center">
                                 <p class="fs-5 text-white">Grâce à vos dons, le livre africain voyage loin à travers
                                     le monde. </p>
-                                <a class="btn btn-secondary py-2 px-4" href="#don">Faire un don</a>
+                                <a class="btn btn-secondary py-2 px-4" href="{{ route('donation.index') }}">Faire un don</a>
                             </div>
                         </div>
                     </div>
@@ -338,32 +341,40 @@
                     <div class="rounded overflow-hidden">
                         <div class="row g-0">
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.1s">
-                                <div class="text-center bg-success py-5 px-4 h-100">
-                                    <i class="fa fa-users fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">{{ $totalMembres ?? 11 }}</h1>
-                                    <span class="text-white">Membres de l'équipe</span>
-                                </div>
+                                <a href="{{ route('equipe.index') }}" class="text-decoration-none d-block">
+                                    <div class="text-center bg-success py-5 px-4 h-100 stat-box-link">
+                                        <i class="fa fa-users fa-3x text-white mb-3"></i>
+                                        <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">{{ $totalMembres ?? 11 }}</h1>
+                                        <span class="text-white">Membres de l'équipe</span>
+                                    </div>
+                                </a>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.3s">
-                                <div class="text-center bg-secondary py-5 px-4 h-100">
-                                    <i class="fa fa-book fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">{{ $totalLivres ?? 0 }}</h1>
-                                    <span class="text-white">Livres au catalogue</span>
-                                </div>
+                                <a href="{{ route('catalogue.index') }}" class="text-decoration-none d-block">
+                                    <div class="text-center bg-secondary py-5 px-4 h-100 stat-box-link">
+                                        <i class="fa fa-book fa-3x text-white mb-3"></i>
+                                        <h1 class="display-5 text-white mb-0" data-toggle="counter-up">{{ $totalLivres ?? 0 }}</h1>
+                                        <span class="text-white">Livres au catalogue</span>
+                                    </div>
+                                </a>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.5s">
-                                <div class="text-center bg-secondary py-5 px-4 h-100">
-                                    <i class="fa fa-graduation-cap fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 text-white mb-0" data-toggle="counter-up">{{ $totalFormations ?? 0 }}</h1>
-                                    <span class="text-white">Formations disponibles</span>
-                                </div>
+                                <a href="{{ route('formation.modules') }}" class="text-decoration-none d-block">
+                                    <div class="text-center bg-secondary py-5 px-4 h-100 stat-box-link">
+                                        <i class="fa fa-graduation-cap fa-3x text-white mb-3"></i>
+                                        <h1 class="display-5 text-white mb-0" data-toggle="counter-up">{{ $totalFormations ?? 0 }}</h1>
+                                        <span class="text-white">Formations disponibles</span>
+                                    </div>
+                                </a>
                             </div>
                             <div class="col-sm-6 wow fadeIn" data-wow-delay="0.7s">
-                                <div class="text-center bg-success py-5 px-4 h-100">
-                                    <i class="fa fa-user-graduate fa-3x text-white mb-3"></i>
-                                    <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">{{ $totalUtilisateurs ?? 0 }}</h1>
-                                    <span class="text-white">Utilisateurs inscrits</span>
-                                </div>
+                                <a href="{{ route('account.profil') }}" class="text-decoration-none d-block">
+                                    <div class="text-center bg-success py-5 px-4 h-100 stat-box-link">
+                                        <i class="fa fa-user-graduate fa-3x text-white mb-3"></i>
+                                        <h1 class="display-5 mb-0 text-white" data-toggle="counter-up">{{ $totalUtilisateurs ?? 0 }}</h1>
+                                        <span class="text-white">Utilisateurs inscrits</span>
+                                    </div>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -596,7 +607,7 @@
         <div class="container">
             <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 600px;">
                 <p class="section-title bg-white text-center text-success px-3">Témoignages</p>
-                <h1 class="display-6 mb-4">Ce que nos membres disent de nous</h1>
+                <h1 class="display-6 mb-4">Ce que disent nos membres de nous</h1>
             </div>
 
             @php
@@ -846,6 +857,17 @@
 
 @push('styles')
 <style>
+    /* Stat boxes cliquables */
+    .stat-box-link {
+        transition: transform 0.3s ease, filter 0.3s ease;
+        cursor: pointer;
+    }
+
+    .stat-box-link:hover {
+        transform: scale(1.05);
+        filter: brightness(1.15);
+    }
+
     /* ============================================
        HOME PAGE - MODERN PRODUCT CARDS
        ============================================ */

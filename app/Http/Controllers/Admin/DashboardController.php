@@ -9,6 +9,8 @@ use App\Models\CartItem;
 use App\Models\Emprunt;
 use App\Models\Catalogue;
 use App\Models\Formation;
+use App\Models\FormationInscription;
+use App\Models\Certificat;
 use App\Models\Contact;
 use App\Models\Commande;
 use App\Services\EmpruntService;
@@ -60,6 +62,21 @@ class DashboardController extends Controller
             ->whereNotNull('access_expires_at')
             ->where('access_expires_at', '<', now())
             ->orderBy('access_expires_at', 'asc')
+            ->get();
+
+        // Formations terminées sans certificat (alerte pour générer les certificats)
+        $formationsTerminesSansCertificat = FormationInscription::with(['user', 'formation'])
+            ->where('statut', 'termine')
+            ->whereDoesntHave('certificat')
+            ->orderBy('date_fin', 'desc')
+            ->get();
+
+        // Demandes de certificat en attente
+        $demandesCertificat = FormationInscription::with(['user', 'formation'])
+            ->where('statut', 'termine')
+            ->where('certificat_demande', true)
+            ->whereDoesntHave('certificat')
+            ->orderBy('certificat_demande_at', 'desc')
             ->get();
 
         // Statistiques catalogue
@@ -126,6 +143,7 @@ class DashboardController extends Controller
             'totalSales', 'totalRevenue', 'salesThisMonth', 'revenueThisMonth',
             'totalEmprunts', 'empruntsEnCours', 'empruntsEnAttente', 'empruntsEnRetard',
             'empruntsRetournes', 'empruntsThisMonth', 'empruntsAccesExpire',
+            'formationsTerminesSansCertificat', 'demandesCertificat',
             'totalBooks', 'booksForSale', 'booksForLoan', 'outOfStock',
             'recentUsers', 'recentSales', 'recentEmprunts',
             'topSellingBooks', 'topBorrowedBooks',

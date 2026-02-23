@@ -383,6 +383,17 @@
                                     <span class="achievement-badge badge-gold mb-2">
                                         <i class="fas fa-trophy"></i> Terminée
                                     </span>
+                                    {{-- Statut du certificat --}}
+                                    @php $cert = $inscription->certificat; @endphp
+                                    @if($cert)
+                                        <span class="achievement-badge mb-2" style="background: linear-gradient(135deg, #2ecc71, #27ae60); color: white;">
+                                            <i class="fas fa-certificate"></i> Certificat disponible
+                                        </span>
+                                    @elseif($inscription->certificat_demande)
+                                        <span class="achievement-badge mb-2" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107;">
+                                            <i class="fas fa-hourglass-half"></i> Certificat en cours
+                                        </span>
+                                    @endif
                                 @endif
                             @endif
                         </div>
@@ -394,6 +405,16 @@
                                         <i class="fas fa-credit-card me-1"></i>Payer
                                     </a>
                                 @elseif($progression >= 100)
+                                    @php $cert = $inscription->certificat; @endphp
+                                    @if($cert)
+                                        <a href="{{ route('admin.certifications.download', $cert) }}" class="btn btn-success btn-sm w-100 rounded-2 mb-1">
+                                            <i class="fas fa-download me-1"></i>Certificat
+                                        </a>
+                                    @elseif(!$inscription->certificat_demande)
+                                        <a href="{{ route('formation.show', $formation) }}" class="btn btn-warning btn-sm w-100 rounded-2 mb-1">
+                                            <i class="fas fa-certificate me-1"></i>Demander certificat
+                                        </a>
+                                    @endif
                                     <a href="{{ route('formation.show', $formation) }}" class="btn btn-outline-success btn-sm w-100 rounded-2">
                                         <i class="fas fa-eye me-1"></i>Revoir
                                     </a>

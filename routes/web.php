@@ -12,6 +12,7 @@ use App\Http\Controllers\EquipeController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\ErrorController;
+use App\Http\Controllers\PhoneCodeController;
 use Illuminate\Support\Facades\Route;
 
 // Routes resource pour l'administration
@@ -44,6 +45,7 @@ use App\Http\Controllers\Admin\FormationController as AdminFormationController;
 use App\Http\Controllers\EmpruntUserController;
 use App\Http\Controllers\SecurePdfController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\BannerAdminController;
 use App\Http\Controllers\PaiementController;
 use App\Http\Controllers\Admin\BlogAdminController;
 
@@ -69,6 +71,7 @@ Route::post('formation/{formation}/traiter-paiement', [FormationController::clas
 Route::get('formation/{formation}/module/{module}', [FormationController::class, 'moduleShow'])->name('formation.module.show');
 Route::post('formation/{formation}/module/{module}/contenu/{contenu}/complete', [FormationController::class, 'markContenuCompleted'])->middleware('auth')->name('formation.module.contenu.complete');
 Route::post('formation/{formation}/module/{module}/contenu/{contenu}/update-video-progress', [FormationController::class, 'updateVideoProgress'])->middleware('auth')->name('formation.module.contenu.update-video-progress');
+Route::post('formation/{formation}/demander-certificat', [FormationController::class, 'demanderCertificat'])->middleware('auth')->name('formation.demander-certificat');
 
 // Route pour le visualiseur PDF sécurisé (page dédiée)
 Route::get('formation/{formation}/module/{module}/pdf/{contenu}', [\App\Http\Controllers\PdfViewerController::class, 'show'])->middleware('auth')->name('pdf.viewer.show');
@@ -162,6 +165,8 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::resource('users', UserController::class);
     Route::resource('events', EventAdminController::class);
     Route::resource('donations', DonationAdminController::class);
+    Route::resource('banners', BannerAdminController::class)->except(['create', 'show', 'edit']);
+    Route::post('banners/reorder', [BannerAdminController::class, 'reorder'])->name('banners.reorder');
     Route::resource('contacts', ContactAdminController::class);
     Route::post('contacts/{id}/toggle-read', [ContactAdminController::class, 'toggleRead'])->name('contacts.toggleRead');
     Route::resource('blog', BlogAdminController::class);
@@ -274,6 +279,9 @@ Route::prefix('api/security')->group(function () {
     Route::get('/stats', [\App\Http\Controllers\SecurityLogController::class, 'getStats'])->name('api.security.stats');
     Route::post('/unblock-user', [\App\Http\Controllers\SecurityLogController::class, 'unblockUser'])->name('api.security.unblock-user');
 });
+
+// API Route pour la recherche d'indicatifs téléphoniques (AJAX)
+Route::get('api/phone-codes', [PhoneCodeController::class, 'search'])->name('api.phone-codes');
 
 require __DIR__.'/auth.php';
 

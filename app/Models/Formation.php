@@ -17,6 +17,7 @@ class Formation extends Model
         'prix',
         'est_gratuit',
         'duree',
+        'niveau',
         'nombre_modules',
         'active',
         'categorie',

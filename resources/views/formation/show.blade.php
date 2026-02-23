@@ -164,6 +164,7 @@
         line-height: 1.7;
         max-width: 600px;
         margin-bottom: 1.5rem;
+        text-align: justify;
     }
 
     /* Hero stats */
@@ -575,15 +576,8 @@
 
     .module-content {
         background: var(--show-bg);
-        padding: 1.25rem;
+        padding: 1rem 1.25rem;
         border-top: 1px solid #f0f0f0;
-    }
-
-    .module-description {
-        font-size: 0.9rem;
-        color: var(--show-text-muted);
-        line-height: 1.6;
-        margin-bottom: 1rem;
     }
 
     /* Lessons list */
@@ -675,7 +669,7 @@
 
     /* Module CTA */
     .module-cta {
-        margin-top: 1rem;
+        margin-top: 0.65rem;
         display: flex;
         gap: 0.75rem;
         align-items: center;
@@ -1225,6 +1219,170 @@
             justify-content: center;
         }
     }
+
+    /* ============================================
+       COMPLETION BANNER
+       ============================================ */
+    .completion-banner {
+        background: linear-gradient(135deg, #f6d365 0%, #fda085 30%, #f093fb 70%, #f5576c 100%);
+        border-radius: var(--show-radius);
+        padding: 2.5rem 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(245, 87, 108, 0.25);
+    }
+
+    .completion-banner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.15);
+        z-index: 1;
+    }
+
+    .completion-banner-content {
+        position: relative;
+        z-index: 2;
+        color: white;
+        text-align: center;
+    }
+
+    .completion-trophy {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+        animation: trophyBounce 2s ease-in-out infinite;
+    }
+
+    @keyframes trophyBounce {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        25% { transform: translateY(-8px) rotate(-3deg); }
+        75% { transform: translateY(-4px) rotate(3deg); }
+    }
+
+    .completion-banner h2 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .completion-banner p {
+        font-size: 1rem;
+        opacity: 0.95;
+        margin-bottom: 1.5rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .completion-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-certificate {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.85rem 1.75rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-certificate-primary {
+        background: white;
+        color: #e74c3c;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .btn-certificate-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        color: #c0392b;
+    }
+
+    .btn-certificate-outline {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 2px solid rgba(255,255,255,0.5);
+    }
+
+    .btn-certificate-outline:hover {
+        background: rgba(255,255,255,0.3);
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    .certificate-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .certificate-status-pending {
+        background: rgba(255,255,255,0.25);
+        color: white;
+        border: 2px solid rgba(255,255,255,0.4);
+    }
+
+    .certificate-status-ready {
+        background: white;
+        color: #27ae60;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .confetti {
+        position: absolute;
+        z-index: 1;
+        opacity: 0.6;
+        font-size: 1.5rem;
+        animation: confettiFall 3s linear infinite;
+    }
+
+    .confetti:nth-child(1) { left: 5%; animation-delay: 0s; top: -10%; }
+    .confetti:nth-child(2) { left: 15%; animation-delay: 0.5s; top: -15%; }
+    .confetti:nth-child(3) { left: 30%; animation-delay: 1s; top: -5%; }
+    .confetti:nth-child(4) { left: 50%; animation-delay: 0.3s; top: -12%; }
+    .confetti:nth-child(5) { left: 70%; animation-delay: 0.8s; top: -8%; }
+    .confetti:nth-child(6) { left: 85%; animation-delay: 1.2s; top: -15%; }
+    .confetti:nth-child(7) { left: 95%; animation-delay: 0.2s; top: -10%; }
+
+    @keyframes confettiFall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+        100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+    }
+
+    @media (max-width: 575px) {
+        .completion-banner {
+            padding: 1.75rem 1.25rem;
+        }
+        .completion-banner h2 {
+            font-size: 1.3rem;
+        }
+        .completion-trophy {
+            font-size: 2.5rem;
+        }
+        .btn-certificate {
+            padding: 0.7rem 1.25rem;
+            font-size: 0.85rem;
+        }
+    }
 </style>
 @endpush
 
@@ -1256,6 +1414,11 @@
         }
         $overallProgress = $totalContenus > 0 ? round(($completedFormationContenus / $totalContenus) * 100) : 0;
     }
+
+    // Statut certificat
+    $isCompleted = $inscription && $inscription->statut === 'termine';
+    $certificat = $inscription ? $inscription->certificat : null;
+    $certificatDemande = $inscription && $inscription->certificat_demande;
 @endphp
 
 <div class="formation-show-page">
@@ -1285,7 +1448,10 @@
                         @if($formation->niveau)
                             <span class="hero-badge level">
                                 <i class="fa fa-layer-group"></i>
-                                {{ $formation->niveau }}
+                                @php
+                                    $niveauLabels = ['debutant' => 'Débutant', 'intermediaire' => 'Intermédiaire', 'avance' => 'Avancé'];
+                                @endphp
+                                {{ $niveauLabels[$formation->niveau] ?? ucfirst($formation->niveau) }}
                             </span>
                         @endif
                         @if($formation->est_gratuit || $formation->prix == 0)
@@ -1354,6 +1520,55 @@
     <!-- Main Content -->
     <div class="formation-main">
         <div class="container">
+            <!-- Bannière de félicitations si formation terminée -->
+            @if($isCompleted)
+                <div class="completion-banner">
+                    <span class="confetti">&#127881;</span>
+                    <span class="confetti">&#11088;</span>
+                    <span class="confetti">&#127882;</span>
+                    <span class="confetti">&#127942;</span>
+                    <span class="confetti">&#127881;</span>
+                    <span class="confetti">&#11088;</span>
+                    <span class="confetti">&#127882;</span>
+
+                    <div class="completion-banner-content">
+                        <div class="completion-trophy">&#127942;</div>
+                        <h2>Formation terminee avec succes !</h2>
+                        <p>Vous avez complete tous les modules et reussi tous les quiz. Vous pouvez maintenant obtenir votre certificat.</p>
+
+                        <div class="completion-actions">
+                            @if($certificat)
+                                {{-- Certificat deja genere --}}
+                                <a href="{{ route('admin.certifications.download', $certificat) }}" class="btn-certificate btn-certificate-primary">
+                                    <i class="fa fa-download"></i>
+                                    Telecharger mon certificat
+                                </a>
+                            @elseif($certificatDemande)
+                                {{-- Demande en cours --}}
+                                <div class="certificate-status certificate-status-pending">
+                                    <i class="fa fa-hourglass-half"></i>
+                                    Demande en cours de traitement...
+                                </div>
+                            @else
+                                {{-- Bouton pour demander le certificat --}}
+                                <form method="POST" action="{{ route('formation.demander-certificat', $formation) }}">
+                                    @csrf
+                                    <button type="submit" class="btn-certificate btn-certificate-primary">
+                                        <i class="fa fa-certificate"></i>
+                                        Demander mon certificat
+                                    </button>
+                                </form>
+                            @endif
+
+                            <a href="{{ route('account.formations') }}" class="btn-certificate btn-certificate-outline">
+                                <i class="fa fa-arrow-left"></i>
+                                Mes formations
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Features Row -->
             <div class="features-row">
                 <div class="feature-card">
@@ -1430,7 +1645,7 @@
                                 <h2 class="section-title">À propos de cette formation</h2>
                             </div>
                             <div class="section-body">
-                                <p style="color: var(--show-text-muted); line-height: 1.8; margin: 0;">{{ $formation->description }}</p>
+                                <p style="color: var(--show-text-muted); line-height: 1.8; margin: 0; text-align: justify;">{{ $formation->description }}</p>
                             </div>
                         </div>
                     @endif
@@ -1518,10 +1733,6 @@
                                     </div>
 
                                     <div class="module-content" style="{{ $index === 0 ? '' : 'display: none;' }}">
-                                        @if($module->description)
-                                            <p class="module-description">{{ $module->description }}</p>
-                                        @endif
-
                                         @if($hasAccess)
                                             @if($module->contenus->count() > 0)
                                                 <div class="lessons-list">
@@ -1712,14 +1923,26 @@
                                     @else
                                         <form method="POST" action="{{ route('formation.acheter', $formation) }}">
                                             @csrf
-                                            <button type="submit" class="btn-cta btn-cta-primary">
-                                                <i class="fa fa-shopping-cart"></i>
-                                                S'inscrire maintenant
-                                            </button>
+                                            @if($formation->est_gratuit || $formation->prix == 0)
+                                                <button type="submit" class="btn-cta btn-cta-primary">
+                                                    <i class="fa fa-check-circle"></i>
+                                                    Commencer la formation
+                                                </button>
+                                            @else
+                                                <button type="submit" class="btn-cta btn-cta-primary">
+                                                    <i class="fa fa-shopping-cart"></i>
+                                                    S'inscrire maintenant
+                                                </button>
+                                            @endif
                                         </form>
                                         <div class="cta-guarantee">
-                                            <i class="fa fa-shield-alt"></i>
-                                            <span>Accès immédiat après inscription</span>
+                                            @if($formation->est_gratuit || $formation->prix == 0)
+                                                <i class="fa fa-gift"></i>
+                                                <span>Formation gratuite - Accès immédiat</span>
+                                            @else
+                                                <i class="fa fa-shield-alt"></i>
+                                                <span>Accès immédiat après paiement</span>
+                                            @endif
                                         </div>
                                     @endif
                                 @else

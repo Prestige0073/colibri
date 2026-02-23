@@ -19,14 +19,18 @@ class FormationInscription extends Model
         'date_fin',
         'paiement_valide',
         'reference_paiement',
+        'certificat_demande',
+        'certificat_demande_at',
     ];
 
     protected $casts = [
         'montant_paye' => 'decimal:2',
         'progression' => 'integer',
         'paiement_valide' => 'boolean',
+        'certificat_demande' => 'boolean',
         'date_inscription' => 'datetime',
         'date_fin' => 'datetime',
+        'certificat_demande_at' => 'datetime',
     ];
 
     // Relations

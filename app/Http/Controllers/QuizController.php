@@ -62,17 +62,19 @@ class QuizController extends Controller
             }
         }
 
-        $attemptsCount = $quiz->attempts()->where('user_id', $user->id)->count();
+        $attemptsCount = $quiz->getUserAttemptsCount($user->id);
         $canAttempt = $quiz->userCanAttempt($user->id);
         $bestScore = $quiz->getUserBestScore($user->id);
+        $hasPassed = $quiz->userHasPassed($user->id);
 
-        // Récupérer les tentatives précédentes
+        // Récupérer les tentatives précédentes (terminées uniquement)
         $previousAttempts = $quiz->attempts()
             ->where('user_id', $user->id)
+            ->whereNotNull('fin_at')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('quiz.show', compact('quiz', 'canAttempt', 'attemptsCount', 'bestScore', 'previousAttempts'));
+        return view('quiz.show', compact('quiz', 'canAttempt', 'attemptsCount', 'bestScore', 'previousAttempts', 'hasPassed'));
     }
 
     /**
@@ -95,6 +97,12 @@ class QuizController extends Controller
             }
         }
 
+        // Vérifier si le quiz a déjà été réussi
+        if ($quiz->userHasPassed($user->id)) {
+            return redirect()->route('quiz.show', $quiz->id)
+                ->with('info', 'Vous avez déjà réussi ce quiz. Aucune nouvelle tentative n\'est autorisée.');
+        }
+
         // Vérifier que l'utilisateur peut passer le quiz
         if (!$quiz->userCanAttempt($user->id)) {
             return redirect()->route('quiz.show', $quiz->id)
@@ -115,10 +123,17 @@ class QuizController extends Controller
             });
         }
 
+        // Calculer le numéro de tentative
+        $numeroTentative = UserQuizAttempt::where('user_id', $user->id)
+            ->where('quiz_id', $quiz->id)
+            ->max('numero_tentative') ?? 0;
+        $numeroTentative++;
+
         // Créer une nouvelle tentative
         $attempt = UserQuizAttempt::create([
             'user_id' => $user->id,
             'quiz_id' => $quiz->id,
+            'numero_tentative' => $numeroTentative,
             'debut_at' => now(),
             'reponses' => [],
         ]);
@@ -181,6 +196,19 @@ class QuizController extends Controller
             'fin_at' => $fin,
             'duree_secondes' => $dureeSecondes,
         ]);
+
+        // Si le quiz est réussi et lié à une formation, vérifier si la formation est terminée
+        if ($reussi && $quiz->formation_id) {
+            $formation = \App\Models\Formation::find($quiz->formation_id);
+            $inscription = \App\Models\FormationInscription::where('user_id', $user->id)
+                ->where('formation_id', $quiz->formation_id)
+                ->where('paiement_valide', true)
+                ->first();
+
+            if ($formation && $inscription) {
+                \App\Http\Controllers\FormationController::checkFormationCompleted($formation, $user, $inscription);
+            }
+        }
 
         return redirect()->route('quiz.result', [$quiz->id, $attempt->id]);
     }

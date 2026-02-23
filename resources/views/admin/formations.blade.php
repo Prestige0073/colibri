@@ -184,9 +184,9 @@
                                     <label for="niveau" class="form-label fw-bold"><i class="fa fa-layer-group me-1 text-primary"></i> Niveau</label>
                                     <select class="form-select rounded-3" id="niveau" name="niveau" required>
                                         <option value="">Choisir le niveau</option>
-                                        <option value="Débutant">Débutant</option>
-                                        <option value="Intermédiaire">Intermédiaire</option>
-                                        <option value="Avancé">Avancé</option>
+                                        <option value="debutant">Débutant</option>
+                                        <option value="intermediaire">Intermédiaire</option>
+                                        <option value="avance">Avancé</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">

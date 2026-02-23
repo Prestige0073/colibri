@@ -24,6 +24,44 @@
 </div>
 @endif
 
+<!-- Alertes Demandes de certificat -->
+@if($demandesCertificat->isNotEmpty())
+<div class="alert-banner mb-4" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: none;">
+    <div class="alert-banner-icon" style="background: rgba(255,255,255,0.2);">
+        <i class="fas fa-certificate"></i>
+    </div>
+    <div class="alert-banner-content">
+        <h4 class="alert-banner-title">{{ $demandesCertificat->count() }} demande(s) de certificat en attente</h4>
+        <p class="alert-banner-text">Des apprenants ont termine leur formation et demandent leur certificat.</p>
+    </div>
+    <button class="btn-admin btn-admin-sm" data-bs-toggle="modal" data-bs-target="#demandesCertificatModal">
+        <i class="fas fa-eye me-1"></i>Voir les demandes
+    </button>
+    <button type="button" class="alert-banner-close" data-bs-dismiss="alert">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+@endif
+
+<!-- Alertes Formations Terminées (certificats à générer) -->
+@if($formationsTerminesSansCertificat->isNotEmpty())
+<div class="alert-banner alert-banner-formation mb-4">
+    <div class="alert-banner-icon">
+        <i class="fas fa-graduation-cap"></i>
+    </div>
+    <div class="alert-banner-content">
+        <h4 class="alert-banner-title">{{ $formationsTerminesSansCertificat->count() }} Formation(s) terminee(s) - Certificat(s) a generer</h4>
+        <p class="alert-banner-text">Des apprenants ont termine leur formation et attendent leur certificat.</p>
+    </div>
+    <button class="btn-admin btn-admin-sm" data-bs-toggle="modal" data-bs-target="#formationsTermineesModal">
+        <i class="fas fa-eye me-1"></i>Voir details
+    </button>
+    <button type="button" class="alert-banner-close" data-bs-dismiss="alert">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+@endif
+
 <!-- Stats Cards -->
 <div class="row g-4 mb-4">
     <!-- Utilisateurs -->
@@ -549,6 +587,28 @@
     .alert-banner-danger {
         background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
         border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .alert-banner-formation {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .alert-banner-formation .alert-banner-icon {
+        background: #3b82f6;
+        color: #fff;
+    }
+
+    .alert-banner-formation .alert-banner-title {
+        color: #1e40af;
+    }
+
+    .alert-banner-formation .alert-banner-text {
+        color: #1d4ed8;
+    }
+
+    .alert-banner-formation .alert-banner-close {
+        color: #1d4ed8;
     }
 
     .alert-banner-icon {

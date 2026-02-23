@@ -12,6 +12,7 @@ class UserQuizAttempt extends Model
     protected $fillable = [
         'user_id',
         'quiz_id',
+        'numero_tentative',
         'reponses',
         'score',
         'points_obtenus',

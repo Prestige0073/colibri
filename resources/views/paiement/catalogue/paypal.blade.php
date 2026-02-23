@@ -39,7 +39,8 @@
     </div>
 
     <!-- PayPal SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=EUR"></script>
+    @if(config('services.paypal.client_id'))
+    <script src="https://www.paypal.com/sdk/js?client-id={{ config('services.paypal.client_id') }}&currency=EUR"></script>
     <script>
         const amountInEUR = ({{ $montant }} / 655.957).toFixed(2);
 
@@ -69,4 +70,15 @@
             }
         }).render('#paypal-button-container');
     </script>
+    @else
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('paypal-button-container').innerHTML =
+                '<div class="alert alert-danger text-center">' +
+                '<i class="fa fa-exclamation-triangle me-2"></i>' +
+                'PayPal n\'est pas configuré. Veuillez utiliser un autre moyen de paiement.' +
+                '</div>';
+        });
+    </script>
+    @endif
 @endsection

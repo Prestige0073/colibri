@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('title', 'Gestion du Catalogue')
-@section('subtitle', '{{ $catalogues->total() }} livre(s) au catalogue')
+@section('subtitle', $catalogues->total() . ' livre(s) au catalogue')
 
 @section('content')
 
@@ -130,6 +130,7 @@
                                             <option value="">Sélectionner...</option>
                                             <option value="Roman">Roman</option>
                                             <option value="Nouvelle">Nouvelle</option>
+                                            <option value="Récit">Récit</option>
                                             <option value="Essai">Essai</option>
                                             <option value="Jeunesse">Jeunesse</option>
                                             <option value="Poésie">Poésie</option>

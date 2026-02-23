@@ -59,19 +59,49 @@ class Quiz extends Model
 
     public function userCanAttempt($userId)
     {
-        $attempts = $this->attempts()->where('user_id', $userId)->count();
+        // Si le quiz a déjà été réussi, pas de nouvelle tentative
+        $passed = $this->attempts()
+            ->where('user_id', $userId)
+            ->where('reussi', true)
+            ->exists();
+
+        if ($passed) {
+            return false;
+        }
+
+        // Compter seulement les tentatives terminées
+        $attempts = $this->attempts()
+            ->where('user_id', $userId)
+            ->whereNotNull('fin_at')
+            ->count();
+
         return $attempts < $this->nombre_tentatives;
     }
 
     public function getUserAttemptsCount($userId)
     {
-        return $this->attempts()->where('user_id', $userId)->count();
+        return $this->attempts()
+            ->where('user_id', $userId)
+            ->whereNotNull('fin_at')
+            ->count();
     }
 
     public function getUserBestScore($userId)
     {
         return $this->attempts()
             ->where('user_id', $userId)
+            ->whereNotNull('fin_at')
             ->max('score');
+    }
+
+    /**
+     * Vérifie si l'utilisateur a réussi ce quiz
+     */
+    public function userHasPassed($userId)
+    {
+        return $this->attempts()
+            ->where('user_id', $userId)
+            ->where('reussi', true)
+            ->exists();
     }
 }

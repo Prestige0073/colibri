@@ -25,11 +25,11 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <p class="mb-1"><strong>Durée:</strong> {{ $formation->duree ?? 'N/A' }}</p>
-                                        <p class="mb-1"><strong>Niveau:</strong> {{ $formation->niveau ?? 'Tous niveaux' }}</p>
+                                        <p class="mb-1"><strong>Niveau:</strong> {{ ['debutant' => 'Débutant', 'intermediaire' => 'Intermédiaire', 'avance' => 'Avancé'][$formation->niveau] ?? 'Tous niveaux' }}</p>
                                         <p class="mb-1"><strong>Modules:</strong> {{ $formation->modules->count() }}</p>
                                     </div>
                                     <div class="text-end">
-                                        <h3 class="text-success mb-0">{{ fcfa($formation->prix ?? 0) }}</h3>
+                                        <h3 class="text-success mb-0">{{ $formation->est_gratuit || $formation->prix == 0 ? 'Gratuit' : fcfa($formation->prix) }}</h3>
                                     </div>
                                 </div>
                             </div>

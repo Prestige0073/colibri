@@ -146,8 +146,11 @@
                                     ];
                                     $levelColor = $levelColors[$formation->niveau] ?? 'secondary';
                                 @endphp
+                                @php
+                                    $niveauLabels = ['debutant' => 'Débutant', 'intermediaire' => 'Intermédiaire', 'avance' => 'Avancé'];
+                                @endphp
                                 <span class="admin-badge admin-badge-{{ $levelColor }}">
-                                    {{ ucfirst($formation->niveau) }}
+                                    {{ $niveauLabels[$formation->niveau] ?? ucfirst($formation->niveau) }}
                                 </span>
                             </td>
                             <td class="text-center">

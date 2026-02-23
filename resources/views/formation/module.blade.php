@@ -609,7 +609,7 @@
                     </nav>
                     <h1>{{ $module->titre }}</h1>
                     @if($module->description)
-                        <p class="text-muted mb-0">{{ $module->description }}</p>
+                        <p class="text-muted mb-0" style="text-align: justify;">{{ $module->description }}</p>
                     @endif
                 </div>
                 <div class="text-end">
@@ -681,7 +681,7 @@
 
                     <div class="contenu-card-body">
                         @if($contenu->description)
-                            <p class="text-muted mb-4">{{ $contenu->description }}</p>
+                            <p class="text-muted mb-4" style="text-align: justify;">{{ $contenu->description }}</p>
                         @endif
 
                         @if(!$isUnlocked)
@@ -952,13 +952,34 @@
                     </button>
                 @endif
             @else
-                <a href="{{ route('formation.show', $formation) }}" class="nav-module-btn next">
-                    <div class="text-end">
-                        <span class="small opacity-75 d-block">Terminé!</span>
-                        <span class="fw-bold">Retour à la formation</span>
-                    </div>
-                    <i class="fas fa-flag-checkered"></i>
-                </a>
+                @php
+                    $allQuizzesPassed = true;
+                    $moduleQuizzes = \App\Models\Quiz::where('module_id', $module->id)->where('active', true)->get();
+                    foreach ($moduleQuizzes as $mq) {
+                        if (!$mq->userHasPassed(auth()->id())) {
+                            $allQuizzesPassed = false;
+                            break;
+                        }
+                    }
+                    $formationCompleted = $moduleProgress >= 100 && $allQuizzesPassed;
+                @endphp
+                @if($formationCompleted)
+                    <a href="{{ route('formation.show', $formation) }}" class="nav-module-btn next" style="background: linear-gradient(135deg, #f6d365, #fda085); color: white; padding: 0.75rem 1.5rem;">
+                        <div class="text-end">
+                            <span class="small opacity-75 d-block">Formation terminee !</span>
+                            <span class="fw-bold">Voir mon resultat</span>
+                        </div>
+                        <i class="fas fa-trophy" style="font-size: 1.25rem;"></i>
+                    </a>
+                @else
+                    <a href="{{ route('formation.show', $formation) }}" class="nav-module-btn next">
+                        <div class="text-end">
+                            <span class="small opacity-75 d-block">Termine !</span>
+                            <span class="fw-bold">Retour a la formation</span>
+                        </div>
+                        <i class="fas fa-flag-checkered"></i>
+                    </a>
+                @endif
             @endif
         </div>
     </main>

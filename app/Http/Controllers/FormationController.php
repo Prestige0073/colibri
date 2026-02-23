@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Formation;
 use App\Models\Module as ModuleModel;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\Admin\FormationCompleted;
 
 class FormationController extends Controller
 {
@@ -38,12 +40,12 @@ class FormationController extends Controller
     }
 
     /**
-     * Permet à un utilisateur connecté d'acheter une formation (création d'une inscription)
+     * Permet à un utilisateur connecté de s'inscrire à une formation
      */
     public function acheter(Request $request, Formation $formation)
     {
         if (!\Illuminate\Support\Facades\Auth::check()) {
-            return redirect()->route('login')->with('error', 'Veuillez vous connecter pour acheter une formation.');
+            return redirect()->route('login')->with('error', 'Veuillez vous connecter pour vous inscrire à une formation.');
         }
 
         $user = \Illuminate\Support\Facades\Auth::user();
@@ -58,10 +60,8 @@ class FormationController extends Controller
                 return redirect()->route('formation.show', $formation)
                     ->with('info', 'Vous êtes déjà inscrit à cette formation.');
             }
-            // Si l'inscription existe mais le paiement n'est pas validé, on redirige vers le paiement
             $inscription = $existingInscription;
         } else {
-            // Créer une nouvelle inscription en attente de paiement
             $inscription = \App\Models\FormationInscription::create([
                 'user_id' => $user->id,
                 'formation_id' => $formation->id,
@@ -73,7 +73,18 @@ class FormationController extends Controller
             ]);
         }
 
-        // Rediriger vers la page de sélection du moyen de paiement
+        // Si la formation est gratuite, valider directement l'inscription sans paiement
+        if ($formation->est_gratuit || $formation->prix == 0) {
+            $inscription->update([
+                'paiement_valide' => true,
+                'montant_paye' => 0,
+            ]);
+
+            return redirect()->route('formation.show', $formation)
+                ->with('success', 'Vous êtes maintenant inscrit à cette formation. Bon apprentissage !');
+        }
+
+        // Sinon, rediriger vers la page de sélection du moyen de paiement
         return redirect()->route('formation.paiement', $formation);
     }
 
@@ -101,6 +112,17 @@ class FormationController extends Controller
         if ($inscription->paiement_valide) {
             return redirect()->route('formation.show', $formation)
                 ->with('info', 'Vous êtes déjà inscrit à cette formation.');
+        }
+
+        // Les formations gratuites ne passent pas par la page de paiement
+        if ($formation->est_gratuit || $formation->prix == 0) {
+            $inscription->update([
+                'paiement_valide' => true,
+                'montant_paye' => 0,
+            ]);
+
+            return redirect()->route('formation.show', $formation)
+                ->with('success', 'Vous êtes maintenant inscrit à cette formation. Bon apprentissage !');
         }
 
         $formation->load('modules');
@@ -157,7 +179,7 @@ class FormationController extends Controller
                 ->with('error', 'Vous devez vous connecter pour accéder à ce contenu.');
         }
 
-        // Vérifier que l'utilisateur est inscrit et a payé
+        // Vérifier que l'utilisateur est inscrit
         $inscription = \App\Models\FormationInscription::where('user_id', $user->id)
             ->where('formation_id', $formation->id)
             ->where('paiement_valide', true)
@@ -165,7 +187,7 @@ class FormationController extends Controller
 
         if (!$inscription) {
             return redirect()->route('formation.show', $formation)
-                ->with('error', 'Vous devez vous inscrire et valider votre paiement pour accéder aux modules de cette formation.');
+                ->with('error', 'Vous devez vous inscrire pour accéder aux modules de cette formation.');
         }
 
         // Charger tous les modules de la formation triés par ordre
@@ -196,6 +218,18 @@ class FormationController extends Controller
             if (!$previousModuleCompleted) {
                 return redirect()->route('formation.module.show', [$formation, $previousModule])
                     ->with('error', 'Vous devez d\'abord terminer le module précédent avant d\'accéder à celui-ci.');
+            }
+
+            // Vérifier si tous les quizzes du module précédent sont réussis
+            $previousModuleQuizzes = \App\Models\Quiz::where('module_id', $previousModule->id)
+                ->where('active', true)
+                ->get();
+
+            foreach ($previousModuleQuizzes as $quiz) {
+                if (!$quiz->userHasPassed($user->id)) {
+                    return redirect()->route('formation.module.show', [$formation, $previousModule])
+                        ->with('error', 'Vous devez réussir le quiz du module précédent avant de passer au suivant.');
+                }
             }
         }
 
@@ -277,6 +311,9 @@ class FormationController extends Controller
             ]
         );
 
+        // Vérifier si la formation est terminée (tous les contenus complétés + tous les quizzes réussis)
+        $this->checkFormationCompleted($formation, $user, $inscription);
+
         return response()->json(['success' => true, 'message' => 'Contenu marqué comme complété']);
     }
 
@@ -320,5 +357,110 @@ class FormationController extends Controller
 
     public function certification() {
         return view('formation.certification');
+    }
+
+    /**
+     * Vérifie si un apprenant a terminé une formation (tous contenus + tous quizzes)
+     * et envoie une alerte email à l'admin pour générer le certificat
+     */
+    public static function checkFormationCompleted(Formation $formation, $user, $inscription)
+    {
+        // Si la formation est déjà marquée terminée, ne pas renvoyer d'alerte
+        if ($inscription->statut === 'termine') {
+            return false;
+        }
+
+        // 1. Vérifier que tous les contenus de tous les modules sont complétés
+        $formation->load('modules.contenus');
+        $totalContenus = 0;
+        $completedContenus = 0;
+
+        foreach ($formation->modules as $module) {
+            foreach ($module->contenus as $contenu) {
+                $totalContenus++;
+                $isCompleted = \App\Models\UserModuleProgression::where('user_id', $user->id)
+                    ->where('module_contenu_id', $contenu->id)
+                    ->where('completed', true)
+                    ->exists();
+                if ($isCompleted) {
+                    $completedContenus++;
+                }
+            }
+        }
+
+        // Si pas tous les contenus sont complétés, on arrête
+        if ($totalContenus === 0 || $completedContenus < $totalContenus) {
+            // Mettre à jour la progression
+            $progression = $totalContenus > 0 ? round(($completedContenus / $totalContenus) * 100) : 0;
+            $inscription->update(['progression' => $progression]);
+            return false;
+        }
+
+        // 2. Vérifier que tous les quizzes de la formation sont réussis
+        $quizzes = \App\Models\Quiz::where('formation_id', $formation->id)
+            ->where('active', true)
+            ->get();
+
+        $bestScore = null;
+        foreach ($quizzes as $quiz) {
+            if (!$quiz->userHasPassed($user->id)) {
+                // Un quiz n'est pas encore réussi
+                $inscription->update(['progression' => 100]);
+                return false;
+            }
+            $quizBestScore = $quiz->getUserBestScore($user->id);
+            if ($bestScore === null || $quizBestScore > $bestScore) {
+                $bestScore = $quizBestScore;
+            }
+        }
+
+        // La formation est terminée !
+        $inscription->update([
+            'statut' => 'termine',
+            'progression' => 100,
+            'date_fin' => now(),
+        ]);
+
+        // Envoyer l'alerte email à l'admin
+        try {
+            Mail::to(config('mail.from.address'))->queue(new FormationCompleted($inscription, $bestScore));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur envoi email fin formation: ' . $e->getMessage());
+        }
+
+        return true;
+    }
+
+    /**
+     * Demander la génération du certificat
+     */
+    public function demanderCertificat(Formation $formation)
+    {
+        $user = auth()->user();
+
+        $inscription = \App\Models\FormationInscription::where('user_id', $user->id)
+            ->where('formation_id', $formation->id)
+            ->where('paiement_valide', true)
+            ->where('statut', 'termine')
+            ->first();
+
+        if (!$inscription) {
+            return back()->with('error', 'Vous devez terminer la formation avant de demander un certificat.');
+        }
+
+        if ($inscription->certificat) {
+            return back()->with('info', 'Votre certificat a déjà été généré.');
+        }
+
+        if ($inscription->certificat_demande) {
+            return back()->with('info', 'Votre demande de certificat est déjà en cours de traitement.');
+        }
+
+        $inscription->update([
+            'certificat_demande' => true,
+            'certificat_demande_at' => now(),
+        ]);
+
+        return back()->with('success', 'Votre demande de certificat a été envoyée ! L\'équipe administrative va le générer prochainement.');
     }
 }
